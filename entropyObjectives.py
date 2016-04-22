@@ -11,7 +11,9 @@ def map_into_grid(mazenav, grid_sz):
         expects to be given a MazeSolution class, but can also be given a behavior
         @grid cells: returns a tuple with x and y index of grid
         """
-        robot = mazenav.robot
+        return map_robot_into_grid(mazenav.robot,grid_sz)
+
+def map_robot_into_grid(robot, grid_sz):
         x=mazepy.feature_detector.endx(robot)
         y=mazepy.feature_detector.endy(robot)
         x_grid=int(x*(grid_sz-1))
@@ -45,13 +47,13 @@ def map_pop_to_array_by_objective(pop,array_sz,obj,grid=None):
                 grid[key] += 1
         return grid
 
-def calc_individual_entropy(grid, mazenav):
-        return individual_entropy(grid,map_into_grid(mazenav,mazenav.grid_sz))
+def calc_individual_entropy(grid, mazenav, grid_sz):
+        return individual_entropy(grid,map_into_grid(mazenav,grid_sz))
 
 def individual_entropy(grid, behavior):
         '''
         s the entropy of an behavior within a given grid
-        behavior is a tuple
+        behavior is a tuple that must be within the size of the grid
         '''
         fsamp = np.sum(grid)
         p = grid[behavior]/fsamp
@@ -88,7 +90,17 @@ def calc_FFA(ffa_archive, mazenav):
         key = int(mazenav.objs[FIT]*(len(ffa_archive)-1))
         return individual_entropy(ffa_archive, key)
 
-
+def map_mutants_to_grid(mazenav,Nmuts, grid_sz):
+        grids = np.zeros((grid_sz,grid_sz))
+        for x in range(Nmuts):
+                mutant = mazenav.robot.copy()
+                mutant.mutate()
+                mutant.map()
+                key=map_robot_into_grid(mutant,grid_sz)
+                grids[key]+=1
+        key=map_into_grid(mazenav,grid_sz)
+        grids[key] += 1
+        return grids
 
 
 

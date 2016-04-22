@@ -118,7 +118,10 @@ class NSGAII:
                                         FFAArchive=False,
                                       select4SEVO=False,
                                         select4PEVO=False,
-                                      breakAfterSolved=False, NMutations=10 ):
+                                      breakAfterSolved=False, NMutations=10,
+                                        recordObj=[],
+                                        probeEvoIntervall=50,
+                                           probeRARSafterX=50):
         '''
         Run NSGA-II. 
         '''
@@ -165,7 +168,11 @@ class NSGAII:
             NovAddedThisGen = 0
             for s in R:
                #evaluates rarity (wrt to archive) and novelty (current pop and archive)
-               s.evaluate2(R , archive_array, NoveltyArchive, ffa_archive)
+               s.evaluate2( R, archive_array,
+                           NoveltyArchive,
+                           ffa_archive,
+                          probe_Evo = i>1 and i%probeEvoIntervall==0,
+                           probe_RARs = i > probeRARSafterX)
                if s.solver:
                   solvers +=1
             if NovArchive:
