@@ -159,7 +159,7 @@ class NSGAII:
             #those are a bit expensice so only run them when asked
             if select4SEVO:
                     self.evaluate3(R,NMutations)
-            if select4PEVO:
+            if False and select4PEVO:
                     self.evaluate_pevo(R)
             solvers = 0
             NovAdded = False
@@ -235,7 +235,7 @@ class NSGAII:
         for rob in pop:
                 popgrid += rob.grid
         for r in pop:
-                    r.objs[PEVO] = eob.grid_contribution_to_population(r.grid,popgrid)
+                    r.objs[PEVO] = entropyJ2.grid_contribution_to_population(r.grid,popgrid)
 
     def evaluate3(self,pop, NMutations =20):
        '''

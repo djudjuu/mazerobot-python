@@ -8,9 +8,7 @@ from nsga2J import NSGAII
 
 import mazepy
 import numpy
-#import entropy
-import entropyJ2
-import entropyJ
+import entropyObjectives as eob
 import pickle
 import itertools
 
@@ -55,12 +53,12 @@ class MazeSolution(Solution):
         x = mazepy.feature_detector.endx(self.robot)
         y = mazepy.feature_detector.endy(self.robot)
         self.behavior=numpy.array([x,y])
-        self.grid[entropyJ2.map_into_grid(self, self.grid_sz)] += 1
+        self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
 
         #record fitness and curiosity and evolvabilities
         self.objs[FIT]  = mazepy.feature_detector.end_goal(self.robot)
         self.objs[CUR] = - mazepy.feature_detector.state_entropy(self.robot)
-        self.objs[EVO] = - entropyJ2.grid_entropy(self.grid)
+        self.objs[EVO] = - eob.grid_entropy(self.grid)
         if(self.robot.solution()):
          self.solver = True
          print "solution" 
@@ -88,17 +86,13 @@ class MazeSolution(Solution):
             self.dists.sort()
             self.objs[NOV] = - sum(self.dists[:NNov])
         
-        #print "RAR is computed..."  
-        self.objs[RAR] = - entropyJ2.calc_individual_entropy(archivegrid,self)
-        #compute FFA
-        self.objs[FFA] = - entropyJ2.calc_FFA(FFAArchive,self)
-
+        self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self)
+        self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
+        self.objs[EVO] = - eob.grid_entropy(self.grid)
+        self.objs[PEVO] = - eob.grid_contribution_to_population(self.grid, archivegrid)
         for k in range(len(self.selected4)):
             self.objectives[k] = self.objs[self.selected4[k]]
-        #self.objs[EVO] = - entropyJ2.grid_entropy(self.grid)
-
-        # unmcomment PEVO if it should be recorded irrespective of evolved for or not,( good idea but not working yet)
-        #self.objs[PEVO] = - entropyJ2.grid_contribution_to_population(self.grid, pop)
+        
 
         #write objectives into list that is used for nsga2 selection 
 
@@ -152,26 +146,16 @@ mazelevels= [ 'superhard']
 mazelevels= [ 'medium']
 
 
-#next up:
-#- more fitdivs im medium level trials done 10-70 
-#- run more of the other objectives while recording evolvability -> modify code first for speed
-#- run NOVmedium with higher maxgens
-#- run hard again with SEVO, RARCURSEVO, RAR30-70
-#changed refpop check to >=0 see if it matters
-
-
-
 #superhard
-objsGr = []
-objsGr = [ [RAR, CUR, PEVO],[CUR,PEVO],[RAR,PEVO], [PEVO,EVO] ]
+objsNoGrid =[[FFA]]
 objsGr = [ ]
+objsGr = [ [RAR,PEVO],[RAR,EVO],[FFA]]#, [PEVO,EVO] ]
 recordPevo = False
 #rarpevo bis 8 gekomme
-objsNoGrid = [[FFA]]
 trial_start=0
-Ntrials = 30
+Ntrials = 60
+No_grid_szs = [4]*len(objsNoGrid)
 
-No_grid_szs = [grid_szs[0]]*len(objsNoGrid)
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
            'NMutation': NMutation,
            'kNov':NNov, 'breakAfterSolved':breakflag,
@@ -208,7 +192,6 @@ if __name__ == '__main__':
                  P.append(MazeSolution(obj))
                  P[-1].set_grid_sz(gridsz)
              print "run nsga2"
-             print  NOV in obj
              s = nsga2.run(P, NPop, ngen, visualization = disp, title = exp_name + str(ti),
                                            NovArchive=(NOV in obj),
                                            select4SEVO=(SEVO in obj),
