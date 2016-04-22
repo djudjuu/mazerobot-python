@@ -107,7 +107,7 @@ with open(filename,'a') as f:
 		f.write(row + '\n')
 				
 ###################### make a correlation table 
-expObjs2correlate = ['RAR/PEVO']
+expObjs2correlate = ['FFA']
 exps2correlate = [ folder+str('/')+s.replace('/','')+str(grid_sz)+mazelevel for s in expObjs2correlate]
 Ds2corr =[util.load_exp_series(exp) for exp in exps2correlate]
 Rs= [util.get_correlation_table(ds,gens=[-1]) for ds in Ds2corr]

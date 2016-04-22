@@ -9,7 +9,6 @@ modified by Julius
 import sys, random
 from entropy import *
 import entropyObjectives as eob
-import entropyJ2
 import numpy as np
 import pickle
 import visuals
@@ -135,14 +134,14 @@ class NSGAII:
         chronic = numpy.zeros((2+(len(P[0].objs)),population_size, Nslice))
         solved = {}
         archive_array = np.zeros((self.grid_sz, self.grid_sz))
-        ffa_archive = np.zeros(self.grid_sz**2)
+        ffa_archive = np.zeros(self.grid_sz)
         pp = 0 # counter to keep track of chronics that are saved
         stats_array = np.zeros((100,100))
         
         #map initial generation into archive
         archive_array = eob.map_population_to_grid(P, grid_sz =self.grid_sz, grid=archive_array)
         ffa_archive = eob.map_pop_to_array_by_objective(
-                                        P, self.grid_sz**2,
+                                        P, self.grid_sz,
                                          FIT,ffa_archive)
         
         for i in range(num_generations):
@@ -213,7 +212,7 @@ class NSGAII:
 
             archive_array = eob.map_population_to_grid(refQ, self.grid_sz, archive_array)
             ffa_archive = eob.map_pop_to_array_by_objective(
-                                        refQ, self.grid_sz**2,
+                                        refQ, self.grid_sz,
                                          FIT,ffa_archive)
             #for visualization
             if visualization:

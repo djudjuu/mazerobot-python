@@ -3,8 +3,8 @@
 """
 
 import random, math
-from nsga2J import Solution
-from nsga2J import NSGAII
+from nsga2JF import Solution
+from nsga2JF import NSGAII
 
 import mazepy
 import numpy
@@ -66,7 +66,8 @@ class MazeSolution(Solution):
     
     def evaluate2(self,pop, archivegrid, NovArchive=None,FFAArchive=None):
         '''
-        calculate novelty and diversity
+        calculate all coevolutionary objectives that require reference to the history or the other individuals in the populaiton:
+        novelty, diversity, ffa, pevo, rar,
         and write everything into the list that is used for nsga selection
         if an archive is given for novelty (list of end positions), then it will be used
         otherwise novelty is computed wrt to parent and current population
@@ -85,11 +86,12 @@ class MazeSolution(Solution):
                     self.dists += (arch_dists)
             self.dists.sort()
             self.objs[NOV] = - sum(self.dists[:NNov])
-        
-        self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self)
-        self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
-        self.objs[EVO] = - eob.grid_entropy(self.grid)
-        self.objs[PEVO] = - eob.grid_contribution_to_population(self.grid, archivegrid)
+        if RAR in self.selected4:
+            self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self)
+        if FFA in self.selected4:
+            self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
+        if PEVO in self.selected4:
+            self.objs[PEVO] = - eob.grid_contribution_to_population(self.grid, archivegrid)
         for k in range(len(self.selected4)):
             self.objectives[k] = self.objs[self.selected4[k]]
         
@@ -135,26 +137,27 @@ wallpunish = False
 breakflag = True # stop trial after first success   
 disp=True
 NovTresh = 0.08
-grid_szs = [10]
+grid_szs = [100]
 NGens = [600] #according to maze level
    
-urname = "superhard" # there must be a directory with this name in /out
-urname = "medium" # there must be a directory with this name in /out
 urname = "T"
+urname = "hard" # there must be a directory with this name in /out
+urname = "medium" # there must be a directory with this name in /out
 
 mazelevels= [ 'superhard']
+mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 
 
 #superhard
-objsNoGrid =[[FFA]]
+objsNoGrid =[[FIT],[FFA]]
+objsGr = [ [RAR,EVO],[RAR,PEVO],[FFA]]#, [PEVO,EVO] ]
 objsGr = [ ]
-objsGr = [ [RAR,PEVO],[RAR,EVO],[FFA]]#, [PEVO,EVO] ]
 recordPevo = False
 #rarpevo bis 8 gekomme
-trial_start=0
-Ntrials = 60
-No_grid_szs = [4]*len(objsNoGrid)
+trial_start=3
+Ntrials = 10
+No_grid_szs = [grid_szs[0]]*len(objsNoGrid)
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
            'NMutation': NMutation,
