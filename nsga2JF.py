@@ -121,6 +121,7 @@ class NSGAII:
                                       breakAfterSolved=False, NMutations=10,
                                         recordObj=[],
                                         probeEvoIntervall=50,
+                                        probeEvoNmutants =150,
                                            probeRARSafterX=50):
         '''
         Run NSGA-II. 
@@ -171,7 +172,9 @@ class NSGAII:
                s.evaluate2( R, archive_array,
                            NoveltyArchive,
                            ffa_archive,
-                          probe_Evo = i>1 and i%probeEvoIntervall==0,
+                          probe_Evo = (i%probeEvoIntervall)==probeRARSafterX,
+                           EvoMuts = probeEvoNmutants,
+                           recordObj = recordObj,
                            probe_RARs = i > probeRARSafterX)
                if s.solver:
                   solvers +=1

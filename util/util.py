@@ -1,8 +1,9 @@
 import numpy as np
 import pickle
 import scipy.linalg
-import util
 from fixedparams import *
+
+print "utl imported from thesis/util"
 
 def correlationMatrix(data, objs, gens=[-1]):
 	'''

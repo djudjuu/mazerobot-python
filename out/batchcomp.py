@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import pickle
 import  visfunction 
 import itertools
-import util
+from util import util
 import scipy.stats
 from fixedparams import *
 
@@ -16,6 +16,7 @@ folder = 'medium'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
+expObjs= ['RAR/SOL','RAR/IRAR','RAR/LRAR','RAR', 'RAR/SOL/IRAR']
 mazelevel = 'easy'
 mazelevel = 'superhard'
 mazelevel = 'medium'
@@ -62,16 +63,6 @@ print len(meanfirst), len(firstSolved)
 #Ds =[util.load_exp_series(exp) for exp in exps] #Ds is a list of expseries list of(list of chronics)
 
 
-################# plot objectives against each other ################
-'''
-ds = Ds[0] # link here to the dataset
-x_obj = [RAR]
-y_objs = [PEVO,CUR,FIT]
-color_obj= FIT
-
-visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj)
-plt.show()
-'''
 ####### make a summary table for the experiment ############
 
 Ns = [len(exp) for exp in solvers]
@@ -107,7 +98,7 @@ with open(filename,'a') as f:
 		f.write(row + '\n')
 				
 ###################### make a correlation table 
-expObjs2correlate = ['FFA']
+expObjs2correlate = ['RAR/SOL/IRAR']
 exps2correlate = [ folder+str('/')+s.replace('/','')+str(grid_sz)+mazelevel for s in expObjs2correlate]
 Ds2corr =[util.load_exp_series(exp) for exp in exps2correlate]
 Rs= [util.get_correlation_table(ds,gens=[-1]) for ds in Ds2corr]
@@ -117,7 +108,7 @@ with open(filename,'a') as f:
     f.write("Correlation Tables (Pearson)")
     for expname, R in zip(expObjs2correlate, Rs):
         exp = expname.split('/')
-        exp += ['FIT']
+        exp += ['FIT','LRAR']
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -128,8 +119,20 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 
+################# plot objectives against each other ################
 
-'''
+expObjs2VSPlot = ['RAR/SOL/IRAR']
+exps2VSPlot = [ folder+str('/')+s.replace('/','')+str(grid_sz)+mazelevel for s in expObjs2VSPlot]
+Ds2VSPlot =[util.load_exp_series(exp) for exp in exps2VSPlot]
+
+for ds in Ds2VSPlot:
+    x_obj = [RAR]
+    y_objs = [IRAR,SOL]
+    color_obj= FIT
+    visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj)
+plt.show()
+
+
 
 ############# plot average convergence rate ###########
 plt.figure(0)
@@ -147,7 +150,6 @@ plt.legend(loc=4)
 plt.savefig('./'+mazelevel+'/'+mazelevel+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
 plt.show()
-'''
 
 '''
 

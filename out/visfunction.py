@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
-import util
+from util import util
 from fixedparams import *
 
 def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
@@ -32,19 +32,14 @@ def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
                 ax.set_title(obj_names[xobj] + 'vs' +obj_names[yobj] +'\n r = ' + "%.2f"%R[0][xobj,yobj])
                 ax.set_xlabel(obj_names[xobj])
                 ax.set_ylabel(obj_names[yobj])
-                sc=ax.scatter(X[xobj,:],X[yobj,:],c=X[color_obj][:,np.newaxis],cmap='jet')
+                sc=ax.scatter(X[xobj,:],X[yobj,:],c=1-Xraw[2:,:][color_obj][:,np.newaxis],cmap='jet')
             plt.colorbar(sc)
-
-
-
 
 def plot_histogramm(stats_grid, name='exp'):
 	f=plt.figure()	
 	im= plt.imshow(stats_grid, cmap = plt.get_cmap('jet'))
 	plt.show()
 	f.savefig(name + '.png')
-	
-	
 
 #makes an animated plot of the populations density through the generations
 #expects a figure
@@ -124,8 +119,7 @@ def draw_mazes(mazes=mazelist):
 	
 
 def labelplot(title,fs,ax, params = None):
-	obj_string = ['NOV','PEVO', 'EVO', 'CUR', 'FIT', 'RAR', 'SEVO', 'DIV']
-	objs = [ s for s in obj_string if s in title]
+	objs = [ s for s in obj_names if s in title]
 	xpnr = title[-1]
 	s = 'objective: ' + str(objs)+ ', Exp-Nr: '+str( xpnr) + '\n solved: ' + str(fs)
 	if params != None:
@@ -142,23 +136,44 @@ def sort_by_objective(data, obj, top, until = 30):
 	idx = np.argsort(data, axis= 1)
 	dsorted = np.zeros((data.shape[0],top,0))
 	for i in range(until):
-		tmp = data[:,idx[obj,:top,i],i][:,:,np.newaxis]
+		tmp = data[:,idx[obj+2,:top,i],i][:,:,np.newaxis]
 		dsorted=np.concatenate((dsorted,tmp ), axis=2)
 	return dsorted
 
 
-def plot_objective(X, obj_idx, ax,  until = 30, plot_max=True,  lab = None):
+def plot_objective(X, obj_idx, ax,  until = 30, plot_max=True,plot_sd=False,  lab = None):
 	if lab == None:
-		lab = datax[obj_idx]
-	ax.set_title(datax[obj_idx])
+		lab = obj_names[obj_idx]
+	ax.set_title(obj_names[obj_idx])
+        means = np.mean(X, axis=1)[obj_idx,:until]
 	if obj_idx == FIT:
-		ax.plot(np.arange(until),1-np.mean(X, axis=1)[obj_idx,:until], label = 'mean '+lab)
-		if plot_max:
-			ax.plot(np.arange(until),1- np.min(X, axis=1)[obj_idx,:until], label = 'max ' +lab)
-	else:
-		ax.plot(np.arange(until),np.mean(-X, axis=1)[obj_idx,:until], label = 'mean '+lab)
-		if plot_max:
-			ax.plot(np.arange(until), np.max(-X, axis=1)[obj_idx,:until], label = 'max ' +lab)
+                means = 1-means
+                maxs = np.max(1-X, axis=1)[obj_idx,:until]
+        if obj_idx == EVO:
+                gensEvo = [idx for idx, value in enumerate(X[EVO,0,:]) if value != 0]
+                print gensEvo
+
+                evos = means[gensEvo]
+                print evos
+                ax.scatter(gensEvo,evos , label='mean' + lab)
+                #for a boxplot
+                ds = [-X[EVO,:,i] for i in gensEvo]
+                #ax.boxplot(ds,1,gensEvo)
+                return
+
+
+        else:
+                means *=-1 #minfitness assumed by nsga2 
+                maxs = np.max(-X, axis=1)[obj_idx,:until]
+        ax.plot(np.arange(until),means, label = 'mean '+lab)
+        if plot_max:
+                ax.plot(np.arange(until),maxs, label = 'max '+lab)
+        if plot_sd:
+                stds = np.std(X, axis=1)[obj_idx, :until]
+                top = (means+stds)
+                bottom = (means-stds)
+                r= np.arange(until)
+                ax.fill_between(r,top, bottom,color='grey', alpha=.5)
 
 def clear_axis(ax):
 	plt.sca(ax)
@@ -180,7 +195,7 @@ def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False,
 			for i in range(until):
 				xs.append(X[0,idx[i],i])
 				ys.append(X[1,idx[i],i])
-			sc = ax.scatter(xs, ys, c = np.arange(until),marker = markr[ii], cmap=cm[0], s=25.0, label =datax[obj_idx]) 
+			sc = ax.scatter(xs, ys, c = np.arange(until),marker = markr[ii], cmap=cm[0], s=25.0, label =obj_names[obj_idx-2]) 
 			ii += 1
 		plt.colorbar(sc)
 		plt.legend(prop={'size':10})

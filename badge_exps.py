@@ -166,13 +166,10 @@ def write_params(paramlist, expname, trialnr):
 ##### PARAMS #########
 NNov = 15  # neigbours looked at when computing novelty
 datapath = './out/'
-NPop = 100 # Population size
-NMutation = 10 # how many offsprings are produced to calculate evolvability
 wallpunish = False
 breakflag = True # stop trial after first success   
 disp=True
 NovTresh = 0.08
-NGens = [400] #according to maze level
    
 urname = "hard" # there must be a directory with this name in /out
 urname = "T"
@@ -186,18 +183,20 @@ mazelevels= [ 'medium']
 #superhard
 objsNoGrid =[]
 objsGr = [ ]
-objsGr = [ [RAR,IRAR],[RAR,LRAR],[RAR],[RAR,SOL,IRAR]]
+objsGr = [[RAR,SOL], [RAR,IRAR],[RAR,LRAR],[RAR],[RAR,SOL,IRAR]]
 objs2BRecorded = [SOL,LRAR,IRAR]
 grid_szs = [10]
-evoAllX = 30
-evoMutants = 100
-rarsAfterX = 20
+evoAllX = 100
+evoMutants = 50
+rarsAfterX = 30
 trial_start=0
 Ntrials = 30
+NPop = 100 # Population size
+NGens = [400] #according to maze level
 No_grid_szs = [grid_szs[0]]*len(objsNoGrid)
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
-           'NMutation': NMutation,
+           'NMutation': evoMutants,
            'kNov':NNov, 'breakAfterSolved':breakflag,
            'wallpunish':wallpunish}
 #Execution starts here
