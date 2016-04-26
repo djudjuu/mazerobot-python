@@ -99,7 +99,10 @@ class NSGAII:
     '''
     current_evaluated_objective = 0
 
-    def __init__(self, num_objectives, mutation_rate=0.1, crossover_rate=1.0, grid_sz = 10, thresNov =0.1, archive_gamma=4):
+    def __init__(self, num_objectives, mutation_rate=0.1,
+                 crossover_rate=1.0, grid_sz = 10,
+                 thresNov =0.1, NovGamma=4,
+                gridGamma =0.5):
         '''
         Constructor. Parameters: number of objectives, mutation rate (default value 10%) and crossover rate (default value 100%). 
         '''
@@ -108,7 +111,9 @@ class NSGAII:
         self.crossover_rate = crossover_rate
         self.grid_sz = grid_sz
         self.thresNovelty = thresNov
-        self.gamma = archive_gamma #how many added per generations 
+        self.NovGamma = NovGamma #how many added per generations 
+        self.NoveltyArchive = None
+        self.gridGamma = gridGamma
         
         random.seed();
         
@@ -132,10 +137,9 @@ class NSGAII:
             s.evaluate_solution()
         Q = []
         if NovArchive: 
-           NoveltyArchive = []
-        else: NoveltyArchive = None
+           self.NoveltyArchive = []
 
-        chronic = numpy.zeros((2+(len(P[0].objs)),population_size, Nslice))
+        chronic = numpy.zeros((len(obj_names),population_size, Nslice))
         solved = {}
         archive_array = np.zeros((self.grid_sz, self.grid_sz))
         ffa_archive = np.zeros(self.grid_sz)
@@ -143,7 +147,9 @@ class NSGAII:
         stats_array = np.zeros((100,100))
         
         #map initial generation into archive
-        archive_array = eob.map_population_to_grid(P, grid_sz =self.grid_sz, grid=archive_array)
+        archive_array = eob.map_population_to_grid(P,
+                                                   grid_sz =self.grid_sz,
+                                                   grid=archive_array)
         ffa_archive = eob.map_pop_to_array_by_objective(
                                         P, self.grid_sz,
                                          FIT,ffa_archive)
@@ -152,49 +158,53 @@ class NSGAII:
             if i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
                self.save_objectives(chronic,title,pp, solved, archive_array,stats_array)
                pp += 1
-            
-            print "Iteracao ", i
+           
+            pfunc = [p for p in P if np.all(p.behavior>=0)]
+            qfunc = [p for p in Q if np.all(p.behavior>=0)]
+            print "Iteracao ", i,'psize: ', len(pfunc), ', qsize: ', len(qfunc) 
             
             R = []
             R.extend(P)
             R.extend(Q)
 
             #those are a bit expensice so only run them when asked
-            if select4SEVO:
+            if select4SEVO or SEVO in recordObj:
                     self.evaluate3(R,NMutations)
-            if False and select4PEVO:
+            if PEVO in recordObj or select4PEVO:
                     self.evaluate_pevo(R)
+
             solvers = 0
             NovAdded = False
             NovAddedThisGen = 0
             for s in R:
                #evaluates rarity (wrt to archive) and novelty (current pop and archive)
                s.evaluate2( R, archive_array,
-                           NoveltyArchive,
+                           self.NoveltyArchive,
                            ffa_archive,
                           probe_Evo = (i%probeEvoIntervall)==probeRARSafterX,
                            EvoMuts = probeEvoNmutants,
                            recordObj = recordObj,
-                           probe_RARs = i > probeRARSafterX)
+                           probe_RARs = i > probeRARSafterX,
+                           gammaGrid = self.gridGamma)
                if s.solver:
                   solvers +=1
             if NovArchive:
-                    #Qnew = [ c for c in Q if not np.any([np.all(c.behavior == a) for a in NoveltyArchive])]
-                    #NoveltyArchive += [c.behavior for c in  random.sample(R,min(self.gamma,len(Q)))]
-                    NoveltyArchive += [c.behavior for c in  random.sample(R,min(self.gamma,len(R)))]
+                    Rfunc = [q for q in Q if np.all(q.behavior >=0)] + [p for p in P if np.all(p.behavior >=0)]
+                    RfuncNew = [r for r in Rfunc if not np.any([np.all(r.behavior == a) for a in self.NoveltyArchive])]
+                    self.NoveltyArchive += [c.behavior for c in  random.sample(RfuncNew,min(self.NovGamma,len(RfuncNew)))]
                                                                           #questions: archive is unique? no double entries?
                                                                          #sample from parents and children or children only?) if not np.any([np.all(c.behavior==a) for a  in NoveltyArchive])]
             
 
             #save the end location and fitness of individuals throughout iterations
             robs = Q if i>1 else P #first generation Q is empty
-            weird =0
             for r in range(len(robs)):
-               chronic[2:,r,i%Nslice] = robs[r].objs
-               chronic[:2,r,i%Nslice] = robs[r].behavior
-               if robs[r].behavior[0]<0 and robs[r].behavior[1]<0:
-                     weird += 1
-            #print "this generation weirdos: ", weird
+               chronic[:,r,i%Nslice] = robs[r].objs
+            if NovArchive:
+               chronic[ARCHIVESIZE,:,i%Nslice] = len(self.NoveltyArchive)
+            Nweirdos = np.sum( chronic[WEIRDO,:,i%Nslice], axis=0)
+            #if Nweirdos> 0:
+                    #print "this generation weirdos: ",Nweirdos
 
             #check if maze got solved            
             if solvers !=0:
@@ -221,18 +231,18 @@ class NSGAII:
                 del P[population_size:]
                 
             Q = self.make_new_pop(P)
-            refQ = [q for q in Q if all(q.behavior>0)]
+            
+            #refQ = [q for q in Q if all(q.behavior>0)]
             #print 'refQ', len(refQ)
-
-            archive_array = eob.map_population_to_grid(refQ, self.grid_sz, archive_array)
+            archive_array = eob.map_population_to_grid(Q, self.grid_sz, archive_array)
             ffa_archive = eob.map_pop_to_array_by_objective(
-                                        refQ, self.grid_sz,
+                                        Q, self.grid_sz,
                                          FIT,ffa_archive)
             #for visualization
             if visualization:
                 viz = visuals.Vizzer(title)
                 if NovArchive:
-                     viz.render_robots_and_archive(NoveltyArchive, [P,Q], color=[(0,255,0),(255,0,0),(0,0,180)])
+                     viz.render_robots_and_archive(self.NoveltyArchive, [P,Q], color=[(0,255,0),(255,0,0),(0,0,180)])
                 else:
                      viz.render_robots( [P,Q], color=[(0,255,0),(255,0,0)])
         self.save_objectives(chronic[:,:,:i%Nslice],title,pp, solved, archive_array)

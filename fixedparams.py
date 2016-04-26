@@ -10,7 +10,13 @@ FFA=8   #frequency fitness assignment with respect to accumulated history of fit
 SOL=9   #evolvability as entropy over personal stepping stones
 IRAR=10  #individual rarity (how different is the last behavior from the last lineage?
 LRAR=11 #Lineage rarity: discounted rarity is herited from parent
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOL', 'IRAR','LRAR']
+ARCHIVESIZE = 12 
+WEIRDO = 13     # True if was disabled after hitting the wall
+XEND=14
+YEND=15
+REVO= 16        #Useful (rare) evolvability, measures the capability to produce offsprings that do something new
+
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOL', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO']
 
 def get_obj_ID(string):
         return obj_names.index(string)

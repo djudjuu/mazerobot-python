@@ -7,7 +7,7 @@ from nsga2JF import Solution
 from nsga2JF import NSGAII
 
 import mazepy
-import numpy
+import numpy as np 
 import entropyObjectives as eob
 import pickle
 import itertools
@@ -45,7 +45,8 @@ class MazeSolution(Solution):
         '''
         Implementation of method evaluate_solution() 
         is just called once per individual's lifetime
-        fitness
+        minimization of objectives is assumed
+        fitness (between 0 and -1 (=solved)
         curiosity
         sets behavior = end location
         also increments the personal history grid
@@ -53,11 +54,14 @@ class MazeSolution(Solution):
         self.robot.map()
         x = mazepy.feature_detector.endx(self.robot)
         y = mazepy.feature_detector.endy(self.robot)
-        self.behavior=numpy.array([x,y])
+        self.behavior=np.array([x,y])
+        self.objs[XEND] = x
+        self.objs[YEND] = y
         self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
 
         #record fitness and curiosity and evolvabilities
-        self.objs[FIT]  = mazepy.feature_detector.end_goal(self.robot)
+        dist2goal = mazepy.feature_detector.end_goal(self.robot)
+        self.objs[FIT] = - (1-dist2goal)
         self.objs[CUR] = - mazepy.feature_detector.state_entropy(self.robot)
         if(self.robot.solution()):
          self.solver = True
@@ -85,51 +89,69 @@ class MazeSolution(Solution):
                 gammaGrid: factor by which grid reduced to measure spread of rarity for IRAR and SOL
                 recordObj:list of objectives to be recorded but not selected 4
         '''
-        #high distances to nearest neighbours are good
-        #  but for nsga2 low is better
-        # thats why - sum...
-        if (NOV in self.selected4+recordObj) or (DIV in self.selected4):
-            refPop = [x for x in pop if all(x.behavior>=0)] #initially some individuals have end positions outside the maze...those are excluded
-            refPop = pop
-            if len(refPop)==0:  print 'refPop 0...makes no sense!'
-            self.dists=[sum((self.behavior-x.behavior)**2) for x in refPop]
-            self.objs[DIV] = - numpy.mean(self.dists)
-            if NovArchive != None:
-                    #print "used"
-                    arch_dists = [sum((self.behavior - a)**2) for a in NovArchive]
-                    self.dists += (arch_dists)
-            self.dists.sort()
-            self.objs[NOV] = - sum(self.dists[:NNov])
-        if (RAR or LRAR) in self.selected4+recordObj:
-            self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
-        if FFA in self.selected4+recordObj:
-            self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
-        if PEVO in self.selected4+recordObj:
-            self.objs[PEVO] = - eob.grid_contribution_to_population(self.grid, archivegrid)
-        if probe_Evo:
-                self.objs[EVO] = - eob.grid_entropy(eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz))
-        if probe_RARs and LRAR in self.selected4+recordObj:
-                self.objs[LRAR] *= gammaLRAR + self.objs[RAR]
-        if probe_RARs and SOL in self.selected4 + recordObj:
-            lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
-            lineagegrid[self.behavior] -= 1
-            self.objs[SOL] = - eob.grid_entropy(lineagegrid)
-        if probe_RARs and IRAR in self.selected4 + recordObj:
-                if not self.IRARflag:
-                        metaGrid = util.reduce_grid_sz(self.grid,gammaGrid)
-                        try:
-                                self.objs[IRAR] = -eob.calc_individual_entropy(metaGrid, self, metaGrid.shape[0])
-                        except ValueError:
-                                #print "IRAR tickt nicht richtig"
-                                self.objs[IRAR]=0
-                else:
-                        self.objs[IRAR] = 0
-                self.IRARflag = not self.IRARflag
+        # if individual is not viable, set all objectives to 0 so it wont be selected
+        if all(self.behavior <0):
+            self.objs[:] = [0.01]* len(obj_names)
+            self.objs[WEIRDO] = 1
+            for k in range(len(self.selected4)):
+                self.objectives[k] = self.objs[self.selected4[k]]
+        else:
+            self.objs[WEIRDO] = 0
+            if (NOV in self.selected4+recordObj) or (DIV in self.selected4):
+                refPop = [x for x in pop if np.all(x.behavior>=0)] 
+                self.dists=[np.sum((self.behavior-x.behavior)**2) for x in refPop]
+                self.objs[DIV] = - np.mean(self.dists)
+                if NovArchive != None:
+                        arch_dists = [np.sum((self.behavior - a)**2) for a in NovArchive]
+                        self.dists += (arch_dists)
+                self.dists.sort()
+                self.objs[NOV] = - np.sum(self.dists[:NNov])
+            if (RAR or LRAR) in self.selected4+recordObj:
+                self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
+                rar = self.objs[RAR]
+                if rar ==0: 
+                    print 'rar0 but viable',self.behavior
+                    print archivegrid
+                    a= eob.map_into_grid(self,self.grid_sz)
+                    print archivegrid[a]
+            if FFA in self.selected4+recordObj:
+                self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
+                ffa = self.objs[FFA]
+                if ffa ==0:
+                    print 'ffa 0 but fit',self.objs[FIT],FFAArchive
+            if PEVO in self.selected4+recordObj:
+                self.objs[PEVO] = - eob.grid_contribution_to_population(self.grid, archivegrid)
+            if probe_Evo:
+                    mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
+                    if np.sum(mutantgrid)==0:
+                        self.objs[EVO] = 0
+                        self.objs[REVO] = 0
+                    else:
+                        self.objs[EVO] = - eob.grid_entropy(mutantgrid)
+                        self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
+
+            if LRAR in self.selected4 or LRAR in recordObj:
+                    self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.objs[LRAR]
+            if probe_RARs and SOL in self.selected4 + recordObj:
+                lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
+                lineagegrid[eob.map_into_grid(self,lineagegrid.shape[0])] -= 1
+                self.objs[SOL] = - eob.grid_entropy(lineagegrid)
+            if probe_RARs and IRAR in self.selected4 + recordObj:
+                    if not self.IRARflag:
+                            metaGrid = util.reduce_grid_sz(self.grid,gammaGrid)
+                            try:
+                                    self.objs[IRAR] = -eob.calc_individual_entropy(metaGrid, self, metaGrid.shape[0])
+                            except ValueError:
+                                    #print "IRAR tickt nicht richtig"
+                                    self.objs[IRAR]=0
+                    else:
+                            self.objs[IRAR] = 0
+                    self.IRARflag = not self.IRARflag
 
 
 
-        for k in range(len(self.selected4)):
-            self.objectives[k] = self.objs[self.selected4[k]]
+            for k in range(len(self.selected4)):
+                self.objectives[k] = self.objs[self.selected4[k]]
         
 
         #write objectives into list that is used for nsga2 selection 
@@ -137,7 +159,7 @@ class MazeSolution(Solution):
     def set_grid_sz(self,gs, historygrid=None):
        self.grid_sz = gs
        if historygrid==None:
-           self.grid = numpy.zeros((gs,gs))
+           self.grid = np.zeros((gs,gs))
        else:
             self.grid = historygrid
 
@@ -176,28 +198,28 @@ NovTresh = 0.08
    
 urname = "hard" # there must be a directory with this name in /out
 urname = "medium" # there must be a directory with this name in /out
-urname = "T"
 urname = "easy"
+urname = "T"
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 mazelevels= [ 'easy']
 
-
-#superhard
-objsNoGrid =[]
+objsNoGrid =[[FFA]]
 objsGr = [ ]
-objsGr = [[CUR,SOL],[LRAR],[RAR,CUR]]
-objs2BRecorded = [SOL,LRAR,IRAR]
+objsGr = []
+objs2BRecorded = [SOL]#,LRAR,IRAR]
 grid_szs = [10]
+NPop = 100 # Population size
+NGens = [400] #according to maze level
+NovGamma = int(NPop*.03)
+gridGamma = .3 #how much reduce the grid to measure SOL
 evoAllX = 500
 evoMutants = 50
 rarsAfterX = 30
 trial_start=0
-Ntrials = 30
-NPop = 100 # Population size
-NGens = [400] #according to maze level
+Ntrials = 5 
 No_grid_szs = [grid_szs[0]]*len(objsNoGrid)
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
@@ -230,7 +252,13 @@ if __name__ == '__main__':
              f.write(''+ exp_name + ',' + str(params) + '\n')
           for ti in range(trial_start,Ntrials):
              print 'trial: ', ti
-             nsga2 = NSGAII(len(obj), mutation_rate=.9, crossover_rate=1.0, grid_sz = gridsz,thresNov=NovTresh)
+             nsga2 = NSGAII(len(obj), mutation_rate=.9,
+                            crossover_rate=1.0,
+                            grid_sz = gridsz,
+                            thresNov=NovTresh,
+                            NovGamma=NovGamma,
+                            gridGamma= gridGamma
+                           )
              P = []
              for i in range(NPop):
                  P.append(MazeSolution(obj))

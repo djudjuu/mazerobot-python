@@ -146,9 +146,6 @@ def plot_objective(X, obj_idx, ax,  until = 30, plot_max=True,plot_sd=False,  la
 		lab = obj_names[obj_idx]
 	ax.set_title(obj_names[obj_idx])
         means = np.mean(X, axis=1)[obj_idx,:until]
-	if obj_idx == FIT:
-                means = 1-means
-                maxs = np.max(1-X, axis=1)[obj_idx,:until]
         if obj_idx == EVO:
                 gensEvo = [idx for idx, value in enumerate(X[EVO,0,:]) if value != 0]
                 print gensEvo
