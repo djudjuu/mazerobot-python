@@ -71,7 +71,7 @@ def individual_entropy(grid, behavior):
                 assert entr<=0
                 return - entr
         except ValueError:
-                print grid
+                print 'ValueError', grid
                 print behavior
                 return 0
 
