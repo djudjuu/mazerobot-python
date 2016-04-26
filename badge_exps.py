@@ -90,6 +90,7 @@ class MazeSolution(Solution):
         # thats why - sum...
         if (NOV in self.selected4+recordObj) or (DIV in self.selected4):
             refPop = [x for x in pop if all(x.behavior>=0)] #initially some individuals have end positions outside the maze...those are excluded
+            refPop = pop
             if len(refPop)==0:  print 'refPop 0...makes no sense!'
             self.dists=[sum((self.behavior-x.behavior)**2) for x in refPop]
             self.objs[DIV] = - numpy.mean(self.dists)
@@ -99,7 +100,7 @@ class MazeSolution(Solution):
                     self.dists += (arch_dists)
             self.dists.sort()
             self.objs[NOV] = - sum(self.dists[:NNov])
-        if RAR in self.selected4+recordObj:
+        if (RAR or LRAR) in self.selected4+recordObj:
             self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
         if FFA in self.selected4+recordObj:
             self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
@@ -110,14 +111,16 @@ class MazeSolution(Solution):
         if probe_RARs and LRAR in self.selected4+recordObj:
                 self.objs[LRAR] *= gammaLRAR + self.objs[RAR]
         if probe_RARs and SOL in self.selected4 + recordObj:
-                self.objs[SOL] = - eob.grid_entropy(util.reduce_grid_sz(self.grid,gammaGrid))
+            lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
+            lineagegrid[self.behavior] -= 1
+            self.objs[SOL] = - eob.grid_entropy(lineagegrid)
         if probe_RARs and IRAR in self.selected4 + recordObj:
                 if not self.IRARflag:
                         metaGrid = util.reduce_grid_sz(self.grid,gammaGrid)
                         try:
                                 self.objs[IRAR] = -eob.calc_individual_entropy(metaGrid, self, metaGrid.shape[0])
                         except ValueError:
-                                print "IRAR tickt nicht richtig"
+                                #print "IRAR tickt nicht richtig"
                                 self.objs[IRAR]=0
                 else:
                         self.objs[IRAR] = 0
@@ -166,27 +169,29 @@ def write_params(paramlist, expname, trialnr):
 ##### PARAMS #########
 NNov = 15  # neigbours looked at when computing novelty
 datapath = './out/'
-wallpunish = False
+wallpunish = True
 breakflag = True # stop trial after first success   
 disp=True
 NovTresh = 0.08
    
 urname = "hard" # there must be a directory with this name in /out
-urname = "T"
 urname = "medium" # there must be a directory with this name in /out
+urname = "T"
+urname = "easy"
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
+mazelevels= [ 'easy']
 
 
 #superhard
 objsNoGrid =[]
 objsGr = [ ]
-objsGr = [[RAR,SOL], [RAR,IRAR],[RAR,LRAR],[RAR],[RAR,SOL,IRAR]]
+objsGr = [[CUR,SOL],[LRAR],[RAR,CUR]]
 objs2BRecorded = [SOL,LRAR,IRAR]
 grid_szs = [10]
-evoAllX = 100
+evoAllX = 500
 evoMutants = 50
 rarsAfterX = 30
 trial_start=0
@@ -206,7 +211,7 @@ import sys
 if __name__ == '__main__':
 #maybe add random seeding, but make sure to save it later for reproducability
     for mazelevel,ngen in zip(mazelevels,NGens):
-       statfile = './out/'+urname+'/'+mazelevel+'-stats.csv'
+       statfile = datapath+urname+'/'+mazelevel+'-stats.csv'
        mazepy.mazenav.initmaze(mazelevel + '_maze_list.txt', "neat.ne")
        mazepy.mazenav.random_seed()
        #the next line combines objectives with various grid sizes
@@ -232,7 +237,7 @@ if __name__ == '__main__':
                  P[-1].set_grid_sz(gridsz)
              print "run nsga2"
              s = nsga2.run(P, NPop, ngen, visualization = disp, title = exp_name + str(ti),
-                                   NovArchive=(NOV in obj),
+                                   NovArchive= (NOV in obj),
                                    select4SEVO=(SEVO in obj),
                                    select4PEVO= (PEVO in obj),
                                     FFAArchive = FFA in obj,

@@ -99,7 +99,7 @@ class NSGAII:
     '''
     current_evaluated_objective = 0
 
-    def __init__(self, num_objectives, mutation_rate=0.1, crossover_rate=1.0, grid_sz = 10, thresNov =0.1, archive_gamma=6):
+    def __init__(self, num_objectives, mutation_rate=0.1, crossover_rate=1.0, grid_sz = 10, thresNov =0.1, archive_gamma=4):
         '''
         Constructor. Parameters: number of objectives, mutation rate (default value 10%) and crossover rate (default value 100%). 
         '''
@@ -179,7 +179,11 @@ class NSGAII:
                if s.solver:
                   solvers +=1
             if NovArchive:
-                NoveltyArchive += [c.behavior for c in  random.sample(Q,self.gamma)]
+                    #Qnew = [ c for c in Q if not np.any([np.all(c.behavior == a) for a in NoveltyArchive])]
+                    #NoveltyArchive += [c.behavior for c in  random.sample(R,min(self.gamma,len(Q)))]
+                    NoveltyArchive += [c.behavior for c in  random.sample(R,min(self.gamma,len(R)))]
+                                                                          #questions: archive is unique? no double entries?
+                                                                         #sample from parents and children or children only?) if not np.any([np.all(c.behavior==a) for a  in NoveltyArchive])]
             
 
             #save the end location and fitness of individuals throughout iterations

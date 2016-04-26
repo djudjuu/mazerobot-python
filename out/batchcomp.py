@@ -13,15 +13,16 @@ from fixedparams import *
 folder = '2s'
 folder = 'superhard'
 folder = 'medium'
+folder = 'easy'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs= ['RAR/SOL','RAR/IRAR','RAR/LRAR','RAR', 'RAR/SOL/IRAR']
-mazelevel = 'easy'
+expObjs= ['CUR/SOL', 'RAR/CUR','RAR/SOL','RAR/LRAR','RAR','FIT' ]
 mazelevel = 'superhard'
 mazelevel = 'medium'
-
+mazelevel = 'easy'
 mazelevel = folder
+
 pp = PdfPages(mazelevel+'-multiplot.pdf')
 
 grid_sz= 10
@@ -98,7 +99,8 @@ with open(filename,'a') as f:
 		f.write(row + '\n')
 				
 ###################### make a correlation table 
-expObjs2correlate = ['RAR/SOL/IRAR']
+'''
+expObjs2correlate = ['RAR/SOL']
 exps2correlate = [ folder+str('/')+s.replace('/','')+str(grid_sz)+mazelevel for s in expObjs2correlate]
 Ds2corr =[util.load_exp_series(exp) for exp in exps2correlate]
 Rs= [util.get_correlation_table(ds,gens=[-1]) for ds in Ds2corr]
@@ -118,7 +120,7 @@ with open(filename,'a') as f:
                 else:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
-
+'''
 ################# plot objectives against each other ################
 
 expObjs2VSPlot = ['RAR/SOL/IRAR']
