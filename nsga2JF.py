@@ -102,7 +102,8 @@ class NSGAII:
     def __init__(self, num_objectives, mutation_rate=0.1,
                  crossover_rate=1.0, grid_sz = 10,
                  thresNov =0.1, NovGamma=4,
-                gridGamma =0.5):
+                gridGamma =0.5,
+                gammaLRAR=0.2):
         '''
         Constructor. Parameters: number of objectives, mutation rate (default value 10%) and crossover rate (default value 100%). 
         '''
@@ -114,6 +115,7 @@ class NSGAII:
         self.NovGamma = NovGamma #how many added per generations 
         self.NoveltyArchive = None
         self.gridGamma = gridGamma
+        self.gammaLRAR = gammaLRAR
         
         random.seed();
         
@@ -190,7 +192,8 @@ class NSGAII:
                            EvoMuts = probeEvoNmutants,
                            recordObj = recordObj,
                            probe_RARs = i > probeRARSafterX,
-                           gammaGrid = self.gridGamma)
+                           gammaGrid = self.gridGamma,
+                          gammaLRAR = self.gammaLRAR)
                if s.solver:
                   solvers +=1
             if NovArchive:

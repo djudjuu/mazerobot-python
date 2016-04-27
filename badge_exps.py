@@ -34,6 +34,7 @@ class MazeSolution(Solution):
         self.objs=[0.0]*len(obj_names) #here i save everything for analysis
         self.solver = False
         self.IRARflag = False  #true if IRAR has been evaluated
+        self.parentRar = 0
         if(not robot):
          self.robot=mazepy.mazenav()
          self.robot.init_rand()
@@ -70,7 +71,7 @@ class MazeSolution(Solution):
     def evaluate2(self,pop, archivegrid,
                   NovArchive=None,FFAArchive=None,
                   probe_Evo=False, EvoMuts=200,
-                  gammaLRAR=0.5,gammaGrid=0.5,
+                  gammaLRAR=0.2,gammaGrid=0.5,
                   recordObj=[],
                  probe_RARs=False):
         '''
@@ -105,14 +106,8 @@ class MazeSolution(Solution):
                 self.dists.sort()
                 self.objs[NOV] = - np.sum(self.dists[:NNov])
             #RARITY
-            if (RAR or LRAR) in self.selected4+recordObj:
+            if np.any([ r in self.selected4+recordObj for r in[ RAR , LRAR]]):
                 self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
-                rar = self.objs[RAR]
-                if rar ==0: 
-                    print 'rar0 but viable',self.behavior
-                    print archivegrid
-                    a= eob.map_into_grid(self,self.grid_sz)
-                    print archivegrid[a]
             #FFA
             if FFA in self.selected4+recordObj:
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
@@ -126,12 +121,11 @@ class MazeSolution(Solution):
                         self.objs[EVO] = 0
                         self.objs[REVO] = 0
                 else:
-                        print "writing something"
                         self.objs[EVO] = - eob.grid_entropy(mutantgrid)
                         self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
-
+            #Lineage rarity: passing on heredity from
             if LRAR in self.selected4 or LRAR in recordObj:
-                    self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.objs[LRAR]
+                    self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.parentRar
             #STEPPING STONES DIVERSITY SOL
             if probe_RARs and SOL in self.selected4 + recordObj:
                 lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
@@ -142,11 +136,8 @@ class MazeSolution(Solution):
             if probe_RARs and IRAR in self.selected4 + recordObj:
                     if not self.IRARflag:
                             metaGrid = util.reduce_grid_sz(self.grid,gammaGrid)
-                            try:
-                                    self.objs[IRAR] = -eob.calc_individual_entropy(metaGrid, self, metaGrid.shape[0])
-                            except ValueError:
-                                    #print "IRAR tickt nicht richtig"
-                                    self.objs[IRAR]=0
+                            metaGrid[eob.map_into_grid(self,metaGrid.shape[0])] += 1
+                            self.objs[IRAR] = -eob.calc_individual_entropy(metaGrid, self, metaGrid.shape[0])
                     else:
                             self.objs[IRAR] = 0
                     self.IRARflag = not self.IRARflag
@@ -171,7 +162,7 @@ class MazeSolution(Solution):
         '''
         child_solution = MazeSolution(self.selected4, self.robot.copy())
         child_solution.set_grid_sz(self.grid_sz, self.grid)
-        child_solution.objs[LRAR] = int(np.copy(self.objs[LRAR]))
+        child_solution.parentRar= int(np.copy(self.objs[LRAR]))
         child_solution.IRARflag = not self.IRARflag 
         return child_solution
     
@@ -205,17 +196,18 @@ urname = "T"
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'hard']
-mazelevels= [ 'easy']
 mazelevels= [ 'medium']
+mazelevels= [ 'easy']
 
 objsNoGrid =[]
 objsGr = []
-objsGr = [[LRAR]]#[RAR,SOL],[RAR,CUR],[CUR],[CUR,SOL] ]
+objsGr = [[RAR,IRAR]]#[RAR,SOL],[RAR,CUR],[CUR],[CUR,SOL] ]
 objs2BRecorded = []#,LRAR,IRAR]
 grid_szs = [10]
 NPop = 100 # Population size
 NGens = [1500] #according to maze level
 NovGamma = int(NPop*.03)
+gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 evoAllX = 9999
 evoMutants = 20
@@ -259,7 +251,8 @@ if __name__ == '__main__':
                             grid_sz = gridsz,
                             thresNov=NovTresh,
                             NovGamma=NovGamma,
-                            gridGamma= gridGamma
+                            gridGamma= gridGamma,
+                            gammaLRAR= gammaLRAR
                            )
              P = []
              for i in range(NPop):
