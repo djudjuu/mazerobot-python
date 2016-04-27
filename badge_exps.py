@@ -57,7 +57,6 @@ class MazeSolution(Solution):
         self.behavior=np.array([x,y])
         self.objs[XEND] = x
         self.objs[YEND] = y
-        self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
 
         #record fitness and curiosity and evolvabilities
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
@@ -76,10 +75,9 @@ class MazeSolution(Solution):
                  probe_RARs=False):
         '''
         calculate all coevolutionary objectives that require reference to the history or the other individuals in the populaiton:
-        novelty, diversity, ffa, pevo, rar,
+        novelty, diversity, ffa, pevo, rar,sol,lrar,irar
+        increment personal history grid
         and write everything into the list that is used for nsga selection
-        if an archive is given for novelty (list of end positions), then it will be used
-        otherwise novelty is computed wrt to parent and current population
         params:
                 archivegrid used for rarity computations
                 nov_archive: if given used for novelty, otherwise wrt to pop only
@@ -106,6 +104,7 @@ class MazeSolution(Solution):
                         self.dists += (arch_dists)
                 self.dists.sort()
                 self.objs[NOV] = - np.sum(self.dists[:NNov])
+            #RARITY
             if (RAR or LRAR) in self.selected4+recordObj:
                 self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
                 rar = self.objs[RAR]
@@ -114,28 +113,32 @@ class MazeSolution(Solution):
                     print archivegrid
                     a= eob.map_into_grid(self,self.grid_sz)
                     print archivegrid[a]
+            #FFA
             if FFA in self.selected4+recordObj:
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
                 ffa = self.objs[FFA]
-                if ffa ==0:
-                    print 'ffa 0 but fit',self.objs[FIT],FFAArchive
             if PEVO in self.selected4+recordObj:
                 self.objs[PEVO] = - eob.grid_contribution_to_population(self.grid, archivegrid)
+            #EVOLVABILITY measure
             if probe_Evo:
-                    mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
-                    if np.sum(mutantgrid)==0:
+                mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
+                if np.sum(mutantgrid)==0:
                         self.objs[EVO] = 0
                         self.objs[REVO] = 0
-                    else:
+                else:
+                        print "writing something"
                         self.objs[EVO] = - eob.grid_entropy(mutantgrid)
                         self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
 
             if LRAR in self.selected4 or LRAR in recordObj:
                     self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.objs[LRAR]
+            #STEPPING STONES DIVERSITY SOL
             if probe_RARs and SOL in self.selected4 + recordObj:
                 lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
-                lineagegrid[eob.map_into_grid(self,lineagegrid.shape[0])] -= 1
-                self.objs[SOL] = - eob.grid_entropy(lineagegrid)
+                sol = - eob.grid_entropy(lineagegrid)
+                self.objs[SOL] = sol
+                if sol == - 100:
+                    print 'SOL is off...'
             if probe_RARs and IRAR in self.selected4 + recordObj:
                     if not self.IRARflag:
                             metaGrid = util.reduce_grid_sz(self.grid,gammaGrid)
@@ -148,8 +151,7 @@ class MazeSolution(Solution):
                             self.objs[IRAR] = 0
                     self.IRARflag = not self.IRARflag
 
-
-
+            self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
             for k in range(len(self.selected4)):
                 self.objectives[k] = self.objs[self.selected4[k]]
         
@@ -161,7 +163,7 @@ class MazeSolution(Solution):
        if historygrid==None:
            self.grid = np.zeros((gs,gs))
        else:
-            self.grid = historygrid
+            self.grid = np.copy(historygrid)
 
     def crossover(self, other):
         '''
@@ -169,7 +171,7 @@ class MazeSolution(Solution):
         '''
         child_solution = MazeSolution(self.selected4, self.robot.copy())
         child_solution.set_grid_sz(self.grid_sz, self.grid)
-        child_solution.objs[LRAR] = self.objs[LRAR]
+        child_solution.objs[LRAR] = int(np.copy(self.objs[LRAR]))
         child_solution.IRARflag = not self.IRARflag 
         return child_solution
     
@@ -197,30 +199,30 @@ disp=True
 NovTresh = 0.08
    
 urname = "hard" # there must be a directory with this name in /out
-urname = "medium" # there must be a directory with this name in /out
 urname = "easy"
+urname = "medium" # there must be a directory with this name in /out
 urname = "T"
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'hard']
-mazelevels= [ 'medium']
 mazelevels= [ 'easy']
+mazelevels= [ 'medium']
 
-objsNoGrid =[[FFA]]
-objsGr = [ ]
+objsNoGrid =[]
 objsGr = []
-objs2BRecorded = [SOL]#,LRAR,IRAR]
+objsGr = [[RAR,SOL],[RAR,CUR],[CUR],[CUR,SOL] ]
+objs2BRecorded = []#,LRAR,IRAR]
 grid_szs = [10]
 NPop = 100 # Population size
-NGens = [400] #according to maze level
+NGens = [1500] #according to maze level
 NovGamma = int(NPop*.03)
-gridGamma = .3 #how much reduce the grid to measure SOL
-evoAllX = 500
-evoMutants = 50
-rarsAfterX = 30
+gridGamma = .4 #how much reduce the grid to measure SOL
+evoAllX = 9999
+evoMutants = 20
+rarsAfterX =30 
 trial_start=0
-Ntrials = 5 
-No_grid_szs = [grid_szs[0]]*len(objsNoGrid)
+Ntrials =15
+No_grid_szs = [30]*len(objsNoGrid)
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
            'NMutation': evoMutants,

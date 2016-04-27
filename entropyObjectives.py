@@ -61,7 +61,10 @@ def individual_entropy(grid, behavior):
         '''
         s the entropy of an behavior within a given grid
         behavior is a tuple that must be within the size of the grid
+        when there is no other behavior in the grid, return something psitive too: 0.01
         '''
+        if np.sum(grid>0) ==1:
+                return .01
         assert np.sum(grid)>0
         fsamp = np.sum(grid)
         try:
@@ -78,12 +81,22 @@ def individual_entropy(grid, behavior):
 def grid_entropy(grid):
         '''
         returns the entropy of the given grid
+        if there is only one behavior in the grid then returns 0.01
+        if there is no behavior in the grid return 0
         '''
         fsamp=np.sum(grid)
+        if fsamp ==1:
+                return .01
+        if fsamp ==0:
+                return 0 
         p = grid/fsamp
         ps = p[p>0]
         entr = np.sum(ps * np.log(ps))
-        assert entr <= 0
+        if entr > 0:
+                print 'ERROR: gridentropy positive:', entr
+                print grid
+                return 100
+                assert entr <=0
         return - entr
 
 def grid_contribution_to_population(robgrid, popgrid):

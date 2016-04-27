@@ -176,12 +176,17 @@ class NSGAII:
             solvers = 0
             NovAdded = False
             NovAddedThisGen = 0
+            evoFlag = i%probeEvoIntervall==0 and i>probeRARSafterX
+            avgEvo=0
+            avgRevo=0
+            if evoFlag:
+                    print "measuring evolvability..."
             for s in R:
                #evaluates rarity (wrt to archive) and novelty (current pop and archive)
                s.evaluate2( R, archive_array,
                            self.NoveltyArchive,
                            ffa_archive,
-                          probe_Evo = (i%probeEvoIntervall)==probeRARSafterX,
+                          probe_Evo = evoFlag,
                            EvoMuts = probeEvoNmutants,
                            recordObj = recordObj,
                            probe_RARs = i > probeRARSafterX,

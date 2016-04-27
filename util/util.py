@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 import scipy.linalg
 from fixedparams import *
+import entropyObjectives as eob
 
 print "util imported from thesis/util"
 
