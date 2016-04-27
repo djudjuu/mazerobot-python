@@ -136,28 +136,44 @@ def sort_by_objective(data, obj, top, until = 30):
 	idx = np.argsort(data, axis= 1)
 	dsorted = np.zeros((data.shape[0],top,0))
 	for i in range(until):
-		tmp = data[:,idx[obj+2,:top,i],i][:,:,np.newaxis]
+		tmp = data[:,idx[obj,:top,i],i][:,:,np.newaxis]
 		dsorted=np.concatenate((dsorted,tmp ), axis=2)
 	return dsorted
 
+def removeWeirdos(X, obj_idxs=[EVO,REVO]):
+        ''' gets a chronic and sets for each individual that is a weirdo (behavior outside maze)
+        all values to 0
+        '''
+        Xviable = np.copy(X)
+        for gi in range(X.shape[2]):
+                for i in range(X.shape[1]):
+                        if X[WEIRDO,i,gi]==1:
+                                Xviable[obj_idxs,i,gi] = 0
+        return Xviable
 
-def plot_objective(X, obj_idx, ax,  until = 30, plot_max=True,plot_sd=False,  lab = None):
+def plot_objective(Xraw, obj_idx, ax,  until = 30, plot_max=True,plot_sd=False,  lab = None):
 	if lab == None:
 		lab = obj_names[obj_idx]
 	ax.set_title(obj_names[obj_idx])
+        lenObj = len(obj_names)
+        #set all weirdo values to zero, except the indication that its a weirdo
+        X = removeWeirdos(Xraw)
+        gensEvo = [i for i in range(X.shape[2]) if np.sum(X[EVO,:,i])< 0]
+        genEvoIntervall = gensEvo[1] - gensEvo[0]
         means = np.mean(X, axis=1)[obj_idx,:until]
-        if obj_idx == EVO:
-                gensEvo = [idx for idx, value in enumerate(X[EVO,0,:]) if value != 0]
-                print gensEvo
-
+        if obj_idx == EVO or obj_idx == REVO:
                 evos = means[gensEvo]
-                print evos
-                ax.scatter(gensEvo,evos , label='mean' + lab)
+                ax.plot(gensEvo,-evos ,'-o', label='mean' + lab)
+                ax.set_xlim([0,X.shape[2]])
+                [ax.axvspan(i, i+genEvoIntervall, facecolor='0.2', alpha=0.3) for i in gensEvo[::2]]
+
                 #for a boxplot
                 ds = [-X[EVO,:,i] for i in gensEvo]
                 #ax.boxplot(ds,1,gensEvo)
                 return
-
+        if obj_idx == WEIRDO:
+                ax.plot(np.arange(until), [(X.shape[1]-np.sum(X[WEIRDO,:,i]))/ float(X.shape[1]) for i in range(until)], label='% viable')
+                return
 
         else:
                 means *=-1 #minfitness assumed by nsga2 
@@ -185,14 +201,12 @@ def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False,
 		for obj_idx in obj_idxs:
 			#sort by objective
 			idx = np.argmin(X[obj_idx,:,:until], axis= 0)
-			if obj_idx == FIT:
-				idx = np.argmax(X[obj_idx,:,:until], axis= 0)
 			xs = []
 			ys =[]
 			for i in range(until):
-				xs.append(X[0,idx[i],i])
-				ys.append(X[1,idx[i],i])
-			sc = ax.scatter(xs, ys, c = np.arange(until),marker = markr[ii], cmap=cm[0], s=25.0, label =obj_names[obj_idx-2]) 
+				xs.append(X[XEND,idx[i],i])
+				ys.append(X[YEND,idx[i],i])
+			sc = ax.scatter(xs, ys, c = np.arange(until),marker = markr[ii], cmap=cm[0], s=25.0, label =obj_names[obj_idx]) 
 			ii += 1
 		plt.colorbar(sc)
 		plt.legend(prop={'size':10})
@@ -200,7 +214,7 @@ def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False,
 			    bottom='off', top='off')
 	if alle:
 		for i in range(X.shape[1]):
-			ax.scatter(X[0,i,:until], X[1,i,:until], c = np.arange(-until,0), cmap='hot')
+			ax.scatter(X[XEND,i,:until], X[YEND,i,:until], c = np.arange(-until,0), cmap='hot')
 
 
 

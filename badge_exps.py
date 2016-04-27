@@ -90,8 +90,10 @@ class MazeSolution(Solution):
         '''
         # if individual is not viable, set all objectives to 0 so it wont be selected
         if all(self.behavior <0):
-            self.objs[:] = [0.01]* len(obj_names)
+            self.objs[:] = [0.00]* len(obj_names)
             self.objs[WEIRDO] = 1
+            self.objs[EVO]=0
+            self.objs[REVO]=0
             for k in range(len(self.selected4)):
                 self.objectives[k] = self.objs[self.selected4[k]]
         else:
@@ -112,17 +114,12 @@ class MazeSolution(Solution):
             if FFA in self.selected4+recordObj:
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
                 ffa = self.objs[FFA]
-            if PEVO in self.selected4+recordObj:
-                self.objs[PEVO] = - eob.grid_contribution_to_population(self.grid, archivegrid)
             #EVOLVABILITY measure
             if probe_Evo:
                 mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
-                if np.sum(mutantgrid)==0:
-                        self.objs[EVO] = 0
-                        self.objs[REVO] = 0
-                else:
-                        self.objs[EVO] = - eob.grid_entropy(mutantgrid)
-                        self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
+                self.objs[EVO] = - eob.grid_entropy(mutantgrid)
+                self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
+                del mutantgrid
             #Lineage rarity: passing on heredity from
             if LRAR in self.selected4 or LRAR in recordObj:
                     self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.parentRar
@@ -183,38 +180,40 @@ def write_params(paramlist, expname, trialnr):
 
 ##### PARAMS #########
 NNov = 15  # neigbours looked at when computing novelty
-datapath = './out/'
+wallcondition = 'brittle' #'soft'
+datapath = './out/'+wallcondition+'/'
 wallpunish = True
-breakflag = True # stop trial after first success   
+breakflag = False #True  stop trial after first success   
 disp=True
 NovTresh = 0.08
    
-urname = "hard" # there must be a directory with this name in /out
-urname = "easy"
-urname = "medium" # there must be a directory with this name in /out
-urname = "T"
+mazeName = "hard" # there must be a directory with this name in /out
+mazeName = "medium" # there must be a directory with this name in /out
+mazeName = "supereasy"
+mazeName = "T"
+mazeName = "easy"
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
+mazelevels= [ 'supereasy']
 mazelevels= [ 'easy']
 
-objsNoGrid =[]
+objsNoGrid =[[NOV],[FFA],[FIT]]
 objsGr = []
-objsGr = [[RAR,IRAR]]#[RAR,SOL],[RAR,CUR],[CUR],[CUR,SOL] ]
-objs2BRecorded = []#,LRAR,IRAR]
+objsGr = [[RAR],[RAR,IRAR],[LRAR],[RAR,SOL],[CUR],[CUR,SOL] ]
+objs2BRecorded = []
 grid_szs = [10]
+No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [1500] #according to maze level
+NGens = [250] #according to maze level
 NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
-evoAllX = 9999
-evoMutants = 20
-rarsAfterX =30 
+EvoBoosterIntervall= 30
+evoMutants = 150
 trial_start=0
-Ntrials =15
-No_grid_szs = [30]*len(objsNoGrid)
+Ntrials =1
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
            'NMutation': evoMutants,
@@ -227,7 +226,7 @@ import sys
 if __name__ == '__main__':
 #maybe add random seeding, but make sure to save it later for reproducability
     for mazelevel,ngen in zip(mazelevels,NGens):
-       statfile = datapath+urname+'/'+mazelevel+'-stats.csv'
+       statfile = datapath+mazeName+'-stats.csv'
        mazepy.mazenav.initmaze(mazelevel + '_maze_list.txt', "neat.ne")
        mazepy.mazenav.random_seed()
        #the next line combines objectives with various grid sizes
@@ -236,10 +235,10 @@ if __name__ == '__main__':
        exp_list.extend( zip( objsNoGrid,No_grid_szs))
        print exp_list
        for obj, gridsz in exp_list:
-          exp_name = ''+urname+ '/'
+          exp_name = wallcondition + '/'+mazeName+ '/'
           for o in obj:
             exp_name += str(obj_names[o])
-          exp_name += str(gridsz) +   mazelevel
+          exp_name += str(gridsz) + '-'
           print exp_name
           print obj, ' with grid_sz: ', str(gridsz)
           with open(statfile,'a') as f:
@@ -262,11 +261,11 @@ if __name__ == '__main__':
              s = nsga2.run(P, NPop, ngen, visualization = disp, title = exp_name + str(ti),
                                    NovArchive= (NOV in obj),
                                    select4SEVO=(SEVO in obj),
-                                   select4PEVO= (PEVO in obj),
                                     FFAArchive = FFA in obj,
                                    breakAfterSolved = breakflag,
                                    recordObj = objs2BRecorded,
-                                  probeEvoIntervall=evoAllX,
-                                  probeRARSafterX = rarsAfterX)
+                                  EvoBoosterIntervall=EvoBoosterIntervall,
+                          probeEvoNmutants = evoMutants
+                          )
              with open(statfile,'a') as f:
                f.write(''+ str(s)+ '\n')

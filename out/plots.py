@@ -7,11 +7,18 @@ from visfunction import *
 from fixedparams import *
 from util import util
 
-#############################Vj# params
-title = 'medium/RARSOLIRAR10medium2'
+wallcondition = 'brittle'
+objectives = 'LRAR10'
+mazeName = 'supereasy'
+objectives = 'FITDIV'
+grid_sz = 10
+trialNr= 0
+title = 'brittle/supereasy/RAR10-0'
+title = wallcondition + '/' + mazeName +'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
 
 mazefile = '../hard_maze2.txt'
 mazefile = '../medium_maze.txt'
+mazefile = '../s_maze2.txt'
 
 
 ##############3#load data
@@ -64,7 +71,7 @@ dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in 
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,RAR,IRAR,SOL,EVO]
+want2plot = [ FIT,RAR,CUR,EVO, REVO,WEIRDO]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1
@@ -75,7 +82,7 @@ nplots = len(want2plot) +w2s+ 1
 #### plot objectives alone ##############
 for obj in want2plot:
 	ax = plt.subplot2grid((nplots,4), (ii,0), colspan=3)
-        plot_objective(data[2:,:,:],obj, ax,plot_max= obj!=NOV,plot_sd=True,until= Nplot)
+        plot_objective(data,obj, ax,plot_max= obj!=NOV,plot_sd=True,until= Nplot)
 	#plot_objective(dsortedPEVO,obj, ax, plot_max= False,  lab='eliteSEVO',until= Nplot)
 	#plot_objective(dsortedEVO,obj, ax, plot_max= False,  lab='eliteSEVO',until= Nplot)
 	#plot_objective(dsortedRAR,obj, ax, plot_max= False  , lab='eliteRAR',until= Nplot)
@@ -84,7 +91,7 @@ for obj in want2plot:
 	#add_solved_indication(ax, solved)
 
 ####### PLOT INDIVIDUALS IN MAZE ##############
-'''
+
 f = plt.figure(0)
 ax = plt.subplot(121)
 labelplot(title,fs,ax)
@@ -95,9 +102,8 @@ scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
 ax1 = plt.subplot(122)
 ax1.set_title('Best individuals')
 drawMazeOnAxes(ax1, mazefile)
-scatter_individuals(ax1,data, obj_idxs = [SOL,IRAR],best=True, until= Nplot)
+scatter_individuals(ax1,data, obj_idxs = [RAR,IRAR],best=True, until= Nplot)
 #scatter_individuals(ax1,best=False,  alle= True, X = dsorted)
-'''
 
 ##### plot normalized objectives together in one plot 
 '''

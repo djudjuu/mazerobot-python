@@ -124,12 +124,10 @@ class NSGAII:
                                      NovArchive = False,
                                         FFAArchive=False,
                                       select4SEVO=False,
-                                        select4PEVO=False,
                                       breakAfterSolved=False, NMutations=10,
                                         recordObj=[],
-                                        probeEvoIntervall=50,
-                                        probeEvoNmutants =150,
-                                           probeRARSafterX=50):
+                                        EvoBoosterIntervall=50,
+                                    probeEvoNmutants =150):
         '''
         Run NSGA-II. 
         '''
@@ -147,7 +145,8 @@ class NSGAII:
         ffa_archive = np.zeros(self.grid_sz)
         pp = 0 # counter to keep track of chronics that are saved
         stats_array = np.zeros((100,100))
-        
+        EvoBoosterFlag = False 
+        measureEvoFlag = False
         #map initial generation into archive
         archive_array = eob.map_population_to_grid(P,
                                                    grid_sz =self.grid_sz,
@@ -172,26 +171,26 @@ class NSGAII:
             #those are a bit expensice so only run them when asked
             if select4SEVO or SEVO in recordObj:
                     self.evaluate3(R,NMutations)
-            if PEVO in recordObj or select4PEVO:
-                    self.evaluate_pevo(R)
 
             solvers = 0
             NovAdded = False
             NovAddedThisGen = 0
-            evoFlag = i%probeEvoIntervall==0 and i>probeRARSafterX
-            avgEvo=0
-            avgRevo=0
-            if evoFlag:
+            before = EvoBoosterFlag
+            EvoBoosterFlag = (i %(2*EvoBoosterIntervall)) > EvoBoosterIntervall and i> EvoBoosterIntervall
+            if before != EvoBoosterFlag:
+                    measureEvoFlag = True
                     print "measuring evolvability..."
+            else:
+                    measureEvoFlag = False
             for s in R:
                #evaluates rarity (wrt to archive) and novelty (current pop and archive)
                s.evaluate2( R, archive_array,
                            self.NoveltyArchive,
                            ffa_archive,
-                          probe_Evo = evoFlag,
+                           probe_Evo = measureEvoFlag,
                            EvoMuts = probeEvoNmutants,
                            recordObj = recordObj,
-                           probe_RARs = i > probeRARSafterX,
+                           probe_RARs = EvoBoosterFlag, 
                            gammaGrid = self.gridGamma,
                           gammaLRAR = self.gammaLRAR)
                if s.solver:

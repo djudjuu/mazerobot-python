@@ -67,6 +67,7 @@ def load_chronic(title):
 	while flag:
 		try:
 		  tmp = np.load(title+'-'+str(i)+'.npy')
+                  print tmp.shape, data.shape
 	 	  data = np.concatenate((data, tmp), axis=2)
 		  i+=1
 		  #print 'found slice', str(i)
@@ -84,8 +85,8 @@ def load_exp_series(name, Nexp=1000000, solvers = False):
 	i=0
 	while flag and Nexp>i:
 	  try:
-	    tmp = np.load(name+str(i)+'Archive.npy')
-	    exp_names.append(name+str(i))
+	    tmp = np.load(name+'-'+str(i)+'Archive.npy')
+	    exp_names.append(name+'-'+str(i))
 	    i += 1
 	  except IOError:
 	    flag = False
@@ -116,8 +117,7 @@ def get_correlation_table(chronics, gens=[-1]):
         matrix (pearson) for each given generation for all the objective, some will be nan though
         '''
         Xs = concatenate_trials(chronics,gens)
-        #idx slicing to discard xy position
-        return [np.corrcoef(X[2:,:]) for X in Xs]
+        return [np.corrcoef(X) for X in Xs]
 
 def reduce_grid_sz(grid, factor):
     old_sz = grid.shape[0]

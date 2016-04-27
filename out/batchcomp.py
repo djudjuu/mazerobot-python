@@ -10,38 +10,38 @@ from util import util
 import scipy.stats
 from fixedparams import *
 
-folder = '2s'
-folder = 'superhard'
-folder = 'medium'
-folder = 'easy'
+wallcondition = 'brittle'
+
+mazeName = 'superhard'
+mazeName = 'medium'
+mazeName = 'easy'
+mazeName = 'T'
+mazeName = 'supereasy'
+
+mazefile = '../medium_maze.txt'
+mazefile = '../s_maze2.txt'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs= ['CUR/SOL', 'RAR/CUR','RAR/SOL','RAR/LRAR','RAR','FIT' ]
-mazelevel = 'superhard'
-mazelevel = 'medium'
-mazelevel = 'easy'
-mazelevel = folder
+expObjs= ['RAR/IRAR','RAR','IRAR','FIT/DIV' ]
 
-pp = PdfPages(mazelevel+'-multiplot.pdf')
+pp = PdfPages(mazeName+'-multiplot.pdf')
 
 grid_sz= 10
 cn = '' #comparison number that can be used to differ between different analyses 
-exps = [ folder+str('/')+s.replace('/','')+str(grid_sz)+mazelevel for s in expObjs]
+exps = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs]
 print 'lenexps', len(exps)
-
-mazefile = '../s-maze2.txt'
-mazefile = '../ss_maze.txt'
-mazefile = '../hard_maze2.txt'
-mazefile = '../medium_maze.txt'
+print 'exps',exps
 
 #### load objectives or solvers
 
 
 # load only trials have been solved 
 solvers  = [util.load_exp_series(exp, solvers = True) for exp in exps]
+print 'solverss:', len(solvers)
 
 firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers]
+print 'fs:', firstSolved
 meanfirst =[np.mean(exp) for exp in firstSolved] 
 stdfirst =[np.std(exp) for exp in firstSolved] 
 
@@ -58,8 +58,8 @@ expObjs = [ expObjs[i] for i in order]
 solvers = [solvers[i] for i in order]
 exps = [exps[i] for i in order]
 
-print expObjs
-print len(meanfirst), len(firstSolved)
+print 'expObjs',expObjs
+print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
 # load chronic with all objectives and positions
 #Ds =[util.load_exp_series(exp) for exp in exps] #Ds is a list of expseries list of(list of chronics)
 
@@ -70,7 +70,7 @@ Ns = [len(exp) for exp in solvers]
 convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
 print convs, Ns
 
-filename = './'+str(mazelevel)+str(grid_sz) + '-Summary'+str(cn)+ '.csv'
+filename = './'+wallcondition +'/'+str(mazeName)+str(grid_sz) + '-Summary'+str(cn)+ '.csv'
 with open(filename,'w') as f:
 	f.write('Objectives' + ',' + 'Solved'+ ','+ 'STD'+ ','+ 'Convergence Rate' + ',' +'N' +'\n') 
 	for exp,mf,std,cr,n in zip(expObjs,meanfirst,stdfirst,convs,Ns):
@@ -99,9 +99,8 @@ with open(filename,'a') as f:
 		f.write(row + '\n')
 				
 ###################### make a correlation table 
-'''
-expObjs2correlate = ['RAR/SOL']
-exps2correlate = [ folder+str('/')+s.replace('/','')+str(grid_sz)+mazelevel for s in expObjs2correlate]
+expObjs2correlate = ['RAR/IRAR']
+exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corr =[util.load_exp_series(exp) for exp in exps2correlate]
 Rs= [util.get_correlation_table(ds,gens=[-1]) for ds in Ds2corr]
 
@@ -110,7 +109,7 @@ with open(filename,'a') as f:
     f.write("Correlation Tables (Pearson)")
     for expname, R in zip(expObjs2correlate, Rs):
         exp = expname.split('/')
-        exp += ['FIT','LRAR']
+        exp += ['FIT','EVO','REVO']
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -120,11 +119,10 @@ with open(filename,'a') as f:
                 else:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
-'''
 ################# plot objectives against each other ################
 
-expObjs2VSPlot = ['RAR/SOL/IRAR']
-exps2VSPlot = [ folder+str('/')+s.replace('/','')+str(grid_sz)+mazelevel for s in expObjs2VSPlot]
+expObjs2VSPlot = ['RAR/IRAR']
+exps2VSPlot = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2VSPlot]
 Ds2VSPlot =[util.load_exp_series(exp) for exp in exps2VSPlot]
 
 for ds in Ds2VSPlot:
@@ -149,7 +147,7 @@ ax.set_xlabel('generations')
 ax.set_ylabel('convergence rate')
 [ax.plot( range(maxgen), convRate,label =exp)  for convRate,exp in zip(convRates,expObjs)]
 plt.legend(loc=4)
-plt.savefig('./'+mazelevel+'/'+mazelevel+str(grid_sz)+str('-ConvergenceRate.png'))
+plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
 plt.show()
 
@@ -183,7 +181,7 @@ ax.set_xlabel('generation')
 
 a = [ax.plot(range(len(Dmaxfit[i])),1- Dmaxfit[i], label=expObjs[i]) for i in range(len(Dmaxfit))]
 plt.legend(loc=4)
-plt.savefig('./'+mazelevel+'/'+mazelevel+str(grid_sz)+str('-AverageMaxFitness.png'))
+plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-AverageMaxFitness.png'))
 pp.savefig()
 plt.show()
 ######### boxplot ##############
@@ -194,7 +192,7 @@ ax.boxplot(  firstSolved,1, '')
 plt.xticks(range(1, 1+len(expObjs)),expObjs)
 #ax.set_xticks(expObjs)
 ax.set_ylabel('generation')
-plt.savefig('./'+mazelevel+'/'+mazelevel+str(grid_sz)+str('-Boxplot.png'))
+plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-Boxplot.png'))
 pp.savefig()
 plt.show()
 
