@@ -210,7 +210,7 @@ mazelevels= [ 'medium']
 
 objsNoGrid =[]
 objsGr = []
-objsGr = [[RAR,SOL],[RAR,CUR],[CUR],[CUR,SOL] ]
+objsGr = [[LRAR]]#[RAR,SOL],[RAR,CUR],[CUR],[CUR,SOL] ]
 objs2BRecorded = []#,LRAR,IRAR]
 grid_szs = [10]
 NPop = 100 # Population size
