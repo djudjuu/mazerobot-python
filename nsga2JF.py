@@ -177,7 +177,7 @@ class NSGAII:
             NovAddedThisGen = 0
             before = EvoBoosterFlag
             EvoBoosterFlag = (i %(2*EvoBoosterIntervall)) > EvoBoosterIntervall and i> EvoBoosterIntervall
-            if before != EvoBoosterFlag:
+            if before != EvoBoosterFlag or i == num_generations -1:
                     measureEvoFlag = True
                     print "measuring evolvability..."
             else:

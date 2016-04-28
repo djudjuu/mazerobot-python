@@ -187,22 +187,23 @@ breakflag = False #True  stop trial after first success
 disp=True
 NovTresh = 0.08
    
-mazeName = "hard" # there must be a directory with this name in /out
 mazeName = "medium" # there must be a directory with this name in /out
 mazeName = "supereasy"
+mazeName = "hard" # there must be a directory with this name in /out
 mazeName = "T"
 mazeName = "easy"
 
 mazelevels= [ 'superhard']
-mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 mazelevels= [ 'supereasy']
+mazelevels= [ 'hard']
 mazelevels= [ 'easy']
 
 objsNoGrid =[[NOV],[FFA],[FIT]]
-objsGr = []
-objsGr = [[RAR],[RAR,IRAR],[LRAR],[RAR,SOL],[CUR],[CUR,SOL] ]
-objs2BRecorded = []
+objsNoGrid =[]
+objsGr = [[RAR,IRAR],[LRAR],[RAR,SOL],[CUR],[CUR,SOL] ]
+objsGr = [[RAR]]
+objs2BRecorded = [SOL,IRAR]
 grid_szs = [10]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
@@ -210,10 +211,10 @@ NGens = [250] #according to maze level
 NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
-EvoBoosterIntervall= 30
+EvoBoosterIntervall= 50
 evoMutants = 150
 trial_start=0
-Ntrials =1
+Ntrials =3
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
            'NMutation': evoMutants,

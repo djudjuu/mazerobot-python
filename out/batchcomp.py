@@ -14,16 +14,16 @@ wallcondition = 'brittle'
 
 mazeName = 'superhard'
 mazeName = 'medium'
-mazeName = 'easy'
 mazeName = 'T'
 mazeName = 'supereasy'
+mazeName = 'easy'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs= ['RAR/IRAR','RAR','IRAR','FIT/DIV' ]
+expObjs = ['RAR','RAR/SOL', 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
@@ -38,10 +38,10 @@ print 'exps',exps
 
 # load only trials have been solved 
 solvers  = [util.load_exp_series(exp, solvers = True) for exp in exps]
-print 'solverss:', len(solvers)
+#print 'solverss:', len(solvers)
 
 firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers]
-print 'fs:', firstSolved
+#print 'fs:', firstSolved
 meanfirst =[np.mean(exp) for exp in firstSolved] 
 stdfirst =[np.std(exp) for exp in firstSolved] 
 
@@ -68,7 +68,7 @@ print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
 
 Ns = [len(exp) for exp in solvers]
 convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
-print convs, Ns
+#print convs, Ns
 
 filename = './'+wallcondition +'/'+str(mazeName)+str(grid_sz) + '-Summary'+str(cn)+ '.csv'
 with open(filename,'w') as f:
@@ -81,10 +81,9 @@ with open(filename,'w') as f:
 ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
 
 [ps[i].insert(i, -1) for i in range(len(ps))]
-print 'ps:', len(ps)
 
 with open(filename,'a') as f:
-        f.write('Differences between experiments significant?\n')
+        f.write('\nDifferences between experiments significant?\n')
 	f.write( '\n ,'+str(expObjs)+ '\n')
 	for ie in range(len(ps)):
 		row =str( expObjs[ie])+','
@@ -97,16 +96,16 @@ with open(filename,'a') as f:
 					row += '*,' 
 				else: row += ','
 		f.write(row + '\n')
-				
+
 ###################### make a correlation table 
-expObjs2correlate = ['RAR/IRAR']
+expObjs2correlate = ['RAR/SOL']
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corr =[util.load_exp_series(exp) for exp in exps2correlate]
 Rs= [util.get_correlation_table(ds,gens=[-1]) for ds in Ds2corr]
 
 
 with open(filename,'a') as f:
-    f.write("Correlation Tables (Pearson)")
+    f.write("\nCorrelation Tables (Pearson)")
     for expname, R in zip(expObjs2correlate, Rs):
         exp = expname.split('/')
         exp += ['FIT','EVO','REVO']
@@ -120,23 +119,23 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 ################# plot objectives against each other ################
-
-expObjs2VSPlot = ['RAR/IRAR']
+'''
+expObjs2VSPlot = ['RAR/SOL']
+Gen2VisCorr= 30
 exps2VSPlot = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2VSPlot]
 Ds2VSPlot =[util.load_exp_series(exp) for exp in exps2VSPlot]
 
 for ds in Ds2VSPlot:
     x_obj = [RAR]
-    y_objs = [IRAR,SOL]
+    y_objs = [EVO,REVO, SOL]
     color_obj= FIT
-    visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj)
+    visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj,gen=Gen2VisCorr)
 plt.show()
-
-
+'''
 
 ############# plot average convergence rate ###########
 plt.figure(0)
-ax=plt.subplot(111)
+ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 #lenexps = [np.asarray([di.shape[2] for di in exp]) for exp in Ds]
 firstSolvedAsArray = [np.asarray(solved) for solved  in firstSolved]
 
@@ -146,10 +145,53 @@ convRates = [[len(solved[solved<=i])/float(ntrials) for i in range(maxgen)] for 
 ax.set_xlabel('generations')
 ax.set_ylabel('convergence rate')
 [ax.plot( range(maxgen), convRate,label =exp)  for convRate,exp in zip(convRates,expObjs)]
-plt.legend(loc=4)
+#plt.legend(loc=4)
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
+#plt.show()
+
+############ PLOT EVOLVABILITY COMPARISON ######################
+expObjs2EvoComp = ['RAR','RAR/SOL', 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
+expObjs2EvoComp = ['RAR','RAR/SOL']#, 'CUR', 'CUR/SOL', 'FFA']
+exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
+Ds2EvoComp =[util.load_exp_series(exp) for exp in exps2EvoComp]
+#find which generations evolvability was measured
+plt.figure(22)
+#find out which gens evo was measured
+X = Ds2EvoComp[0][0]
+nGens = X.shape[2]
+gensEvoMeasured = []
+AllEvos =[]
+for exp in Ds2EvoComp:
+    X = exp[0]
+    gensEvo = [i for i in range(X.shape[2]) if np.sum(X[EVO,:,i])< 0]
+    print 'gens Evo was measured', gensEvo
+    gensEvoMeasured.append(gensEvo)
+    meanEvos = [np.mean(d[EVO,:,gensEvo],axis=1) for d in exp]
+    meanEvosExp = np.mean(meanEvos, axis=0)
+    AllEvos.append(meanEvosExp)
+
+ax = plt.subplot2grid((2,4), (0,0), colspan=3)
+[ax.plot(gensEvo,-evos ,'-o', label= exp) for  evos, exp, gensEvo in zip(AllEvos, expObjs2EvoComp, gensEvoMeasured)]
+ax.set_xlim([0,nGens])
+ax.set_xlabel('generations')
+ax.set_ylabel('mean evolvability')
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
+
+#color background according to first experiment
+genEvoIntervall = gensEvoMeasured[0][1] - gensEvoMeasured[0][0]
+[ax.axvspan(i, i+genEvoIntervall, facecolor='0.2', alpha=0.3) for i in gensEvoMeasured[0][::2]]
+
+ax = plt.subplot2grid((2,4), (1,0), colspan=3)
+weirdos = [(nGens-np.mean([np.sum(d[WEIRDO,:,:],axis=0) for d in  exp], axis=0))/float(nGens) for exp in Ds2EvoComp]
+[ax.plot(range(nGens), weirdo , label=exp ) for weirdo, exp in zip(weirdos, expObjs2EvoComp)]
+ax.set_xlabel('generations')
+ax.set_ylabel('mean % viable children')
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.show()
+
+
 
 '''
 
@@ -174,13 +216,13 @@ Dmaxfit = [np.mean([ np.sort(di,axis=1)[FIT,0,:] for di in exp],axis=0) for exp 
 
 #4) actual plotting
 plt.figure(1)
-ax = plt.subplot(111)
+ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 
 ax.set_ylabel('average max fitness')
 ax.set_xlabel('generation')
 
 a = [ax.plot(range(len(Dmaxfit[i])),1- Dmaxfit[i], label=expObjs[i]) for i in range(len(Dmaxfit))]
-plt.legend(loc=4)
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-AverageMaxFitness.png'))
 pp.savefig()
 plt.show()
@@ -188,6 +230,7 @@ plt.show()
 
 plt.figure(2)
 ax=plt.subplot(111)
+ax = plt.subplot2grid((2,4), (1,0), colspan=3)
 ax.boxplot(  firstSolved,1, '')
 plt.xticks(range(1, 1+len(expObjs)),expObjs)
 #ax.set_xticks(expObjs)

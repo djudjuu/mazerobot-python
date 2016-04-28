@@ -14,13 +14,12 @@ def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
         #centering data and dividing by variance
         ds = triallist
         R = util.get_correlation_table(ds, gens=[-1])
-        print R[0]
+        #print R[0]
         
         Xraw = util.concatenate_trials(ds,gens=[-1])[0]
         Xcentered = Xraw - np.mean(Xraw,axis=1)[:,np.newaxis]
         X = Xcentered / np.std(Xcentered,axis=1)[:,np.newaxis]
         X = -X #nsga2 asumes  minimization of objectives
-        X = X[2:,:]     # discard x,y posiitons
        
         plt.figure(33)
         nrows = len(x_objs)
@@ -32,7 +31,7 @@ def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
                 ax.set_title(obj_names[xobj] + 'vs' +obj_names[yobj] +'\n r = ' + "%.2f"%R[0][xobj,yobj])
                 ax.set_xlabel(obj_names[xobj])
                 ax.set_ylabel(obj_names[yobj])
-                sc=ax.scatter(X[xobj,:],X[yobj,:],c=1-Xraw[2:,:][color_obj][:,np.newaxis],cmap='jet')
+                sc=ax.scatter(X[xobj,:],X[yobj,:],c=-Xraw[color_obj][:,np.newaxis],cmap='jet')
             plt.colorbar(sc)
 
 def plot_histogramm(stats_grid, name='exp'):

@@ -67,13 +67,13 @@ def load_chronic(title):
 	while flag:
 		try:
 		  tmp = np.load(title+'-'+str(i)+'.npy')
-                  print tmp.shape, data.shape
+                  #print 'loachchronic: ', tmp.shape, data.shape
 	 	  data = np.concatenate((data, tmp), axis=2)
 		  i+=1
 		  #print 'found slice', str(i)
 		except IOError:
 		  flag = False
-		  print 'found'+str(i)+'slices, totalling ', data.shape[2], ' generations'
+		  #print 'found'+str(i)+'slices, totalling ', data.shape[2], ' generations'
 	return data
 
 def load_exp_series(name, Nexp=1000000, solvers = False):
@@ -95,10 +95,12 @@ def load_exp_series(name, Nexp=1000000, solvers = False):
 		for exp in exp_names:
 			with open(exp + 'Solver.pkl','rb') as f:
 				expSolvers.append(pickle.load(f))
-		return expSolvers
+		ret =  expSolvers
 	else:
 		datas = [(load_chronic(exp)) for exp in exp_names]
-		return datas
+		ret =  datas
+        print len(ret), 'datasets found for exp: ', name
+        return ret
 		
 def concatenate_trials(chronics, gens=[-1]):
         '''receives a list of chronics and concatenates them for a given generation (default last)
