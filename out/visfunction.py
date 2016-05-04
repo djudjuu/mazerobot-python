@@ -13,10 +13,10 @@ def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
         '''
         #centering data and dividing by variance
         ds = triallist
-        R = util.get_correlation_table(ds, gens=[-1])
+        R = util.get_correlation_table(ds, gens=[gen])
         #print R[0]
         
-        Xraw = util.concatenate_trials(ds,gens=[-1])[0]
+        Xraw = util.concatenate_trials(ds,gens=[gen])[0]
         Xcentered = Xraw - np.mean(Xraw,axis=1)[:,np.newaxis]
         X = Xcentered / np.std(Xcentered,axis=1)[:,np.newaxis]
         X = -X #nsga2 asumes  minimization of objectives

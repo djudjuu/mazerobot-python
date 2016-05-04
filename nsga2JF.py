@@ -190,7 +190,7 @@ class NSGAII:
                            probe_Evo = measureEvoFlag,
                            EvoMuts = probeEvoNmutants,
                            recordObj = recordObj,
-                           probe_RARs = EvoBoosterFlag, 
+                           probe_RARs = (EvoBoosterFlag or measureEvoFlag),
                            gammaGrid = self.gridGamma,
                           gammaLRAR = self.gammaLRAR)
                if s.solver:

@@ -8,17 +8,17 @@ from fixedparams import *
 from util import util
 
 wallcondition = 'brittle'
-objectives = 'LRAR10'
-mazeName = 'supereasy'
-objectives = 'FITDIV'
+objectives = 'RAR'
+mazeName = 'easy'
 grid_sz = 10
 trialNr= 0
 title = 'brittle/supereasy/RAR10-0'
 title = wallcondition + '/' + mazeName +'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
 
 mazefile = '../hard_maze2.txt'
-mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
+mazefile = '../medium_maze.txt'
+mazefile = '../ss_maze.txt'
 
 
 ##############3#load data
@@ -96,13 +96,13 @@ f = plt.figure(0)
 ax = plt.subplot(121)
 labelplot(title,fs,ax)
 drawMazeOnAxes(ax, mazefile)
-scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
-#scatter_individuals(ax,best=False,  alle= True,X = dsortedDIV[:,:20,:],until=2)
+#scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
+scatter_individuals(ax,best=False,  alle= True,X = dsortedEVO[:,:20,:],until=Nplot)
 
 ax1 = plt.subplot(122)
 ax1.set_title('Best individuals')
 drawMazeOnAxes(ax1, mazefile)
-scatter_individuals(ax1,data, obj_idxs = [RAR,IRAR],best=True, until= Nplot)
+scatter_individuals(ax1,data, obj_idxs = [EVO],best=True, until= Nplot)
 #scatter_individuals(ax1,best=False,  alle= True, X = dsorted)
 
 ##### plot normalized objectives together in one plot 

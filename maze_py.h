@@ -81,8 +81,8 @@ class mazenav {
    nov_item = maze_novelty_map(o);
 
    //if(nov_item->collisions!=0) {
-   //if(false) {
-   if(nov_item->collisions!=0) {
+   //if(nov_item->collisions!=0) {
+   if(false) {
     nov_item->end_x= -1.0; 
     nov_item->end_y= -1.0; 
     nov_item->closest_goal_dist = nov_item->max_dist;

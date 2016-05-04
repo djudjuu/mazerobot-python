@@ -130,6 +130,7 @@ class MazeSolution(Solution):
                 self.objs[SOL] = sol
                 if sol == - 100:
                     print 'SOL is off...'
+            #IRAR
             if probe_RARs and IRAR in self.selected4 + recordObj:
                     if not self.IRARflag:
                             metaGrid = util.reduce_grid_sz(self.grid,gammaGrid)
@@ -144,8 +145,6 @@ class MazeSolution(Solution):
                 self.objectives[k] = self.objs[self.selected4[k]]
         
 
-        #write objectives into list that is used for nsga2 selection 
-
     def set_grid_sz(self,gs, historygrid=None):
        self.grid_sz = gs
        if historygrid==None:
@@ -154,20 +153,20 @@ class MazeSolution(Solution):
             self.grid = np.copy(historygrid)
 
     def crossover(self, other):
-        '''
-        Crossover of T1 solutions.
+        ''' Crossover of T1 solutions.
         '''
         child_solution = MazeSolution(self.selected4, self.robot.copy())
         child_solution.set_grid_sz(self.grid_sz, self.grid)
         child_solution.parentRar= int(np.copy(self.objs[LRAR]))
         child_solution.IRARflag = not self.IRARflag 
         return child_solution
-    
+
     def mutate(self):
         '''
         Mutation of T1 solution.
         '''
         self.robot.mutate()
+
 
 def write_params(paramlist, expname, trialnr):
    paramfile = './out/'+expname+str(trialnr)+'params.txt'
@@ -180,41 +179,42 @@ def write_params(paramlist, expname, trialnr):
 
 ##### PARAMS #########
 NNov = 15  # neigbours looked at when computing novelty
-wallcondition = 'brittle' #'soft'
+wallcondition = 'soft' #'soft'
 datapath = './out/'+wallcondition+'/'
-wallpunish = True
+wallpunish = False
 breakflag = False #True  stop trial after first success   
 disp=True
 NovTresh = 0.08
    
-mazeName = "medium" # there must be a directory with this name in /out
 mazeName = "supereasy"
+mazeName = "easy"
 mazeName = "hard" # there must be a directory with this name in /out
 mazeName = "T"
-mazeName = "easy"
+mazeName = "medium" # there must be a directory with this name in /out
 
 mazelevels= [ 'superhard']
-mazelevels= [ 'medium']
 mazelevels= [ 'supereasy']
-mazelevels= [ 'hard']
 mazelevels= [ 'easy']
+mazelevels= [ 'hard']
+mazelevels= [ 'medium']
 
-objsNoGrid =[[NOV],[FFA],[FIT]]
 objsNoGrid =[]
-objsGr = [[RAR,IRAR],[LRAR],[RAR,SOL],[CUR],[CUR,SOL] ]
-objsGr = [[RAR]]
-objs2BRecorded = [SOL,IRAR]
+objsNoGrid =[]
+objsGr = []
+objsGr = [[RAR,SOL,CUR],[RAR,IRAR]]#[RAR,SOL],[RAR],[LRAR,SOL]
+#bis Lrarsol 27
+objs2BRecorded = [RAR,SOL,IRAR,LRAR]
 grid_szs = [10]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [250] #according to maze level
+NGens = [500] #according to maze level
 NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 EvoBoosterIntervall= 50
 evoMutants = 150
 trial_start=0
-Ntrials =3
+Ntrials =5
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
            'NMutation': evoMutants,
