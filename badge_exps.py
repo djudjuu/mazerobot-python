@@ -34,6 +34,7 @@ class MazeSolution(Solution):
         self.selected4 = obj
         self.grid_sz = -1
         self.grid = 0 #4 personal history
+        self.history = []
         self.objs=[0.0]*len(obj_names) #here i save everything for analysis
         self.solver = False
         self.IRARflag = False  #true if IRAR has been evaluated
@@ -79,6 +80,7 @@ class MazeSolution(Solution):
                   NovArchive=None,FFAArchive=None,
                   probe_Evo=False, EvoMuts=200,
                   gammaLRAR=0.2,gammaGrid=0.5,
+                  shSOLSpan = 20,
                   recordObj=[],
                  probe_RARs=False):
         '''
@@ -127,16 +129,25 @@ class MazeSolution(Solution):
                 self.objs[EVO] = - eob.grid_entropy(mutantgrid)
                 self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
                 del mutantgrid
+
             #Lineage rarity: passing on heredity from
             if LRAR in self.selected4 or LRAR in recordObj:
                     self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.parentRar
             #STEPPING STONES DIVERSITY SOL
+            #currently without current position, if it should be included uncomment this line and comment it in 152
+            #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
             if probe_RARs and SOL in self.selected4 + recordObj:
                 lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
                 sol = - eob.grid_entropy(lineagegrid)
                 self.objs[SOL] = sol
                 if sol == - 100:
                     print 'SOL is off...'
+
+            #short term SOL
+            if probe_RARs and shSOL in self.selected4 + recordObj:
+                lineagegrid = eob.map_behaviors_to_grid(self.history[-shSOLSpan:], self.grid_sz)
+                self.objs[shSOL] = - eob.grid_entropy(lineagegrid)
+
             #IRAR
             if probe_RARs and IRAR in self.selected4 + recordObj:
                     if not self.IRARflag:
@@ -148,6 +159,8 @@ class MazeSolution(Solution):
                     self.IRARflag = not self.IRARflag
 
             self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
+            self.history.append(eob.map_into_grid(self, self.grid_sz))
+
             for k in range(len(self.selected4)):
                 self.objectives[k] = self.objs[self.selected4[k]]
         
@@ -166,7 +179,8 @@ class MazeSolution(Solution):
         child_solution.set_grid_sz(self.grid_sz, self.grid)
         child_solution.parentRar= int(np.copy(self.objs[LRAR]))
         child_solution.IRARflag = not self.IRARflag 
-        child.solution.parentIDs.append(seld.id)
+        child_solution.parentIDs.append(self.id)
+        child_solution.history = list(self.history)
         self.childrenInQ += 1
         return child_solution
 
@@ -210,9 +224,8 @@ mazelevels= [ 'medium']
 objsNoGrid =[NOV]
 objsNoGrid =[]
 objsGr = []
-objsGr = [[RAR,SOL,CUR],[RAR,IRAR]]#[RAR,SOL],[RAR],[LRAR,SOL]
-#bis Lrarsol 27
-objs2BRecorded = [RAR,SOL,IRAR,LRAR]
+objsGr = [[RAR,shSOL],[RAR,VIAB],[LRAR,shSOL],[LRAR,VIAB]]
+objs2BRecorded = [RAR,shSOL,IRAR,LRAR]
 grid_szs = [10]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
@@ -221,9 +234,10 @@ NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 EvoBoosterIntervall= 50
-evoMutants = 150
+evoMutants = 15 
 trial_start=0
-Ntrials =5
+Ntrials = 20
+shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
            'NMutation': evoMutants,
@@ -261,7 +275,8 @@ if __name__ == '__main__':
                             thresNov=NovTresh,
                             NovGamma=NovGamma,
                             gridGamma= gridGamma,
-                            gammaLRAR= gammaLRAR
+                            gammaLRAR= gammaLRAR,
+                            shSOLSpan = shSOLSpan
                            )
              P = []
              for i in range(NPop):

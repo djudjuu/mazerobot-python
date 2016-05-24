@@ -157,10 +157,10 @@ def plot_objective(Xraw, obj_idx, ax,  until = 30, plot_max=True,plot_sd=False, 
         lenObj = len(obj_names)
         #set all weirdo values to zero, except the indication that its a weirdo
         X = removeWeirdos(Xraw)
-        gensEvo = [i for i in range(X.shape[2]) if np.sum(X[EVO,:,i])< 0]
-        genEvoIntervall = gensEvo[1] - gensEvo[0]
         means = np.mean(X, axis=1)[obj_idx,:until]
         if obj_idx == EVO or obj_idx == REVO:
+                gensEvo = [i for i in range(X.shape[2]) if np.sum(X[EVO,:,i])< 0]
+                genEvoIntervall = gensEvo[1] - gensEvo[0]
                 evos = means[gensEvo]
                 ax.plot(gensEvo,-evos ,'-o', label='mean' + lab)
                 ax.set_xlim([0,X.shape[2]])
@@ -173,11 +173,17 @@ def plot_objective(Xraw, obj_idx, ax,  until = 30, plot_max=True,plot_sd=False, 
         if obj_idx == WEIRDO:
                 ax.plot(np.arange(until), [(X.shape[1]-np.sum(X[WEIRDO,:,i]))/ float(X.shape[1]) for i in range(until)], label='% viable')
                 return
-
         else:
                 means *=-1 #minfitness assumed by nsga2 
                 maxs = np.max(-X, axis=1)[obj_idx,:until]
+        
+        if obj_idx == PROGRESS:
+                #ax.set_ylim([0,.2])
+                means *=-1
+                plot_max = False
+
         ax.plot(np.arange(until),means, label = 'mean '+lab)
+
         if plot_max:
                 ax.plot(np.arange(until),maxs, label = 'max '+lab)
         if plot_sd:

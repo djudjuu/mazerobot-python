@@ -7,18 +7,18 @@ from visfunction import *
 from fixedparams import *
 from util import util
 
-wallcondition = 'brittle'
-objectives = 'RAR'
-mazeName = 'easy'
+wallcondition = 'soft'
+objectives = 'RARshSOL'
+mazeName = 'T'
 grid_sz = 10
 trialNr= 0
-title = 'brittle/supereasy/RAR10-0'
 title = wallcondition + '/' + mazeName +'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
+
 
 mazefile = '../hard_maze2.txt'
 mazefile = '../s_maze2.txt'
-mazefile = '../medium_maze.txt'
 mazefile = '../ss_maze.txt'
+mazefile = '../medium_maze.txt'
 
 
 ##############3#load data
@@ -71,7 +71,7 @@ dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in 
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,RAR,CUR,EVO, REVO,WEIRDO]
+want2plot = [ FIT,RAR,CUR, VIAB,PROGRESS,shSOL]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1

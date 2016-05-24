@@ -103,7 +103,8 @@ class NSGAII:
                  crossover_rate=1.0, grid_sz = 10,
                  thresNov =0.1, NovGamma=4,
                 gridGamma =0.5,
-                gammaLRAR=0.2):
+                gammaLRAR=0.2,
+                shSOLSpan=20):
         '''
         Constructor. Parameters: number of objectives, mutation rate (default value 10%) and crossover rate (default value 100%). 
         '''
@@ -116,6 +117,8 @@ class NSGAII:
         self.NoveltyArchive = None
         self.gridGamma = gridGamma
         self.gammaLRAR = gammaLRAR
+        self.shSOLSpan = shSOLSpan
+
         
         random.seed();
         
@@ -139,7 +142,7 @@ class NSGAII:
         if NovArchive: 
            self.NoveltyArchive = []
 
-        chronic = numpy.zeros((len(obj_names),population_size, Nslice))
+        chronic = numpy.zeros((len(obj_names),population_size*2, Nslice))
         solved = {}
         archive_array = np.zeros((self.grid_sz, self.grid_sz))
         ffa_archive = np.zeros(self.grid_sz)
@@ -162,11 +165,7 @@ class NSGAII:
            
             pfunc = [p for p in P if np.all(p.behavior>=0)]
             qfunc = [p for p in Q if np.all(p.behavior>=0)]
-            print "Iteracao ", i,'psize: ', len(pfunc), ', qsize: ', len(qfunc) 
             
-            R = []
-            R.extend(P)
-            R.extend(Q)
 
             #FEEDBACK from children to compute EVO
             #progress is measured as number of individuals added to the elite per generation
@@ -176,13 +175,19 @@ class NSGAII:
                     if p.newInArchive:
                             p.newInArchive = False
                             progress += 1
-                            augmentParentEvo(p.parentID,P,propagate=False)
+                            self.augmentParentEvo(p.parentIDs,P,propagate=False)
             #punishing feedback
             progress = float(progress)/len(P)
             for p in P:
-                    self.objs[VIAB] = - self.childrenInQ * progress
-                    self.objs[PROGRESS] = progress
-                    self.childrenInQ = 0
+                    p.objs[VIAB] += p.childrenInQ * progress
+                    p.objs[PROGRESS] = progress
+                    p.childrenInQ = 0
+           
+            print "Iteracao ", i,'psize: ', len(pfunc), ', qsize: ', len(qfunc) , ' fraction added to elite: ', progress, '%'
+
+            R = []
+            R.extend(P)
+            R.extend(Q)
 
             solvers = 0
             NovAdded = False
@@ -207,7 +212,9 @@ class NSGAII:
                            recordObj = recordObj,
                            probe_RARs = (EvoBoosterFlag or measureEvoFlag),
                            gammaGrid = self.gridGamma,
-                          gammaLRAR = self.gammaLRAR)
+                          gammaLRAR = self.gammaLRAR,
+                           shSOLSpan=self.shSOLSpan)
+               s.objs[PROGRESS] = progress
                if s.solver:
                   solvers +=1
            
@@ -222,7 +229,7 @@ class NSGAII:
 
 
             #save the end location and fitness of individuals throughout iterations
-            robs = Q if i>1 else P #first generation Q is empty
+            robs =R# Q if i>1 else P #first generation Q is empty
             for r in range(len(robs)):
                chronic[:,r,i%Nslice] = robs[r].objs
             if NovArchive:
@@ -279,17 +286,16 @@ class NSGAII:
            ret = -1
         return ret
         
-    def augmentParentEvo(pID, P, propagate = False):
+    def augmentParentEvo(self,pIDs, P, propagate = False):
             '''
             augments the Evolvability proxy VIAB of the parent by one.
             Does the same for all grandparents still in the archive if propagete is set to TRUE
             '''
             for p in P:
-                    if p.id == pID:
-                            p.objs[VIAB] += 1
+                    if p.id in pIDs:
+                            p.objs[VIAB] -= 1
                             if propagate:
-                                    for px in p.parentIDs:
-                                            augmentParentEvo(px,P)
+                                    self.augmentParentEvo(p.parentIDs,P,propagate)
 
     def evaluate_pevo(self,pop):
         popgrid = np.zeros((self.grid_sz, self.grid_sz) )
@@ -403,7 +409,7 @@ class NSGAII:
             if random.random() < self.crossover_rate: #happens always
                 child_solution = selected_solutions[0].crossover(selected_solutions[1])
                 
-                if random.random() < self.mutation_rate: #currently set to 0.1
+                if random.random() < self.mutation_rate: #currently set to 0.9
                     child_solution.mutate()
                     
                 child_solution.evaluate_solution()

@@ -23,7 +23,7 @@ mazefile = '../s_maze2.txt'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs = ['RAR','RAR/SOL','LRAR', 'LRAR/SOL']#, 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
+expObjs = ['RAR','LRAR', 'NOV','RAR/VIAB', 'RAR/CUR/VIAB']#, 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
@@ -64,7 +64,6 @@ print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
 
 ####### make a summary table for the experiment ############
 
-'''
 Ns = [len(exp) for exp in solvers]
 convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
 #print convs, Ns
@@ -73,8 +72,8 @@ with open(filename,'w') as f:
 	f.write('Objectives' + ',' + 'Solved'+ ','+ 'STD'+ ','+ 'Convergence Rate' + ',' +'N' +'\n') 
 	for exp,mf,std,cr,n in zip(expObjs,meanfirst,stdfirst,convs,Ns):
 		f.write(exp.replace(',','/') + ',' + "%.1f"%mf + ',' + "%.1f"%std + ',' +"%.1f"% cr + ',' +str(n) +'\n') 
-print 'summary table made...'
-'''
+print 'summary table made...\n'
+
 #### make statistical significance table #####
 '''
 ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
@@ -98,8 +97,8 @@ with open(filename,'a') as f:
 print 'significance table made...'
 '''
 ##### make a correlation table 
-'''
-expObjs2correlate = ['RAR/SOL', 'RAR', 'LRAR', 'RAR/IRAR', 'NOV']
+print 'making correlation table...'
+expObjs2correlate = ['RAR/VIAB', 'RAR/CUR/VIAB']
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corr =[util.load_exp_series(exp) for exp in exps2correlate]
 
@@ -122,8 +121,7 @@ with open(filename,'a') as f:
                 else:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
-'''
-print "Correlations table made..."
+print "Correlations table made...\n"
 
 ################# plot objectives against each other ################
 '''expObjs2VSPlot = ['LRAR']
@@ -161,8 +159,8 @@ pp.savefig()
 
 # --------- EVOLVABILITY COMPARISONS--------------------            
 
-expObjs2EvoComp = ['RAR','RAR/SOL', 'CUR', 'CUR/SOL', 'NOV']
 expObjs2EvoComp = ['RAR/SOL','RAR','LRAR', 'LRAR/SOL']#/IRAR']#, 'LRAR','RAR/IRAR', 'FIT','FFA']
+expObjs2EvoComp = ['RAR/VIAB', 'RAR/CUR/VIAB' ]
 exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
 Ds2EvoComp =[util.load_exp_series(exp) for exp in exps2EvoComp]
 
@@ -243,12 +241,15 @@ plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-EvolvabilityCorre
 # plot average objectives over generations
 plt.figure('what are the mean values of the objectives in the compared experiments?')
 
-obj2plot = [RAR,SOL,LRAR]
+obj2plot = [RAR,VIAB,PROGRESS ]
 for i,obj in enumerate(obj2plot):
     ax = plt.subplot2grid((len(obj2plot),4), (i,0), colspan=3)
     for name,exp in zip(expObjs2EvoComp,Ds2EvoComp):
         meansobjs = [np.mean(-d,axis=1) for d in exp]
+        stdsobjs = [np.std(-d,axis=1) for d in exp]
         meanObjExp = np.mean(meansobjs, axis=0)
+        meanStdExp = np.mean(stdsobjs,axis=0)
+
         print 'meanObjExp', meanObjExp.shape
         ax.plot(range(meanObjExp.shape[1]), meanObjExp[obj], label= name )
         ax.set_title(obj_names[obj])

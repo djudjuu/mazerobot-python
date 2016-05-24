@@ -38,6 +38,12 @@ def map_population_to_grid(pop, grid_sz, grid=None):
                 grid[key] += 1
         return grid
 
+def map_behaviors_to_grid(Bs, grid_sz):
+        grid = np.zeros((grid_sz, grid_sz))
+        for b in Bs:
+                grid[b] += 1
+        return grid
+
 def map_pop_to_array_by_objective(pop,array_sz,obj,grid=None):
         '''maps a lst of given mazenas into an array of given size according 
         to a given objective

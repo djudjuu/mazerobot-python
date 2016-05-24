@@ -17,8 +17,9 @@ YEND=15
 REVO= 16        #Useful (rare) evolvability, measures the capability to produce offsprings that do something new
 VIAB= 17        # also evolvability in the 2nd sense. Measures how many offsprings have been taken into the archive
 PROGRESS = 18   #how many individuals have come into the elite this generations
+shSOL=19        # short term SOL, measured only over the last x mutations
 
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOL', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB']
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOL', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','shSOL']
 
 def get_obj_ID(string):
         return obj_names.index(string)
