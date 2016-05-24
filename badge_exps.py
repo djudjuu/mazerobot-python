@@ -189,8 +189,8 @@ NovTresh = 0.08
 mazeName = "supereasy"
 mazeName = "easy"
 mazeName = "hard" # there must be a directory with this name in /out
-mazeName = "T"
 mazeName = "medium" # there must be a directory with this name in /out
+mazeName = "T"
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'supereasy']
@@ -198,7 +198,7 @@ mazelevels= [ 'easy']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 
-objsNoGrid =[]
+objsNoGrid =[NOV]
 objsNoGrid =[]
 objsGr = []
 objsGr = [[RAR,SOL,CUR],[RAR,IRAR]]#[RAR,SOL],[RAR],[LRAR,SOL]
