@@ -11,6 +11,7 @@ import numpy as np
 import entropyObjectives as eob
 import pickle
 import itertools
+from itertools import count
 from util import util
 
 from fixedparams import *
@@ -21,6 +22,8 @@ class MazeSolution(Solution):
     '''
     instances serve as navigator for the mazes
     '''
+    _ids = count(1)
+
     def __init__(self,obj,robot=False):
         '''
         Constructor.
@@ -35,6 +38,10 @@ class MazeSolution(Solution):
         self.solver = False
         self.IRARflag = False  #true if IRAR has been evaluated
         self.parentRar = 0
+        self.newInArchive = True
+        self.childrenInQ = 0
+        self.id = self._ids.next()
+        self.parentIDs = []
         if(not robot):
          self.robot=mazepy.mazenav()
          self.robot.init_rand()
@@ -159,6 +166,8 @@ class MazeSolution(Solution):
         child_solution.set_grid_sz(self.grid_sz, self.grid)
         child_solution.parentRar= int(np.copy(self.objs[LRAR]))
         child_solution.IRARflag = not self.IRARflag 
+        child.solution.parentIDs.append(seld.id)
+        self.childrenInQ += 1
         return child_solution
 
     def mutate(self):

@@ -168,9 +168,21 @@ class NSGAII:
             R.extend(P)
             R.extend(Q)
 
-            #those are a bit expensice so only run them when asked
-            if select4SEVO or SEVO in recordObj:
-                    self.evaluate3(R,NMutations)
+            #FEEDBACK from children to compute EVO
+            #progress is measured as number of individuals added to the elite per generation
+            progress = 0
+            #rewarding feedback
+            for p in P:
+                    if p.newInArchive:
+                            p.newInArchive = False
+                            progress += 1
+                            augmentParentEvo(p.parentID,P,propagate=False)
+            #punishing feedback
+            progress = float(progress)/len(P)
+            for p in P:
+                    self.objs[VIAB] = - self.childrenInQ * progress
+                    self.objs[PROGRESS] = progress
+                    self.childrenInQ = 0
 
             solvers = 0
             NovAdded = False
@@ -182,6 +194,9 @@ class NSGAII:
                     print "measuring evolvability..."
             else:
                     measureEvoFlag = False
+
+            # evaluate relative criteria (those defined with respect to the population): Rarities, Novelty, Diversity
+            #and writes it in the list used for selection
             for s in R:
                #evaluates rarity (wrt to archive) and novelty (current pop and archive)
                s.evaluate2( R, archive_array,
@@ -195,13 +210,16 @@ class NSGAII:
                           gammaLRAR = self.gammaLRAR)
                if s.solver:
                   solvers +=1
+           
+            #Novelty 
+            # questions: archive is unique? no double entries?
+            # sample from parents and children or children only?) if not np.any([np.all(c.behavior==a) for a  in NoveltyArchive])]
             if NovArchive:
                     Rfunc = [q for q in Q if np.all(q.behavior >=0)] + [p for p in P if np.all(p.behavior >=0)]
                     RfuncNew = [r for r in Rfunc if not np.any([np.all(r.behavior == a) for a in self.NoveltyArchive])]
                     self.NoveltyArchive += [c.behavior for c in  random.sample(RfuncNew,min(self.NovGamma,len(RfuncNew)))]
-                                                                          #questions: archive is unique? no double entries?
-                                                                         #sample from parents and children or children only?) if not np.any([np.all(c.behavior==a) for a  in NoveltyArchive])]
-            
+           
+
 
             #save the end location and fitness of individuals throughout iterations
             robs = Q if i>1 else P #first generation Q is empty
@@ -218,7 +236,8 @@ class NSGAII:
                solved.update({i:solvers})
                if breakAfterSolved:
                   break
-            
+
+            #selection of most interesting trade-offs
             fronts = self.fast_nondominated_sort(R)
             
             del P[:]
@@ -259,6 +278,18 @@ class NSGAII:
         else:
            ret = -1
         return ret
+        
+    def augmentParentEvo(pID, P, propagate = False):
+            '''
+            augments the Evolvability proxy VIAB of the parent by one.
+            Does the same for all grandparents still in the archive if propagete is set to TRUE
+            '''
+            for p in P:
+                    if p.id == pID:
+                            p.objs[VIAB] += 1
+                            if propagate:
+                                    for px in p.parentIDs:
+                                            augmentParentEvo(px,P)
 
     def evaluate_pevo(self,pop):
         popgrid = np.zeros((self.grid_sz, self.grid_sz) )
