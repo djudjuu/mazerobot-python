@@ -180,6 +180,7 @@ class NSGAII:
             progress = float(progress)/len(P)
             for p in P:
                     p.objs[VIAB] += p.childrenInQ * progress
+                    p.objs[VIABP] += p.childrenInQ * progress
                     p.objs[PROGRESS] = progress
                     p.childrenInQ = 0
            
@@ -295,6 +296,7 @@ class NSGAII:
                     if p.id in pIDs:
                             p.objs[VIAB] -= 1
                             if propagate:
+                                    p.objs[VIABP] -= 1
                                     self.augmentParentEvo(p.parentIDs,P,propagate)
 
     def evaluate_pevo(self,pop):

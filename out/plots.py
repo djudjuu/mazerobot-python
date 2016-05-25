@@ -8,10 +8,10 @@ from fixedparams import *
 from util import util
 
 wallcondition = 'soft'
-objectives = 'RARshSOL'
-mazeName = 'T'
+objectives = 'RARVIAB'
+mazeName = 'medium'
 grid_sz = 10
-trialNr= 0
+trialNr= 1
 title = wallcondition + '/' + mazeName +'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
 
 
@@ -29,6 +29,10 @@ mazefile = '../medium_maze.txt'
 """
 #data = np.load(title + '.npy')
 data = util.load_chronic(title)
+
+Q = data[:,100:,:]
+P = data[:,:100,:]
+
 solved = 0
 with open(title + 'Solver.pkl','rb') as f:
 	solved =pickle.load(f)
@@ -46,17 +50,8 @@ if solved != {}:
 elite = 10 # in percentage
 eliteN = int(NPop*(elite/100.0))
 #print 'Elite: ', elite
-dsortedCUR = sort_by_objective(data, CUR, eliteN, until= Nplot)
-dsortedNOV = sort_by_objective(data, NOV, eliteN,  until= Nplot)
-dsortedRAR = sort_by_objective(data, RAR, eliteN,  until= Nplot)
-dsortedEVO = sort_by_objective(data, EVO, eliteN,  until= Nplot)
-dsortedPEVO = sort_by_objective(data, SEVO, eliteN,  until= Nplot)
-dsortedDIV = sort_by_objective(data, DIV, eliteN,  until= Nplot)
-dsortedSOL = sort_by_objective(data, SOL, eliteN,  until= Nplot)
-dsortedIRAR = sort_by_objective(data, IRAR, eliteN,  until= Nplot)
-dsortedLRAR = sort_by_objective(data, LRAR, eliteN,  until= Nplot)
 
-dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
+#dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
 ############### plot density animation ###################
 #f2 = plt.figure(2)
 #ax11 = plt.subplot(121)
@@ -71,7 +66,7 @@ dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in 
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,RAR,CUR, VIAB,PROGRESS,shSOL]
+want2plot = [ FIT,CUR,RAR,EVO, VIAB,PROGRESS,shSOL]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1
@@ -82,8 +77,9 @@ nplots = len(want2plot) +w2s+ 1
 #### plot objectives alone ##############
 for obj in want2plot:
 	ax = plt.subplot2grid((nplots,4), (ii,0), colspan=3)
-        plot_objective(data,obj, ax,plot_max= obj!=NOV,plot_sd=True,until= Nplot)
-	#plot_objective(dsortedPEVO,obj, ax, plot_max= False,  lab='eliteSEVO',until= Nplot)
+        #plot_objective(data,obj, ax,plot_max= obj==FIT,plot_sd=True,until= Nplot)
+	plot_objective(Q,obj, ax, plot_max= False, plot_sd=True, lab='Q',until= Nplot)
+	plot_objective(P,obj, ax, plot_max= False,  plot_sd=True,lab='P',until= Nplot)
 	#plot_objective(dsortedEVO,obj, ax, plot_max= False,  lab='eliteSEVO',until= Nplot)
 	#plot_objective(dsortedRAR,obj, ax, plot_max= False  , lab='eliteRAR',until= Nplot)
 	ii += 1
@@ -96,13 +92,13 @@ f = plt.figure(0)
 ax = plt.subplot(121)
 labelplot(title,fs,ax)
 drawMazeOnAxes(ax, mazefile)
-#scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
-scatter_individuals(ax,best=False,  alle= True,X = dsortedEVO[:,:20,:],until=Nplot)
+scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
+#scatter_individuals(ax,best=False,  alle= True,X = dsortedEVO[:,:20,:],until=Nplot)
 
 ax1 = plt.subplot(122)
 ax1.set_title('Best individuals')
 drawMazeOnAxes(ax1, mazefile)
-scatter_individuals(ax1,data, obj_idxs = [EVO],best=True, until= Nplot)
+scatter_individuals(ax1,data, obj_idxs = [VIAB],best=True, until= Nplot)
 #scatter_individuals(ax1,best=False,  alle= True, X = dsorted)
 
 ##### plot normalized objectives together in one plot 

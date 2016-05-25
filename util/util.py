@@ -76,9 +76,14 @@ def load_chronic(title):
 		  #print 'found'+str(i)+'slices, totalling ', data.shape[2], ' generations'
 	return data
 
-def load_exp_series(name, Nexp=1000000, solvers = False):
+def load_exp_series(name, Nexp=1000000, solvers = False, part='all'):
 	'''
 	returns all chronics of a series of experiments with the given name
+        if solvers = True returns only the solvers
+        part indicates whether to return...
+                children  -> Q
+                Parents  -> P
+                all (children concatenteted with parents)-> 3
 	'''
 	exp_names = []
 	flag = True
@@ -98,8 +103,15 @@ def load_exp_series(name, Nexp=1000000, solvers = False):
 		ret =  expSolvers
 	else:
 		datas = [(load_chronic(exp)) for exp in exp_names]
+                npop = 100
+                if part=='Q':
+                        print 'loading children...'
+                        datas = [d[:,npop:,:] for d in datas]
+                if part =='P':
+                        print 'loading elite/genepool...'
+                        datas = [d[:,:npop,:] for d in datas]
 		ret =  datas
-        print len(ret), 'datasets found for exp: ', name
+        print len(ret), 'datasets found for exp: ', name, ' (attention NPop=100 hardcoded)'
         return ret
 		
 def concatenate_trials(chronics, gens=[-1]):
