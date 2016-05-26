@@ -221,11 +221,11 @@ mazelevels= [ 'easy']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 
-objsNoGrid =[NOV]
 objsNoGrid =[]
-objsGr = []
+objsNoGrid =[[NOV,VIAB]]
 objsGr = [[RAR,VIAB],[RAR]]#,shSOL],[RAR,VIAB],[LRAR,shSOL],[LRAR,VIAB]]
-objs2BRecorded = [RAR,shSOL,]
+objsGr = []
+objs2BRecorded = [RAR,shSOL]
 grid_szs = [10]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
@@ -236,7 +236,7 @@ gridGamma = .4 #how much reduce the grid to measure SOL
 EvoBoosterIntervall= 100
 evoMutants = 150
 trial_start=0
-Ntrials = 20
+Ntrials = 30
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],

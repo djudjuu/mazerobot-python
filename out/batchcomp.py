@@ -23,7 +23,7 @@ mazefile = '../s_maze2.txt'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs = ['RAR','LRAR', 'LRAR/VIAB','RAR/VIABP','RAR/shSOL']#, 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
+expObjs = ['RAR','RAR/VIAB', 'NOV', 'NOV/VIAB']#, 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
@@ -62,7 +62,7 @@ print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
 # load chronic with all objectives and positions
 #Ds =[util.load_exp_series(exp) for exp in exps] #Ds is a list of expseries list of(list of chronics)
 
-########################## make a summary table for the experiment ############
+########################## SUMMARY  ############
 
 Ns = [len(exp) for exp in solvers]
 convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
@@ -75,7 +75,7 @@ with open(filename,'w') as f:
 print 'summary table made...\n'
 
 
-######################### make statistical significance table #####
+######################### STATISTICAL SIGNIFICANCE #####
 '''
 ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
 
@@ -96,10 +96,12 @@ with open(filename,'a') as f:
 				else: row += ','
 		f.write(row + '\n')
 print 'significance table made...'
-##### make a correlation table 
+'''
+
+########################### CORRELATION ###################
 '''
 print 'making correlation table...'
-expObjs2correlate = ['RAR/VIABP' ,'RAR/shSOL' ]
+expObjs2correlate = ['RAR/VIAB' ,'RAR','NOV','NOV/VIAB' ]
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corrQ =[util.load_exp_series(exp,part='Q') for exp in exps2correlate]
 Ds2corrP =[util.load_exp_series(exp,part='P') for exp in exps2correlate]
@@ -128,6 +130,7 @@ with open(filename,'a') as f:
             f.write(row + '\n')
 
 '''
+'''
 with open(filename,'a') as f:
     f.write("\nCorrelation Tables (Pearson) (data of children)")
     for expname, R in zip(expObjs2correlate, RsQ):
@@ -143,6 +146,7 @@ with open(filename,'a') as f:
                 else:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
+'''
 '''
 with open(filename,'a') as f:
     f.write("\nCorrelation Tables (Pearson)\n (all)")
@@ -160,6 +164,7 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 print "Correlations table made...\n"
+'''
 
 ################# plot objectives against each other ################
 '''
@@ -170,7 +175,7 @@ Ds2VSPlotQ =[util.load_exp_series(exp, part='Q') for exp in exps2VSPlot]
 Ds2VSPlotP =[util.load_exp_series(exp, part='P') for exp in exps2VSPlot]
 
 for ds in Ds2VSPlotP:
-    x_obj = [RAR,VIABP]
+    x_obj = [RAR,VIAB]
     y_objs = [EVO]
     color_obj= FIT
     visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj,gen=Gen2VisCorr)
@@ -178,7 +183,7 @@ pp.savefig()
 plt.show()
 '''
 
-### plot average convergence rate ###########
+############ average convergence rate ###########
 '''
 plt.figure('average convergence rate')
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
@@ -197,23 +202,24 @@ plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.p
 pp.savefig()
 #plt.show()
 '''
-# --------- EVOLVABILITY COMPARISONS--------------------            
 
-expObjs2EvoComp = ['RAR/SOL','RAR','LRAR', 'LRAR/SOL']#/IRAR']#, 'LRAR','RAR/IRAR', 'FIT','FFA']
-expObjs2EvoComp = ['RAR','RAR/shSOL','RAR/VIABP' ]
+# ############# EVOLVABILITY COMPARISONS #########################
+expObjs2EvoComp = ['RAR','RAR/VIAB','NOV/VIAB','NOV' ]
 exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
 Ds2EvoCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2EvoComp]
 Ds2EvoCompP =[util.load_exp_series(exp,part='P') for exp in exps2EvoComp]
+Ds2EvoCompAll =[util.load_exp_series(exp,part='all') for exp in exps2EvoComp]
 
 
 plt.figure('How does the evolvability develop over time?')
+'''
 #find out which gens evo was measured
 X = Ds2EvoCompQ[0][0]
 nGens = X.shape[2]
 gensEvoMeasured = []
 AllEvos =[]
 AllEvosP =[]
-for exp, expP in zip(Ds2EvoCompQ,Ds2EvoCompP):
+for exp, expAll in zip(Ds2EvoCompQ,Ds2EvoCompAll):
     X = exp[0]
     print 'Xshape :' , X.shape
     gensEvo = [i for i in range(X.shape[2]) if np.sum(X[EVO,:,i])< 0]
@@ -223,16 +229,16 @@ for exp, expP in zip(Ds2EvoCompQ,Ds2EvoCompP):
     meanEvos = [np.mean(d[EVO,:,gensEvo],axis=1) for d in exp]
     meanEvosExp = np.mean(meanEvos, axis=0)
     AllEvos.append(meanEvosExp)
-    #P
-    meanEvosP = [np.mean(d[EVO,:,gensEvo],axis=1) for d in expP]
+    #All
+    meanEvosP = [np.mean(d[EVO,:,gensEvo],axis=1) for d in expAll]
     meanEvosExpP = np.mean(meanEvosP, axis=0)
     AllEvosP.append(meanEvosExpP)
 
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 colormap = plt.cm.nipy_spectral
 ax.set_color_cycle([colormap(i) for i in np.linspace(0, 1,len(expObjs2EvoComp))])
-[ax.plot(gensEvo,-evos ,'-o', label= exp+'Q') for  evos, exp, gensEvo in zip(AllEvos, expObjs2EvoComp, gensEvoMeasured)]
-#[ax.plot(gensEvo,-evos ,'r-o', label= exp+'P') for  evos, exp, gensEvo in zip(AllEvosP, expObjs2EvoComp, gensEvoMeasured)]
+#[ax.plot(gensEvo,-evos ,'-o', label= exp+'Q') for  evos, exp, gensEvo in zip(AllEvos, expObjs2EvoComp, gensEvoMeasured)]
+[ax.plot(gensEvo,-evos ,'-o', label= exp+'All') for  evos, exp, gensEvo in zip(AllEvosP, expObjs2EvoComp, gensEvoMeasured)]
 ax.set_xlim([0,nGens])
 ax.set_xlabel('generations')
 ax.set_ylabel('mean evolvability')
@@ -254,7 +260,6 @@ plt.show()
 
 
 ##### PLOT evolvability correlation over time ###########
-
 f = plt.figure('How does the correlation with evolvability change over time?')
 RsP= [util.get_correlation_table(ds,gens=gensEvo) for ds,gensEvo in zip(Ds2EvoCompP,gensEvoMeasured)]
 RsQ= [util.get_correlation_table(ds,gens=gensEvo) for ds,gensEvo in zip(Ds2EvoCompQ,gensEvoMeasured)]
@@ -290,19 +295,26 @@ for i,exp in enumerate( expObjs2EvoComp):
     #plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-EvolvabilityCorreltaionOverTime.png'))
+'''
 
-# plot average objectives over generations
+############ plot average objectives over generations ####################
+expObjs2AvgComp = ['RAR','RAR/VIAB','NOV/VIAB','NOV' ]
+exps2AvgComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2AvgComp]
+Ds2AvgCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2AvgComp]
+Ds2AvgCompP =[util.load_exp_series(exp,part='P') for exp in exps2AvgComp]
+Ds2AvgCompAll =[util.load_exp_series(exp,part='all') for exp in exps2AvgComp]
+
 part = 'P'
 plt.figure('what are the mean values of the objectives ('+part+') in the compared experiments?')
-obj2plot = [RAR,VIABP,PROGRESS ]
+obj2plot = [RAR,VIAB,PROGRESS ]
 
-Ds2EvoComp = Ds2EvoCompP
+Ds2AvgComp = Ds2AvgCompP
 if part == 'Q':
-    Ds2EvoComp = Ds2EvoCompQ
+    Ds2AvgComp = Ds2AvgCompQ
 
 for i,obj in enumerate(obj2plot):
     ax = plt.subplot2grid((len(obj2plot),4), (i,0), colspan=3)
-    for name,exp in zip(expObjs2EvoComp,Ds2EvoComp):
+    for name,exp in zip(expObjs2AvgComp,Ds2AvgComp):
         meansobjs = [np.mean(-d,axis=1) for d in exp]
         stdsobjs = [np.std(-d,axis=1) for d in exp]
         meanObjExp = np.mean(meansobjs, axis=0)
