@@ -299,18 +299,19 @@ plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-EvolvabilityCorre
 
 ############ plot average objectives over generations ####################
 expObjs2AvgComp = ['RAR','RAR/VIAB','NOV/VIAB','NOV' ]
+
 exps2AvgComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2AvgComp]
-Ds2AvgCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2AvgComp]
-Ds2AvgCompP =[util.load_exp_series(exp,part='P') for exp in exps2AvgComp]
+Ds2AvgCompQ Ds2AvgCompP =[util.load_exp_series(exp,part='P') for exp in exps2AvgComp]
 Ds2AvgCompAll =[util.load_exp_series(exp,part='all') for exp in exps2AvgComp]
 
 part = 'P'
 plt.figure('what are the mean values of the objectives ('+part+') in the compared experiments?')
 obj2plot = [RAR,VIAB,PROGRESS ]
 
-Ds2AvgComp = Ds2AvgCompP
+Ds2AvgComp = 0
 if part == 'Q':
-    Ds2AvgComp = Ds2AvgCompQ
+    Ds2AvgComp = [util.load_exp_series(exp,part='Q') for exp in exps2AvgComp]
+
 
 for i,obj in enumerate(obj2plot):
     ax = plt.subplot2grid((len(obj2plot),4), (i,0), colspan=3)

@@ -107,6 +107,8 @@ class MazeSolution(Solution):
                 self.objectives[k] = self.objs[self.selected4[k]]
         else:
             self.objs[WEIRDO] = 0
+
+            #NOVELTY and behav DIVERSITY
             if (NOV in self.selected4+recordObj) or (DIV in self.selected4):
                 refPop = [x for x in pop if np.all(x.behavior>=0)] 
                 self.dists=[np.sum((self.behavior-x.behavior)**2) for x in refPop]
@@ -116,6 +118,7 @@ class MazeSolution(Solution):
                         self.dists += (arch_dists)
                 self.dists.sort()
                 self.objs[NOV] = - np.sum(self.dists[:NNov])
+        
             #RARITY
             if np.any([ r in self.selected4+recordObj for r in[ RAR , LRAR]]):
                 self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
@@ -133,20 +136,38 @@ class MazeSolution(Solution):
             #Lineage rarity: passing on heredity from
             if LRAR in self.selected4 or LRAR in recordObj:
                     self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.parentRar
+            
             #STEPPING STONES DIVERSITY SOL
             #currently without current position, if it should be included uncomment this line and comment it in 152
             #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
-            if probe_RARs and SOL in self.selected4 + recordObj:
+            if probe_RARs and (SOLr in self.selected4 + recordObj or
+                                SOLrnd in self.selected4 + recordObj or
+                                SOLnd in self.selected4 + recordObj):
                 lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
                 sol = - eob.grid_entropy(lineagegrid)
-                self.objs[SOL] = sol
+                self.objs[SOLr] = sol
+                self.objs[SOLrnd] = - np.sum(lineagegrid>0)/float(np.sum(lineagegrid>0))
+                self.objs[SOLnd] = - np.sum(self.grid>0)/float(np.sum(self.grid>0))
                 if sol == - 100:
                     print 'SOL is off...'
 
             #short term SOL
-            if probe_RARs and shSOL in self.selected4 + recordObj:
+            if probe_RARs and (shSOL in self.selected4 + recordObj or
+                                shSOLnd in self.selected4 + recordObj or
+                                shSOLr in self.selected4 + recordObj or
+                               shSOLrnd in self.selected4 + recordObj):
+                #shSOL auf normalen grid
                 lineagegrid = eob.map_behaviors_to_grid(self.history[-shSOLSpan:], self.grid_sz)
                 self.objs[shSOL] = - eob.grid_entropy(lineagegrid)
+                self.objs[shSOLnd] = - np.sum(lineagegrid>0)/float(np.sum(lineagegrid>0))
+                #shSOL auf reduced  grid
+                lineagegridreduced = util.reduce_grid_sz(lineagegrid,gammaGrid)
+                self.objs[shSOLr]= - eob.grid_entropy(lineagegridreduced)
+                self.objs[shSOLrnd]= - np.sum(lineagegrid>0)/float(np.sum(lineagegrid>0))
+
+
+
+
 
             #IRAR
             if probe_RARs and IRAR in self.selected4 + recordObj:
@@ -221,11 +242,11 @@ mazelevels= [ 'easy']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 
-objsNoGrid =[]
 objsNoGrid =[[NOV,VIAB]]
-objsGr = [[RAR,VIAB],[RAR]]#,shSOL],[RAR,VIAB],[LRAR,shSOL],[LRAR,VIAB]]
+objsNoGrid =[]
+objsGr = [[RAR,SOLnd],[RAR,shSOLnd]]
 objsGr = []
-objs2BRecorded = [RAR,shSOL]
+objs2BRecorded = [RAR,shSOL,SOLr]
 grid_szs = [10]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
@@ -236,7 +257,7 @@ gridGamma = .4 #how much reduce the grid to measure SOL
 EvoBoosterIntervall= 100
 evoMutants = 150
 trial_start=0
-Ntrials = 30
+Ntrials = 2
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
