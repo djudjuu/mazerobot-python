@@ -269,7 +269,7 @@ if __name__ == '__main__':
 #maybe add random seeding, but make sure to save it later for reproducability
     for mazelevel,ngen in zip(mazelevels,NGens):
        statfile = datapath+mazeName+'-stats.csv'
-       mazepy.mazenav.initmaze(mazelevel + '_maze_list.txt', "neat.ne")
+       mazepy.mazenav.initmaze(mazelevel + '_maze_list.txt', "test.ne")
        mazepy.mazenav.random_seed()
        #the next line combines objectives with various grid sizes
        exp_list = list(itertools.product(objsGr, grid_szs))
@@ -287,7 +287,7 @@ if __name__ == '__main__':
              f.write(''+ exp_name + ',' + str(params) + '\n')
           for ti in range(trial_start,Ntrials):
              print 'trial: ', ti
-             nsga2 = NSGAII(len(obj), mutation_rate=.9,
+             nsga2 = NSGAII(len(obj), mutation_rate=1,
                             crossover_rate=1.0,
                             grid_sz = gridsz,
                             thresNov=NovTresh,
