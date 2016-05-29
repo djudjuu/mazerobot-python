@@ -272,7 +272,7 @@ class NSGAII:
             ffa_archive = eob.map_pop_to_array_by_objective(
                                         Q, self.grid_sz,
                                          FIT,ffa_archive)
-            #for visualization
+            ### visualization
             if visualization:
                 viz = visuals.Vizzer(title)
                 if NovArchive:

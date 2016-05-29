@@ -73,7 +73,7 @@ class MazeSolution(Solution):
         self.objs[CUR] = - mazepy.feature_detector.state_entropy(self.robot)
         if(self.robot.solution()):
          self.solver = True
-         print "solution" 
+         print 'solution, (needed ',len(self.history),' mutations.'
         else: self.solver = False
     
     def evaluate2(self,pop, archivegrid,
@@ -230,14 +230,11 @@ breakflag = False #True  stop trial after first success
 disp=True
 NovTresh = 0.08
    
-mazeName = "supereasy"
-mazeName = "easy"
 mazeName = "hard" # there must be a directory with this name in /out
 mazeName = "T"
 mazeName = "medium" # there must be a directory with this name in /out
 
 mazelevels= [ 'superhard']
-mazelevels= [ 'supereasy']
 mazelevels= [ 'easy']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
@@ -245,19 +242,19 @@ mazelevels= [ 'medium']
 objsNoGrid =[[NOV,VIAB]]
 objsNoGrid =[]
 objsGr = [[RAR,SOLnd],[RAR,shSOLnd]]
-objsGr = []
+objsGr = [[RAR]]
 objs2BRecorded = [RAR,shSOL,SOLr]
-grid_szs = [10]
+grid_szs = [5,8,13,18,20,25,30,40]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
 NGens = [600] #according to maze level
 NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
-EvoBoosterIntervall= 100
+EvoBoosterIntervall= 1000
 evoMutants = 150
 trial_start=0
-Ntrials = 2
+Ntrials = 15
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
