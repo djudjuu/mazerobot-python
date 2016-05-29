@@ -23,12 +23,13 @@ mazefile = '../s_maze2.txt'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs = ['RAR']#,'RAR/VIAB', 'NOV', 'NOV/VIAB']#, 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
+expObjs = ['RAR/SOLnd','RAR/shSOLnd']#,'RAR/VIAB', 'NOV', 'NOV/VIAB']#, 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
-grid_szs= [5,8,10,13,18,20,25,30,40]
-grid_szs= [13,18,20,25,30]
+grid_szs= [13,18,20,25,300]
+grid_szs= [8,10,13,15,18,20,23,25,30,40]
+grid_szs= [10]
 cn = '' #comparison number that can be used to differ between different analyses 
 exps = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product(expObjs,grid_szs))]
 print 'lenexps', len(exps)
@@ -40,7 +41,7 @@ print expObjs
 
 
 
-#### load objectives or solvers
+########### load objectives or solvers (and sorting them)
 
 # load only trials have been solved 
 solvers  = [util.load_exp_series(exp, solvers = True) for exp in exps]
@@ -50,24 +51,29 @@ firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in
 #print 'fs:', firstSolved
 meanfirst =[np.mean(exp) for exp in firstSolved] 
 stdfirst =[np.std(exp) for exp in firstSolved] 
+convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
 
-# rearraning from best to worst while taking out all experiments that never solved it
-#sort after ConvRate
+########### rearraning from best to worst while taking out all experiments that never solved it
+#sort after ConvRate, then after speed
+criteria = [exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs]
 
-mfs = np.asarray(meanfirst)
-order = np.argsort(mfs)
-print 'order:' ,order
-order = [o for o in order if not math.isnan(mfs[o])]
-print 'afters ot: ', order
-meanfirst= [meanfirst[i] for i in order]
-stdfirst= [stdfirst[i] for i in order]
-firstSolved = [firstSolved[i] for i in order]
-expObjs = [ expObjs[i] for i in order]
-solvers = [solvers[i] for i in order]
-exps = [exps[i] for i in order]
+
+sumExp = zip(exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs)
+sumExp = zip(*criteria)
+
+sumExp=sorted(sumExp, key=lambda x: (-x[6],x[3]))
+
+exps = [e[0] for e in sumExp]
+expObjs = [e[1] for e in sumExp]
+solvers = [e[2] for e in sumExp]
+meanfirst = [e[3] for e in sumExp]
+firstSolved = [e[4] for e in sumExp]
+stdfirst = [e[5] for e in sumExp]
+convs = [e[6] for e in sumExp]
+# [crit = [e[i] for e in sumExp] for i,crit in enumerate(criteria)]
 
 print 'expObjs',expObjs
-print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
+#print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
 
 # load chronic with all objectives and positions
 #Ds =[util.load_exp_series(exp) for exp in exps] #Ds is a list of expseries list of(list of chronics)
@@ -75,13 +81,13 @@ print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
 ########################## SUMMARY  ############
 
 Ns = [len(exp) for exp in solvers]
-convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
+#convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
 #print convs, Ns
 filename = './'+wallcondition +'/'+str(mazeName)+str(grid_sz) + '-Summary'+str(cn)+ '.csv'
 with open(filename,'w') as f:
-	f.write('Objectives' + ',' + 'Solved'+ ','+ 'STD'+ ','+ 'Convergence Rate' + ',' +'N' +'\n') 
+	f.write('Objectives' + ',' + 'Convergence Rate' + ',' +'Solved at'+ ','+ 'STD'+ ','+ 'N' +'\n') 
 	for exp,mf,std,cr,n in zip(expObjs,meanfirst,stdfirst,convs,Ns):
-		f.write(exp.replace(',','/') + ',' + "%.1f"%mf + ',' + "%.1f"%std + ',' +"%.1f"% cr + ',' +str(n) +'\n') 
+		f.write(exp.replace(',','/') + ',' + "%.1f"% cr+',' +"%.1f"%mf + ',' + "%.1f"%std + ',' +str(n) +'\n') 
 print 'summary table made...\n'
 
 
@@ -109,7 +115,6 @@ print 'significance table made...'
 '''
 
 ########################### CORRELATION ###################
-'''
 print 'making correlation table...'
 expObjs2correlate = ['RAR/SOLnd' ,'RAR/shSOLnd' ]
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
@@ -128,7 +133,7 @@ with open(filename,'a') as f:
     for expname, R in zip(expObjs2correlate, RsP):
         exp = expname.split('/')
         f.write('\n'+expname + '\n:')
-        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB']
+        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLrnd',]
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -154,12 +159,14 @@ with open(filename,'a') as f:
 #                else:
 #                    row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
 ##            f.write(row + '\n')
+
 with open(filename,'a') as f:
     f.write("\nCorrelation Tables (Pearson)\n (all)")
     for expname, R in zip(expObjs2correlate, RsAll):
         exp = expname.split('/')
         f.write('\n'+expname + '\n:')
         exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB']
+        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLrnd',]
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -170,7 +177,7 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 print "Correlations table made...\n"
-'''
+
 ################# plot objectives against each other ################
 '''
 expObjs2VSPlot = ['RAR/VIABP']

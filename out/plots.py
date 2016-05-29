@@ -8,7 +8,7 @@ from fixedparams import *
 from util import util
 
 wallcondition = 'soft'
-objectives = 'RARVIAB'
+objectives = 'RARSOLnd'
 mazeName = 'medium'
 grid_sz = 10
 trialNr= 1
@@ -45,13 +45,14 @@ nplots = 7
 fs= -1	# iteration when maze was first solved
 if solved != {}:
 	fs = solved.keys()[0]
+#dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
 
 #### PLOT PARAMS #######
 elite = 10 # in percentage
 eliteN = int(NPop*(elite/100.0))
 #print 'Elite: ', elite
 
-#dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
+
 ############### plot density animation ###################
 #f2 = plt.figure(2)
 #ax11 = plt.subplot(121)
@@ -61,12 +62,11 @@ eliteN = int(NPop*(elite/100.0))
 
 ###############plot PCA #################
 
-
 ############## PLOT OBJECTIVES ##############
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,CUR,RAR,EVO, VIAB,PROGRESS,shSOL]
+want2plot = [ FIT,shSOLnd,SOLnd]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1
