@@ -142,7 +142,8 @@ class MazeSolution(Solution):
             
             #STEPPING STONES DIVERSITY SOL
             #currently without current position, if it should be included uncomment this line and comment it in 152
-            #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
+            self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
+            self.history.append(eob.map_into_grid(self, self.grid_sz))
             if probe_RARs and (SOLr in self.selected4 + recordObj or
                                 SOLrnd in self.selected4 + recordObj or
                                 SOLnd in self.selected4 + recordObj):
@@ -182,8 +183,8 @@ class MazeSolution(Solution):
                             self.objs[IRAR] = 0
                     self.IRARflag = not self.IRARflag
 
-            self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
-            self.history.append(eob.map_into_grid(self, self.grid_sz))
+            #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
+            #self.history.append(eob.map_into_grid(self, self.grid_sz))
 
             for k in range(len(self.selected4)):
                 self.objectives[k] = self.objs[self.selected4[k]]
@@ -229,7 +230,7 @@ NNov = 15  # neigbours looked at when computing novelty
 wallcondition = 'soft' #'soft'
 datapath = './out/'+wallcondition+'/'
 wallpunish = False
-breakflag = False #True #True#  stop trial after first success   
+breakflag =True #True#  stop trial after first success   
 disp=True
 NovTresh = 0.08
    
@@ -247,19 +248,20 @@ objsNoGrid =[[NOV,VIAB]]
 objsNoGrid =[]
 objsGr = [[RAR]]
 objsGr = [[RAR,SOLnd],[RAR,shSOLr],[RAR,SOLr],[RAR,VIAB],[RAR,shSOLnd]]
+objsGr = [[RAR,SOLnd],[RAR,SOLr],[RAR,VIAB]]
 objs2BRecorded = [RAR,shSOL,SOLr]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [200] #according to maze level
+NGens = [1000] #according to maze level
 NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
-EvoBoosterIntervall= 100
+EvoBoosterIntervall= 10000
 evoMutants = 150
 trial_start=0
-Ntrials = 1
+Ntrials = 10
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],

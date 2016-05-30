@@ -243,7 +243,7 @@ class NSGAII:
                     #print "this generation weirdos: ",Nweirdos
             if measureEvoFlag:
                     evoZeros = np.sum(chronic[EVO,:,i%Nslice]==0) / float(len(R))
-                    print evoZeros ,'% of population have evolvability 0'
+                    print 'average evolvability is : ', np.mean(chronic[EVO,:,i%Nslice])
 
             #check if maze got solved            
             if solvers !=0:

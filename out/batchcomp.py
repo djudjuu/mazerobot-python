@@ -16,8 +16,8 @@ mazeName = 'superhard'
 mazeName = 'supereasy'
 mazeName = 'easy'
 mazeName = 'gridComp'
-mazeName = 'medium'
 mazeName = 'T'
+mazeName = 'medium'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
@@ -25,7 +25,7 @@ mazefile = '../s_maze2.txt'
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
 expObjs = ['RAR']
-expObjs = ['RAR/SOLnd']#,'RAR/shSOLnd']
+expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd']
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
@@ -118,7 +118,7 @@ print 'significance table made...'
 
 ########################### CORRELATION ###################
 print 'making correlation table...'
-expObjs2correlate = ['RAR/SOLnd']# ,'RAR/shSOLnd' ]
+expObjs2correlate = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd']
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corrQ =[util.load_exp_series(exp,part='Q') for exp in exps2correlate]
 Ds2corrP =[util.load_exp_series(exp,part='P') for exp in exps2correlate]
@@ -133,13 +133,13 @@ print 'generations here EVO was measured:',gensEvo
 RsP= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrP,gensEvo)]
 RsQ= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrQ,gensEvo)]
 RsAll = [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corr,gensEvo)]
-
+'''
 with open(filename,'a') as f:
     f.write("\nCorrelation Tables (Pearson)\n (parents)")
     for expname, R in zip(expObjs2correlate, RsP):
         exp = expname.split('/')
         f.write('\n'+expname + '\n:')
-        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLrnd',]
+        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLnd','SOLrnd',]
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -165,14 +165,13 @@ with open(filename,'a') as f:
 #                else:
 #                    row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
 ##            f.write(row + '\n')
-
+'''
 with open(filename,'a') as f:
     f.write("\nCorrelation Tables (Pearson)\n (all)")
     for expname, R in zip(expObjs2correlate, RsAll):
         exp = expname.split('/')
         f.write('\n'+expname + '\n:')
-        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB']
-        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLrnd',]
+        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLnd','SOLrnd',]
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -186,7 +185,7 @@ print "Correlations table made...\n"
 
 ################# plot objectives against each other ################
 print 'preparing to plot objectives against each other...'
-expObjs2VSPlot = ['RAR/SOLnd']
+expObjs2VSPlot = ['RAR/VIAB']
 Gen2VisCorr= -1
 exps2VSPlot = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2VSPlot]
 Ds2VSPlotQ =[util.load_exp_series(exp, part='Q') for exp in exps2VSPlot]
@@ -194,7 +193,7 @@ Ds2VSPlotP =[util.load_exp_series(exp, part='P') for exp in exps2VSPlot]
 
 for ds in Ds2VSPlotP:
     print 'dsshape:' ,ds[0].shape
-    x_obj = [RAR, SOLnd]
+    x_obj = [SOLnd,shSOLr,VIAB]
     y_objs = [EVO]
     color_obj= FIT
     visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj,gen=Gen2VisCorr)

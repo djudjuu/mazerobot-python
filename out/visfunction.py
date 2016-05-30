@@ -29,7 +29,7 @@ def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
             sc=0
             for yobj, yi in zip(y_objs,range(ncols)):
                 ax = plt.subplot(nrows,ncols,ncols*xi+yi)
-                ax.set_title(obj_names[xobj] + 'vs' +obj_names[yobj] +'\n r = ' + "%.2f"%R[0][xobj,yobj])
+                ax.set_title(obj_names[xobj] + 'vs' +obj_names[yobj] +', r = ' + "%.2f"%R[0][xobj,yobj])
                 ax.set_xlabel(obj_names[xobj])
                 ax.set_ylabel(obj_names[yobj])
                 sc=ax.scatter(X[xobj,:],X[yobj,:],c=-Xraw[color_obj][:,np.newaxis],cmap='jet')
