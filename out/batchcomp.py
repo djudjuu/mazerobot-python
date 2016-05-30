@@ -13,23 +13,25 @@ from fixedparams import *
 wallcondition = 'soft'#soft''
 
 mazeName = 'superhard'
-mazeName = 'T'
 mazeName = 'supereasy'
 mazeName = 'easy'
+mazeName = 'gridComp'
 mazeName = 'medium'
+mazeName = 'T'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs = ['RAR/SOLnd','RAR/shSOLnd']#,'RAR/VIAB', 'NOV', 'NOV/VIAB']#, 'CUR', 'CUR/SOL', 'LRAR','RAR/IRAR', 'FIT','NOV','FFA']
+expObjs = ['RAR']
+expObjs = ['RAR/SOLnd']#,'RAR/shSOLnd']
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
 grid_szs= [13,18,20,25,300]
-grid_szs= [8,10,13,15,18,20,23,25,30,40]
-grid_szs= [10]
+grid_szs= [8,10,13,15,18,20,23,25,30]
+grid_szs= [15]
 cn = '' #comparison number that can be used to differ between different analyses 
 exps = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product(expObjs,grid_szs))]
 print 'lenexps', len(exps)
@@ -116,13 +118,17 @@ print 'significance table made...'
 
 ########################### CORRELATION ###################
 print 'making correlation table...'
-expObjs2correlate = ['RAR/SOLnd' ,'RAR/shSOLnd' ]
+expObjs2correlate = ['RAR/SOLnd']# ,'RAR/shSOLnd' ]
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corrQ =[util.load_exp_series(exp,part='Q') for exp in exps2correlate]
 Ds2corrP =[util.load_exp_series(exp,part='P') for exp in exps2correlate]
 Ds2corr =[util.load_exp_series(exp,part='all') for exp in exps2correlate]
 
+evozeros = [np.mean([ np.sum(d[EVO,:,-1]==0)/float(d.shape[1]) for d in Ds]) for Ds in Ds2corrQ]
+print 'on average Evo==0 for ', evozeros, '% of robots in the ELITE?!?!'
+
 gensEvo = [[i for i in range(X[0].shape[2]) if np.sum(X[0][EVO,:,i])< 0] for X in Ds2corrQ]
+print 'generations here EVO was measured:',gensEvo
 
 RsP= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrP,gensEvo)]
 RsQ= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrQ,gensEvo)]
@@ -179,23 +185,24 @@ with open(filename,'a') as f:
 print "Correlations table made...\n"
 
 ################# plot objectives against each other ################
-'''
-expObjs2VSPlot = ['RAR/VIABP']
+print 'preparing to plot objectives against each other...'
+expObjs2VSPlot = ['RAR/SOLnd']
 Gen2VisCorr= -1
 exps2VSPlot = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2VSPlot]
 Ds2VSPlotQ =[util.load_exp_series(exp, part='Q') for exp in exps2VSPlot]
 Ds2VSPlotP =[util.load_exp_series(exp, part='P') for exp in exps2VSPlot]
 
 for ds in Ds2VSPlotP:
-    x_obj = [RAR,VIAB]
+    print 'dsshape:' ,ds[0].shape
+    x_obj = [RAR, SOLnd]
     y_objs = [EVO]
     color_obj= FIT
     visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj,gen=Gen2VisCorr)
 pp.savefig()
 plt.show()
-'''
 
 ############ average convergence rate ###########
+'''
 plt.figure('average convergence rate')
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 #lenexps = [np.asarray([di.shape[2] for di in exp]) for exp in Ds]
@@ -212,6 +219,7 @@ plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
 plt.show()
+'''
 
 # ############# EVOLVABILITY COMPARISONS #########################
 expObjs2EvoComp = ['RAR/SOLnd','RAR/shSOLnd' ]

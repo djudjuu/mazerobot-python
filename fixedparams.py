@@ -24,9 +24,9 @@ shSOLrnd=23     #how many different recent behacviors, those need to be farther 
 SOLr=9          # evolvability as entropy over personal stepping stones, distribution over complete history, need to be apart
 SOLnd = 24      # how many different behaviors in complete history
 SOLrnd = 25      # how many different behaviors in complete history, need to be apart
+evoMeasured =26    #1 if evo measured, 0 elsewise
 
-
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOLr', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','shSOL', 'VIABP','shSOLr','shSOLnd','shSOLrnd','SOLnd','SOLrnd']
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOLr', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','shSOL', 'VIABP','shSOLr','shSOLnd','shSOLrnd','SOLnd','SOLrnd','evoMeasured']
 
 def get_obj_ID(string):
         return obj_names.index(string)

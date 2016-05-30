@@ -10,7 +10,7 @@ from util import util
 wallcondition = 'soft'
 objectives = 'RARSOLnd'
 mazeName = 'medium'
-grid_sz = 10
+grid_sz = 13
 trialNr= 1
 title = wallcondition + '/' + mazeName +'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
 
@@ -66,7 +66,7 @@ eliteN = int(NPop*(elite/100.0))
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,shSOLnd,SOLnd]
+want2plot = [ FIT,shSOLnd,SOLnd,EVO]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1

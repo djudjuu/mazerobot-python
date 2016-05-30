@@ -107,9 +107,11 @@ def load_exp_series(name, Nexp=1000000, solvers = False, part='all'):
                 if part=='Q':
                         print 'loading children...'
                         datas = [d[:,npop:,:] for d in datas]
-                if part =='P':
+                elif part =='P':
                         print 'loading elite/genepool...'
                         datas = [d[:,:npop,:] for d in datas]
+                else:
+                        print 'loading all ',datas[0].shape[1],' robots'
 		ret =  datas
         print len(ret), 'datasets found for exp: ', name, ' (attention NPop=100 hardcoded)'
         return ret

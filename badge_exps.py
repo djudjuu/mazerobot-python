@@ -105,6 +105,7 @@ class MazeSolution(Solution):
             self.objs[REVO]=0
             for k in range(len(self.selected4)):
                 self.objectives[k] = self.objs[self.selected4[k]]
+            print 'WEIRDO detected in evaluate2'
         else:
             self.objs[WEIRDO] = 0
 
@@ -131,6 +132,8 @@ class MazeSolution(Solution):
                 mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
                 self.objs[EVO] = - eob.grid_entropy(mutantgrid)
                 self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
+                if self.objs[EVO]==0:
+                        print 'EVO is actually 0'
                 del mutantgrid
 
             #Lineage rarity: passing on heredity from
@@ -226,13 +229,13 @@ NNov = 15  # neigbours looked at when computing novelty
 wallcondition = 'soft' #'soft'
 datapath = './out/'+wallcondition+'/'
 wallpunish = False
-breakflag = False #True  stop trial after first success   
+breakflag = False #True #True#  stop trial after first success   
 disp=True
 NovTresh = 0.08
    
 mazeName = "hard" # there must be a directory with this name in /out
-mazeName = "T"
 mazeName = 'gridComp'
+mazeName = "T"
 mazeName = "medium" # there must be a directory with this name in /out
 
 mazelevels= [ 'superhard']
@@ -243,20 +246,20 @@ mazelevels= [ 'medium']
 objsNoGrid =[[NOV,VIAB]]
 objsNoGrid =[]
 objsGr = [[RAR]]
-objsGr = [[RAR,SOLnd],[RAR,shSOLnd]]
+objsGr = [[RAR,SOLnd],[RAR,shSOLr],[RAR,SOLr],[RAR,VIAB],[RAR,shSOLnd]]
 objs2BRecorded = [RAR,shSOL,SOLr]
-grid_szs = [8,10,13,15,18,20,23,25,30]
-grid_szs = [13]#,13,15,18,20,23,25,30]
+grid_szs = [15,18,20,23,25,30]
+grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [10]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [600] #according to maze level
+NGens = [200] #according to maze level
 NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 EvoBoosterIntervall= 100
 evoMutants = 150
 trial_start=0
-Ntrials = 3
+Ntrials = 1
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],

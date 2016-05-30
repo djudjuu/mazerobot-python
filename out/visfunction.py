@@ -20,6 +20,7 @@ def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
         Xcentered = Xraw - np.mean(Xraw,axis=1)[:,np.newaxis]
         X = Xcentered / np.std(Xcentered,axis=1)[:,np.newaxis]
         X = -X #nsga2 asumes  minimization of objectives
+        X = - Xraw
        
         plt.figure(33)
         nrows = len(x_objs)

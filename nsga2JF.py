@@ -216,12 +216,15 @@ class NSGAII:
                           gammaLRAR = self.gammaLRAR,
                            shSOLSpan=self.shSOLSpan)
                s.objs[PROGRESS] = progress
+               if measureEvoFlag:
+                       s.objs[evoMeasured] = 1
                if s.solver:
                   solvers +=1
-           
+
             #Novelty 
             # questions: archive is unique? no double entries?
             # sample from parents and children or children only?) if not np.any([np.all(c.behavior==a) for a  in NoveltyArchive])]
+
             if NovArchive:
                     Rfunc = [q for q in Q if np.all(q.behavior >=0)] + [p for p in P if np.all(p.behavior >=0)]
                     RfuncNew = [r for r in Rfunc if not np.any([np.all(r.behavior == a) for a in self.NoveltyArchive])]
@@ -230,7 +233,7 @@ class NSGAII:
 
 
             #save the end location and fitness of individuals throughout iterations
-            robs =R# Q if i>1 else P #first generation Q is empty
+            robs = R # Q if i>1 else P #first generation Q is empty
             for r in range(len(robs)):
                chronic[:,r,i%Nslice] = robs[r].objs
             if NovArchive:
@@ -238,6 +241,9 @@ class NSGAII:
             Nweirdos = np.sum( chronic[WEIRDO,:,i%Nslice], axis=0)
             #if Nweirdos> 0:
                     #print "this generation weirdos: ",Nweirdos
+            if measureEvoFlag:
+                    evoZeros = np.sum(chronic[EVO,:,i%Nslice]==0) / float(len(R))
+                    print evoZeros ,'% of population have evolvability 0'
 
             #check if maze got solved            
             if solvers !=0:
@@ -279,7 +285,8 @@ class NSGAII:
                      viz.render_robots_and_archive(self.NoveltyArchive, [P,Q], color=[(0,255,0),(255,0,0),(0,0,180)])
                 else:
                      viz.render_robots( [P,Q], color=[(0,255,0),(255,0,0)])
-        self.save_objectives(chronic[:,:,:i%Nslice],title,pp, solved, archive_array)
+        self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archive_array)
+        #print 'lastchronicslice:', chronic[:,:,
 
         if solved!={}:
            ret = solved.keys()[0]
