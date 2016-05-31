@@ -17,6 +17,7 @@ mazeName = 'supereasy'
 mazeName = 'easy'
 mazeName = 'gridComp'
 mazeName = 'T'
+mazeName = 'mediumNegSOL'
 mazeName = 'medium'
 
 mazefile = '../medium_maze.txt'
@@ -25,7 +26,10 @@ mazefile = '../s_maze2.txt'
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
 expObjs = ['RAR']
-expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd']
+expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd'] #normal
+expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
+expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# medium
+expObjs = ['RAR/SOLr','RAR/VIAB','NOV','NOV/VIAB','FFA','FIT'] #normal
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
@@ -39,9 +43,6 @@ print 'exps',exps
 
 expObjs = [e+str(grid_sz) for e,grid_sz in list(itertools.product(expObjs,grid_szs))]
 print expObjs
-
-
-
 
 ########### load objectives or solvers (and sorting them)
 
@@ -89,7 +90,7 @@ filename = './'+wallcondition +'/'+str(mazeName)+str(grid_sz) + '-Summary'+str(c
 with open(filename,'w') as f:
 	f.write('Objectives' + ',' + 'Convergence Rate' + ',' +'Solved at'+ ','+ 'STD'+ ','+ 'N' +'\n') 
 	for exp,mf,std,cr,n in zip(expObjs,meanfirst,stdfirst,convs,Ns):
-		f.write(exp.replace(',','/') + ',' + "%.1f"% cr+',' +"%.1f"%mf + ',' + "%.1f"%std + ',' +str(n) +'\n') 
+		f.write(exp.replace(',','/') + ',' + "%.2f"% cr+',' +"%.1f"%mf + ',' + "%.1f"%std + ',' +str(n) +'\n') 
 print 'summary table made...\n'
 
 
@@ -118,7 +119,8 @@ print 'significance table made...'
 
 ########################### CORRELATION ###################
 print 'making correlation table...'
-expObjs2correlate = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd']
+expObjs2correlate = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
+expObjs2correlate = ['RAR/SOLr','RAR/VIAB'] #normal
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corrQ =[util.load_exp_series(exp,part='Q') for exp in exps2correlate]
 Ds2corrP =[util.load_exp_series(exp,part='P') for exp in exps2correlate]
@@ -133,22 +135,22 @@ print 'generations here EVO was measured:',gensEvo
 RsP= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrP,gensEvo)]
 RsQ= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrQ,gensEvo)]
 RsAll = [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corr,gensEvo)]
-'''
-with open(filename,'a') as f:
-    f.write("\nCorrelation Tables (Pearson)\n (parents)")
-    for expname, R in zip(expObjs2correlate, RsP):
-        exp = expname.split('/')
-        f.write('\n'+expname + '\n:')
-        exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLnd','SOLrnd',]
-        f.write( '\n ,'+str(exp)+ '\n')
-        for obj in exp:
-            row = obj+ ','
-            for obj2 in exp:
-                if obj == obj2:
-                    row += '-,'
-                else:
-                    row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
-            f.write(row + '\n')
+
+#with open(filename,'a') as f:
+    #f.write("\nCorrelation Tables (Pearson)\n (parents)")
+    #for expname, R in zip(expObjs2correlate, RsP):
+        #exp = expname.split('/')
+        #f.write('\n'+expname + '\n:')
+        #exp += ['FIT','EVO','REVO','RAR','shSOL','VIAB','shSOLr','shSOLnd','shSOLrnd','SOLr','SOLnd','SOLrnd',]
+        #f.write( '\n ,'+str(exp)+ '\n')
+        #for obj in exp:
+            #row = obj+ ','
+            #for obj2 in exp:
+                #if obj == obj2:
+                    #row += '-,'
+                #else:
+                    #row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
+            #f.write(row + '\n')
 
 #with open(filename,'a') as f:
 #    f.write("\nCorrelation Tables (Pearson) (data of children)")
@@ -165,7 +167,6 @@ with open(filename,'a') as f:
 #                else:
 #                    row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
 ##            f.write(row + '\n')
-'''
 with open(filename,'a') as f:
     f.write("\nCorrelation Tables (Pearson)\n (all)")
     for expname, R in zip(expObjs2correlate, RsAll):
@@ -182,8 +183,8 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 print "Correlations table made...\n"
-
 ################# plot objectives against each other ################
+'''
 print 'preparing to plot objectives against each other...'
 expObjs2VSPlot = ['RAR/VIAB']
 Gen2VisCorr= -1
@@ -199,7 +200,7 @@ for ds in Ds2VSPlotP:
     visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj,gen=Gen2VisCorr)
 pp.savefig()
 plt.show()
-
+'''
 ############ average convergence rate ###########
 '''
 plt.figure('average convergence rate')
@@ -221,8 +222,11 @@ plt.show()
 '''
 
 # ############# EVOLVABILITY COMPARISONS #########################
-expObjs2EvoComp = ['RAR/SOLnd','RAR/shSOLnd' ]
 '''
+print 'starting to look at evolvability...'
+expObjs2EvoComp = ['RAR/SOLnd','RAR/shSOLrnd' ]
+expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
+expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# medium
 exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
 Ds2EvoCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2EvoComp]
 Ds2EvoCompP =[util.load_exp_series(exp,part='P') for exp in exps2EvoComp]
@@ -312,8 +316,8 @@ for i,exp in enumerate( expObjs2EvoComp):
     #plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-EvolvabilityCorreltaionOverTime.png'))
-
 '''
+
 ############ plot average objectives over generations ####################
 '''
 expObjs2AvgComp = ['RAR','RAR/VIAB','NOV/VIAB','NOV' ]

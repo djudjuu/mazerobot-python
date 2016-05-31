@@ -151,7 +151,7 @@ class MazeSolution(Solution):
                 sol = - eob.grid_entropy(lineagegrid)
                 self.objs[SOLr] = sol
                 self.objs[SOLrnd] = - np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
-                self.objs[SOLnd] = - np.sum(self.grid>0)/float(np.sum(self.grid))
+                self.objs[SOLnd] =  -np.sum(self.grid>0)/float(np.sum(self.grid))
                 if sol == - 100:
                     print 'SOL is off...'
 
@@ -162,12 +162,12 @@ class MazeSolution(Solution):
                                shSOLrnd in self.selected4 + recordObj):
                 #shSOL auf normalen grid
                 lineagegrid = eob.map_behaviors_to_grid(self.history[-shSOLSpan:], self.grid_sz)
-                self.objs[shSOL] = - eob.grid_entropy(lineagegrid)
-                self.objs[shSOLnd] = - np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
+                self.objs[shSOL] =  -eob.grid_entropy(lineagegrid)
+                self.objs[shSOLnd] =  -np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
                 #shSOL auf reduced  grid
                 lineagegridreduced = util.reduce_grid_sz(lineagegrid,gammaGrid)
-                self.objs[shSOLr]= - eob.grid_entropy(lineagegridreduced)
-                self.objs[shSOLrnd]= - np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
+                self.objs[shSOLr]=   -eob.grid_entropy(lineagegridreduced)
+                self.objs[shSOLrnd]= np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
 
 
 
@@ -230,35 +230,37 @@ NNov = 15  # neigbours looked at when computing novelty
 wallcondition = 'soft' #'soft'
 datapath = './out/'+wallcondition+'/'
 wallpunish = False
-breakflag =True #True#  stop trial after first success   
+breakflag =False #  stop trial after first success   
 disp=True
 NovTresh = 0.08
    
 mazeName = "hard" # there must be a directory with this name in /out
 mazeName = 'gridComp'
 mazeName = "T"
+mazeName = "mediumNegSOL" # there must be a directory with this name in /out
 mazeName = "medium" # there must be a directory with this name in /out
+mazeName = "evoCorr" # there must be a directory with this name in /out
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'easy']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 
-objsNoGrid =[[NOV,VIAB]]
+objsNoGrid =[[FIT],[FIT,DIV]]
 objsNoGrid =[]
 objsGr = [[RAR]]
-objsGr = [[RAR,SOLnd],[RAR,shSOLr],[RAR,SOLr],[RAR,VIAB],[RAR,shSOLnd]]
-objsGr = [[RAR,SOLnd],[RAR,SOLr],[RAR,VIAB]]
+objsGr = [[RAR,SOLr],[RAR,SOLnd],[RAR,SOLrnd],[RAR,shSOLr],[RAR,shSOLrnd],[RAR,shSOLrnd]]#negSOL
+objsGr = [[RAR,SOLnd],[shSOLrnd]]
 objs2BRecorded = [RAR,shSOL,SOLr]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
-No_grid_szs = [10]*len(objsNoGrid)
+No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [1000] #according to maze level
+NGens = [200] #according to maze level
 NovGamma = int(NPop*.03)
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
-EvoBoosterIntervall= 10000
+EvoBoosterIntervall= 50
 evoMutants = 150
 trial_start=0
 Ntrials = 10
@@ -278,10 +280,8 @@ if __name__ == '__main__':
        statfile = datapath+mazeName+'-stats.csv'
        mazepy.mazenav.initmaze(mazelevel + '_maze_list.txt', "test.ne")
        mazepy.mazenav.random_seed()
-       #the next line combines objectives with various grid sizes
-       exp_list = list(itertools.product(objsGr, grid_szs))
-       #and extends that list with objectives that need no variation in gridsize
-       exp_list.extend( zip( objsNoGrid,No_grid_szs))
+       exp_list= zip( objsNoGrid,No_grid_szs)
+       exp_list.extend(list(itertools.product(objsGr, grid_szs)))
        print exp_list
        for obj, gridsz in exp_list:
           exp_name = wallcondition + '/'+mazeName+ '/'
