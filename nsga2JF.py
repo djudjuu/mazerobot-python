@@ -104,7 +104,8 @@ class NSGAII:
                  thresNov =0.1, NovGamma=4,
                 gridGamma =0.5,
                 gammaLRAR=0.2,
-                shSOLSpan=20):
+                shSOLSpan=20,
+                 saveChronic=False,):
         '''
         Constructor. Parameters: number of objectives, mutation rate (default value 10%) and crossover rate (default value 100%). 
         '''
@@ -118,6 +119,7 @@ class NSGAII:
         self.gridGamma = gridGamma
         self.gammaLRAR = gammaLRAR
         self.shSOLSpan = shSOLSpan
+        self.saveChronic = saveChronic
 
         
         random.seed();
@@ -159,7 +161,7 @@ class NSGAII:
                                          FIT,ffa_archive)
         
         for i in range(num_generations):
-            if i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
+            if self.saveChronic and i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
                self.save_objectives(chronic,title,pp, solved, archive_array,stats_array)
                pp += 1
            
@@ -285,7 +287,8 @@ class NSGAII:
                      viz.render_robots_and_archive(self.NoveltyArchive, [P,Q], color=[(0,255,0),(255,0,0),(0,0,180)])
                 else:
                      viz.render_robots( [P,Q], color=[(0,255,0),(255,0,0)])
-        self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archive_array)
+        if self.saveChronic:
+             self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archive_array)
         #print 'lastchronicslice:', chronic[:,:,
 
         if solved!={}:

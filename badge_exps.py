@@ -218,16 +218,15 @@ NNov = 15  # neigbours looked at when computing novelty
 wallcondition = 'soft' #'soft'
 datapath = './out/'+wallcondition+'/'
 wallpunish = False
-breakflag =False #  stop trial after first success   
 disp=True
 NovTresh = 0.08
    
 mazeName = "hard" # there must be a directory with this name in /out
 mazeName = 'gridComp'
-mazeName = "T"
 mazeName = "mediumNegSOL" # there must be a directory with this name in /out
-mazeName = "medium" # there must be a directory with this name in /out
 mazeName = "evoCorr" # there must be a directory with this name in /out
+mazeName = "medium" # there must be a directory with this name in /out
+mazeName = "T"
 
 mazelevels= [ 'superhard']
 mazelevels= [ 'easy']
@@ -243,14 +242,19 @@ grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [200] #according to maze level
-NovGamma = int(NPop*.03)
-gammaLRAR = .2
-gridGamma = .4 #how much reduce the grid to measure SOL
-EvoBoosterIntervall= 50
+NGens = [1] #according to maze level
+breakflag =True #  stop trial after first success   
+saveChronic=False
+EvoBoosterIntervall= 50000
 evoMutants = 150
 trial_start=0
 Ntrials = 2
+
+NovGamma = int(NPop*.03)
+
+
+gammaLRAR = .2
+gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
@@ -288,7 +292,8 @@ if __name__ == '__main__':
                             NovGamma=NovGamma,
                             gridGamma= gridGamma,
                             gammaLRAR= gammaLRAR,
-                            shSOLSpan = shSOLSpan
+                            shSOLSpan = shSOLSpan,
+                            saveChronic = saveChronic
                            )
              P = []
              for i in range(NPop):
