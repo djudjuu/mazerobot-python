@@ -237,7 +237,7 @@ mazelevels= [ 'medium']
 objsNoGrid =[[FIT],[FIT,DIV]]
 objsNoGrid =[]
 objsGr = [[RAR]]
-objsGr = [[RAR,VIAB],[RAR,LGE],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
+objsGr = [[RAR,LGE],[RAR,VIAB],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
 objs2BRecorded = [RAR,LGD]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
@@ -250,7 +250,7 @@ gridGamma = .4 #how much reduce the grid to measure SOL
 EvoBoosterIntervall= 50
 evoMutants = 150
 trial_start=0
-Ntrials = 1
+Ntrials = 2
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],

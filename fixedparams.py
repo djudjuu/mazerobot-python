@@ -28,7 +28,7 @@ shLGD=26     #how many different recent behacviors, those need to be farther apa
 shLGDnd=27     #how many different recent behacviors, those need to be farther apart
 evoMeasured =28    #1 if evo measured, 0 elsewise
 
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOLr', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','shSOL', 'VIABP','LGE','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured']
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','DOPE', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured']
 
 def get_obj_ID(string):
         return obj_names.index(string)
