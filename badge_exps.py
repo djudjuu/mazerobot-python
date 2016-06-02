@@ -128,7 +128,7 @@ class MazeSolution(Solution):
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
                 ffa = self.objs[FFA]
             #EVOLVABILITY 
-            if probe_Evo:
+            if probe_Evo or EVO in self.selected4:
                 mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
                 self.objs[EVO] = - eob.grid_entropy(mutantgrid)
                 self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
