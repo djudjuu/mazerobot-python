@@ -16,17 +16,19 @@ YEND=15
 REVO= 16        #Useful (rare) evolvability, measures the capability to produce offsprings that do something new
 VIAB= 17        # also evolvability in the 2nd sense. Measures how many offsprings have been taken into the archive
 PROGRESS = 18   #how many individuals have come into the elite this generations
-shSOL=19        # short term SOL, measured only over the last x mutations
+DOPE=19         # PLACEHOLDER
 VIABP= 20        # also evolvability in the 2nd sense. Measures how many offsprings have been taken into the archive, propagates through parents
-shSOLr=21       #distribution of the recent behaviors, need to be farther apart
-shSOLnd=22      #just counts how many different recent behaviors, ignores distribution
-shSOLrnd=23     #how many different recent behacviors, those need to be farther apart
-SOLr=9          # evolvability as entropy over personal stepping stones, distribution over complete history, need to be apart
-SOLnd = 24      # how many different behaviors in complete history
-SOLrnd = 25      # how many different behaviors in complete history, need to be apart
-evoMeasured =26    #1 if evo measured, 0 elsewise
+LGE=9          # evolvability as entropy over personal stepping stones, distribution over complete history, need to be apart
+LGEr=21       #entropy of the recent behaviors, need to be farther apart
+shLGE=22
+LGD = 23      # how many different behaviors in complete history
+LGDr = 24      # how many different behaviors in complete history, need to be apart
+LGDnd=25      #just counts how many different recent behaviors, ignores distribution
+shLGD=26     #how many different recent behacviors, those need to be farther apart
+shLGDnd=27     #how many different recent behacviors, those need to be farther apart
+evoMeasured =28    #1 if evo measured, 0 elsewise
 
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOLr', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','shSOL', 'VIABP','shSOLr','shSOLnd','shSOLrnd','SOLnd','SOLrnd','evoMeasured']
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','SOLr', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','shSOL', 'VIABP','LGE','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured']
 
 def get_obj_ID(string):
         return obj_names.index(string)

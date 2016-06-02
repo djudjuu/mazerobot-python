@@ -140,37 +140,25 @@ class MazeSolution(Solution):
             if LRAR in self.selected4 or LRAR in recordObj:
                     self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.parentRar
             
-            #STEPPING STONES DIVERSITY SOL
-            #currently without current position, if it should be included uncomment this line and comment it in 152
+            #Lineage Grid Entropy and Diversity
+            #currently with current position, if it should be excluded uncomment this line and comment it in 152
             self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
             self.history.append(eob.map_into_grid(self, self.grid_sz))
-            if probe_RARs and (SOLr in self.selected4 + recordObj or
-                                SOLrnd in self.selected4 + recordObj or
-                                SOLnd in self.selected4 + recordObj):
-                lineagegrid = util.reduce_grid_sz(self.grid,gammaGrid)
-                sol = - eob.grid_entropy(lineagegrid)
-                self.objs[SOLr] = sol
-                self.objs[SOLrnd] = - np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
-                self.objs[SOLnd] =  -np.sum(self.grid>0)/float(np.sum(self.grid))
-                if sol == - 100:
-                    print 'SOL is off...'
+            if probe_RARs and (LGE in self.selected4 + recordObj or
+                               LGD in self.selected4 + recordObj):
+                lineagegridreduced = util.reduce_grid_sz(self.grid,gammaGrid)
+                self.objs[LGE] =  - eob.grid_entropy(self.grid)
+                self.objs[LGEr] =  - eob.grid_entropy(lineagegridreduced)
+                self.objs[LGD] = - np.sum(self.grid>0)
+                self.objs[LGDr] = - np.sum(lineagegridreduced>0)
+                self.objs[LGDnd] =  -np.sum(self.grid>0)/float(np.sum(self.grid))
 
-            #short term SOL
-            if probe_RARs and (shSOL in self.selected4 + recordObj or
-                                shSOLnd in self.selected4 + recordObj or
-                                shSOLr in self.selected4 + recordObj or
-                               shSOLrnd in self.selected4 + recordObj):
+                #short term 
                 #shSOL auf normalen grid
-                lineagegrid = eob.map_behaviors_to_grid(self.history[-shSOLSpan:], self.grid_sz)
-                self.objs[shSOL] =  -eob.grid_entropy(lineagegrid)
-                self.objs[shSOLnd] =  -np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
-                #shSOL auf reduced  grid
-                lineagegridreduced = util.reduce_grid_sz(lineagegrid,gammaGrid)
-                self.objs[shSOLr]=   -eob.grid_entropy(lineagegridreduced)
-                self.objs[shSOLrnd]= np.sum(lineagegrid>0)/float(np.sum(lineagegrid))
-
-
-
+                recent_lineagegrid = eob.map_behaviors_to_grid(self.history[-shSOLSpan:], self.grid_sz)
+                self.objs[shLGE] =  - eob.grid_entropy(recent_lineagegrid)
+                self.objs[shLGD] =  -np.sum(recent_lineagegrid>0)
+                self.objs[shLGDnd] =  -np.sum(recent_lineagegrid>0)/float(np.sum(recent_lineagegrid))
 
 
             #IRAR
@@ -249,9 +237,8 @@ mazelevels= [ 'medium']
 objsNoGrid =[[FIT],[FIT,DIV]]
 objsNoGrid =[]
 objsGr = [[RAR]]
-objsGr = [[RAR,SOLr],[RAR,SOLnd],[RAR,SOLrnd],[RAR,shSOLr],[RAR,shSOLrnd],[RAR,shSOLrnd]]#negSOL
-objsGr = [[RAR,SOLnd],[shSOLrnd]]
-objs2BRecorded = [RAR,shSOL,SOLr]
+objsGr = [[RAR,VIAB],[RAR,LGE],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
+objs2BRecorded = [RAR,LGD]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
@@ -263,7 +250,7 @@ gridGamma = .4 #how much reduce the grid to measure SOL
 EvoBoosterIntervall= 50
 evoMutants = 150
 trial_start=0
-Ntrials = 10
+Ntrials = 1
 shSOLSpan = 20
 
 params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],

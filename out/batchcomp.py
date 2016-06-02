@@ -12,24 +12,25 @@ from fixedparams import *
 
 wallcondition = 'soft'#soft''
 
-mazeName = 'superhard'
-mazeName = 'supereasy'
-mazeName = 'easy'
-mazeName = 'gridComp'
+mazeName = 'gridCompHard'
 mazeName = 'T'
 mazeName = 'mediumNegSOL'
 mazeName = 'medium'
+mazeName = 'gridCompHard'
+mazeName = 'gridComp'
+mazeName = 'evoCorr'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
 
 expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
-expObjs = ['RAR']
 expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd'] #normal
 expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
 expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# medium
 expObjs = ['RAR/SOLr','RAR/VIAB','NOV','NOV/VIAB','FFA','FIT'] #normal
+expObjs = ['RAR'] # gridComp
+expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
 
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
@@ -121,6 +122,7 @@ print 'significance table made...'
 print 'making correlation table...'
 expObjs2correlate = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
 expObjs2correlate = ['RAR/SOLr','RAR/VIAB'] #normal
+expObjs2correlate = ['shSOLrnd','RAR/SOLnd'] # gridComp
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corrQ =[util.load_exp_series(exp,part='Q') for exp in exps2correlate]
 Ds2corrP =[util.load_exp_series(exp,part='P') for exp in exps2correlate]
@@ -183,6 +185,7 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 print "Correlations table made...\n"
+
 ################# plot objectives against each other ################
 '''
 print 'preparing to plot objectives against each other...'
@@ -201,8 +204,8 @@ for ds in Ds2VSPlotP:
 pp.savefig()
 plt.show()
 '''
-############ average convergence rate ###########
-'''
+############ CONVERGENCE RATE ###########
+
 plt.figure('average convergence rate')
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 #lenexps = [np.asarray([di.shape[2] for di in exp]) for exp in Ds]
@@ -219,7 +222,6 @@ plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
 plt.show()
-'''
 
 # ############# EVOLVABILITY COMPARISONS #########################
 '''
@@ -354,6 +356,7 @@ pp.savefig()
 plt.show()
 
 '''
+
 ############## plot average maximum fitness over generations #################
 # manipulate the data:
 '''
@@ -363,13 +366,13 @@ DsortedByObjective = [[ np.sort(di,axis=1) for di in exp] for exp in Ds]
 #2)make all the same length and save that adjusted list in DDs
 DDs = []
 for exp in  Ds:
-	maxgen =max( [ di.shape[2] for di in exp])
-	nobjs, npop,_ = exp[0].shape
-	eexp = []
-	for di in exp:
-		dii=np.concatenate((di, np.zeros((nobjs,npop,maxgen - di.shape[2]))), axis=2)
-		eexp.append(dii)
-	DDs.append(eexp)
+    maxgen =max( [ di.shape[2] for di in exp])
+    nobjs, npop,_ = exp[0].shape
+    eexp = []
+    for di in exp:
+            dii=np.concatenate((di, np.zeros((nobjs,npop,maxgen - di.shape[2]))), axis=2)
+            eexp.append(dii)
+    DDs.append(eexp)
 
 #3) average over max 
 Dmaxfit = [np.mean([ np.sort(di,axis=1)[FIT,0,:] for di in exp],axis=0) for exp in DDs]
