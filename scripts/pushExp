@@ -2,13 +2,24 @@
 #script to push an experiment to the dropbox
 
 expname=$1
-wallcondition=${2-soft}
-data=${3-"n"}
+data=${2-"n"}
+wallcondition=${3-soft}
+
+port=~/Dropbox/Uni/Data/$wallcondition/$expname
+
+
+if [ ! -d $port ]; then
+	mkdir $port
+	echo "created folder $expname"
+fi
+
+nOfExps= ls -1 ../out/$wallcondition/$expname/ | wc -l
+echo "$nOfExps experiments found..."
 
 if [ $data = "y" ]; then
-	cp ../out/$wallcondition/$expname/* ~/Dropbox/Uni/Data/$wallcondition/$expname/
+	cp -i ../out/$wallcondition/$expname/* ~/Dropbox/Uni/Data/$wallcondition/$expname/
 	echo "everyting copied"
 else
-	cp ../out/$wallcondition/$expname/*{Archive,Solver}* ~/Dropbox/Uni/Data/$wallcondition/$expname/ 
+	cp -i ../out/$wallcondition/$expname/*{Archive,Solver}* ~/Dropbox/Uni/Data/$wallcondition/$expname/ 
 	echo "Archives and Solvers copied"
 fi
