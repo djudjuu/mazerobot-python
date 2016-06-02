@@ -1,0 +1,14 @@
+#!/bin/bash
+
+expname=$1
+wallcondition=${2-soft}
+data=${3-"n"}
+
+if [ $data = "y" ]; then
+	cp ~/Dropbox/Uni/Data/$wallcondition/$expname/* ../out/$wallcondition/$expname/
+	echo "everyting copied"
+else
+	cp ~/Dropbox/Uni/Data/$wallcondition/$expname/*Ar* ../out/$wallcondition/$expname/
+	cp ~/Dropbox/Uni/Data/$wallcondition/$expname/*So* ../out/$wallcondition/$expname/
+	echo "Archives and Solvers copied"
+fi
