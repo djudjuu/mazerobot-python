@@ -161,7 +161,7 @@ class NSGAII:
                                          FIT,ffa_archive)
         
         for i in range(num_generations):
-            if self.saveChronic and i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
+            if i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
                self.save_objectives(chronic,title,pp, solved, archive_array,stats_array)
                pp += 1
            
@@ -287,8 +287,7 @@ class NSGAII:
                      viz.render_robots_and_archive(self.NoveltyArchive, [P,Q], color=[(0,255,0),(255,0,0),(0,0,180)])
                 else:
                      viz.render_robots( [P,Q], color=[(0,255,0),(255,0,0)])
-        if self.saveChronic:
-             self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archive_array)
+        self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archive_array)
         #print 'lastchronicslice:', chronic[:,:,
 
         if solved!={}:
@@ -356,7 +355,6 @@ class NSGAII:
                
     def save_objectives(self,chronic,title,pp,solved=None, archive=None, stats=None):
         print "saving chronic of this run...." 
-        numpy.save('./out/'+ title +'-' +str(pp) +'.npy', chronic)
         if archive != None: 
            numpy.save('./out/'+ title +'Archive' +'.npy', archive)
         if stats != None: 
@@ -364,6 +362,8 @@ class NSGAII:
         if solved != None:
            with open('./out/'+ title+'Solver.pkl','wb') as f:
               pickle.dump(solved,f)
+        if self.saveChronic:
+              numpy.save('./out/'+ title +'-' +str(pp) +'.npy', chronic)
         chronic = numpy.zeros(chronic.shape) #reset chronic
            
     def sort_ranking(self, P):
