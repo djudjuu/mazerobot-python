@@ -220,7 +220,7 @@ with open(filename,'a') as f:
 print "Correlations table made...\n"
 
 ################# plot objectives against each other ################
-print 'preparing to plot objectives against each other...'
+'''print 'preparing to plot objectives against each other...'
 expObjs2VSPlot = ['RAR']#'RAR/LGDr','RAR/shLGD','RAR/VIAB']
 Gen2VisCorr= -1
 exps2VSPlot = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2VSPlot]
@@ -237,7 +237,7 @@ for ds,ename in zip(Ds2VSPlotP,expObjs2VSPlot):
     #uncomment this line to plot all trials
     visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj,gen=Gen2VisCorr,title=ename)
 pp.savefig()
-plt.show()
+plt.show()'''
 ############ CONVERGENCE RATE ###########
 '''
 plt.figure('average convergence rate')
@@ -262,8 +262,9 @@ print 'starting to look at evolvability...'
 expObjs2EvoComp = ['RAR/SOLnd','RAR/shSOLrnd' ]
 expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
 expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# medium
-expObjs2EvoComp = ['RAR/LGE','RAR/VIAB','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expObjs2EvoComp = ['RAR','RAR/LGE','RAR/VIAB','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs2EvoComp = ['LGE','LGD/LGE', 'LGDr/shLGD']
+expObjs2EvoComp = ['RAR','RAR/VIAB']
 exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
 Ds2EvoCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2EvoComp]
 Ds2EvoCompP =[util.load_exp_series(exp,part='P') for exp in exps2EvoComp]

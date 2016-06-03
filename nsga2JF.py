@@ -304,6 +304,7 @@ class NSGAII:
             for p in P:
                     if p.id in pIDs:
                             p.objs[VIAB] -= 1
+                            p.objs[VIABP] -= 1
                             if propagate:
                                     p.objs[VIABP] -= 1
                                     self.augmentParentEvo(p.parentIDs,P,propagate)

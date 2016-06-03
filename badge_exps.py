@@ -139,7 +139,9 @@ class MazeSolution(Solution):
             #Lineage rarity: passing on heredity from
             if LRAR in self.selected4 or LRAR in recordObj:
                     self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.parentRar
-            
+            else: 
+                    self.objs[LRAR] =  0
+                    
             #Lineage Grid Entropy and Diversity
             #currently with current position, if it should be excluded uncomment this line and comment it in 152
             self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
@@ -159,7 +161,16 @@ class MazeSolution(Solution):
                 self.objs[shLGE] =  - eob.grid_entropy(recent_lineagegrid)
                 self.objs[shLGD] =  -np.sum(recent_lineagegrid>0)
                 self.objs[shLGDnd] =  -np.sum(recent_lineagegrid>0)/float(np.sum(recent_lineagegrid))
+            else:
 
+                self.objs[LGE] = 0
+                self.objs[LGEr] =0
+                self.objs[LGD] = 0
+                self.objs[LGDr] =0
+                self.objs[LGDnd] =0
+                self.objs[shLGE] = 0
+                self.objs[shLGD] = 0
+                self.objs[shLGDnd] = 0
 
             #IRAR
             if probe_RARs and IRAR in self.selected4 + recordObj:
@@ -170,17 +181,20 @@ class MazeSolution(Solution):
                     else:
                             self.objs[IRAR] = 0
                     self.IRARflag = not self.IRARflag
+            else:
+                    self.objs[IRAR] = 0
 
-            #VIAB (turn this on if it is to be selected only periodically)
-            if not probe_RARs: 
-                self.objs[VIAB]=0
+            #if not probe_RARs: 
+                #self.objs[VIAB]=0
 
             #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
             #self.history.append(eob.map_into_grid(self, self.grid_sz))
             
             for k in range(len(self.selected4)):
-                self.objectives[k] = self.objs[self.selected4[k]]
-        
+                #VIAB computation is still carried on but not selected for
+                if self.selected4[k] != VIAB:
+                    self.objectives[k] = self.objs[self.selected4[k]]
+
 
     def set_grid_sz(self,gs, historygrid=None):
        self.grid_sz = gs
@@ -241,8 +255,8 @@ objsGr = [[RAR]]
 objsGr = [[RAR,LGE],[RAR,VIAB],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
 objsGr = [[RAR,CUR], [CUR], [RAR,CUR,VIAB]]
 objsGr = [[RAR,EVO],[RAR,EVO,CUR], [RAR,VIAB,EVO]]
-objsGr = [[RAR]]
 objsGr = [[LGE],[LGD,LGE], [LGDr,shLGD]]
+objsGr = [[RAR,VIAB],[RAR]]
 objs2BRecorded = [RAR,LGD]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
@@ -254,7 +268,7 @@ saveChronic=True
 EvoBoosterIntervall= 50
 evoMutants = 150
 trial_start=0
-Ntrials = 2
+Ntrials = 4
 
 NovGamma = int(NPop*.03)
 
