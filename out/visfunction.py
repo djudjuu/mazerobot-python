@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 from util import util
 from fixedparams import *
 
-def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
+def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1,title=''):
         '''visualizes the interactions of different objectives against 
         each other and colors by a third one
         expect exp to be a  list of trials of the same experiment
@@ -22,7 +22,7 @@ def visCorrAtGen(triallist,x_objs, y_objs,color_obj,gen=-1):
         X = -X #nsga2 asumes  minimization of objectives
         X = - Xraw
        
-        plt.figure(33)
+        plt.figure(title)
         nrows = len(x_objs)
         ncols = len(y_objs)
         for xobj,xi in zip(x_objs,range(nrows)):

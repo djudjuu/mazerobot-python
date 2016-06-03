@@ -171,9 +171,13 @@ class MazeSolution(Solution):
                             self.objs[IRAR] = 0
                     self.IRARflag = not self.IRARflag
 
+            #VIAB (turn this on if it is to be selected only periodically)
+            if not probe_RARs: 
+                self.objs[VIAB]=0
+
             #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
             #self.history.append(eob.map_into_grid(self, self.grid_sz))
-
+            
             for k in range(len(self.selected4)):
                 self.objectives[k] = self.objs[self.selected4[k]]
         
@@ -224,12 +228,10 @@ NovTresh = 0.08
 mazeName = "hard" # there must be a directory with this name in /out
 mazeName = 'gridComp'
 mazeName = "mediumNegSOL" # there must be a directory with this name in /out
-mazeName = "evoCorr" # there must be a directory with this name in /out
 mazeName = "medium" # there must be a directory with this name in /out
 mazeName = "T"
+mazeName = "evoCorr" # there must be a directory with this name in /out
 
-mazelevels= [ 'superhard']
-mazelevels= [ 'easy']
 mazelevels= [ 'hard']
 mazelevels= [ 'medium']
 
@@ -239,17 +241,17 @@ objsGr = [[RAR]]
 objsGr = [[RAR,LGE],[RAR,VIAB],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
 objsGr = [[RAR,CUR], [CUR], [RAR,CUR,VIAB]]
 objsGr = [[RAR,EVO],[RAR,EVO,CUR], [RAR,VIAB,EVO]]
-objsGr = []
-objsGr = [[LGD],[LGE],[LGD,LGE], [LGDr,shLGD]]
+objsGr = [[RAR]]
+objsGr = [[LGE],[LGD,LGE], [LGDr,shLGD]]
 objs2BRecorded = [RAR,LGD]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [1000] #according to maze level
-breakflag =True #  stop trial after first success   
-saveChronic=False
-EvoBoosterIntervall= 50000
+NGens = [200] #according to maze level
+breakflag =False #  stop trial after first success   
+saveChronic=True
+EvoBoosterIntervall= 50
 evoMutants = 150
 trial_start=0
 Ntrials = 2
