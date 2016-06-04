@@ -9,6 +9,7 @@ import itertools
 from util import util
 import scipy.stats
 from fixedparams import *
+from operator import add
 
 wallcondition = 'soft'#soft''
 
@@ -31,8 +32,8 @@ expObjs = ['RAR/SOLr','RAR/VIAB','NOV','NOV/VIAB','FFA','FIT'] #normal
 expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
 expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp 
 expObjs = ['RAR'] # gridComp
-expObjs = ['RAR','RAR/LGE','RAR/VIAB','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
+expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
 grid_szs= [13,18,20,25,300]
@@ -148,13 +149,15 @@ print 'significance table made...'
 '''
 
 ########################### CORRELATION ###################
-print 'making correlation table...'
+'''print 'making correlation table...'
 expObjs2correlate = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
 expObjs2correlate = ['RAR/SOLr','RAR/VIAB'] #normal
 expObjs2correlate = ['RAR/VIAB','NOV'] # gridComp
-expObjs2correlate = ['RAR/LGE','RAR/VIAB','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs2correlate = ['LGE','LGD/LGE', 'LGDr/shLGD']
-until=2
+expObjs2correlate = ['LGE','LGD']
+expObjs2correlate = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expObjs2correlate = ['RAR','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd','RAR/VIAB','RAR/VIABP'] #EVOcomp
+until=200
 exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corrQ =[util.load_exp_series(exp,Nexp=until,part='Q') for exp in exps2correlate]
 Ds2corrP =[util.load_exp_series(exp,Nexp=until,part='P') for exp in exps2correlate]
@@ -207,7 +210,8 @@ with open(filename,'a') as f:
     for expname, R in zip(expObjs2correlate, RsAll):
         exp = expname.split('/')
         f.write('\n'+expname + '\n:')
-        exp += ['FIT','CUR','EVO','REVO','RAR','VIAB','NOV']
+        #exp += ['FIT','CUR','EVO','REVO','RAR','VIAB','NOV']
+        exp += ['EVO','FIT']
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -217,19 +221,24 @@ with open(filename,'a') as f:
                 else:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
-print "Correlations table made...\n"
+print "Correlations table made...\n"'''
 
 ################# plot objectives against each other ################
 '''print 'preparing to plot objectives against each other...'
+expObjs2VSPlot = ['RAR/VIAB','RAR/VIABP']
 expObjs2VSPlot = ['RAR']#'RAR/LGDr','RAR/shLGD','RAR/VIAB']
 Gen2VisCorr= -1
 exps2VSPlot = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2VSPlot]
 Ds2VSPlotQ =[util.load_exp_series(exp, part='Q') for exp in exps2VSPlot]
-Ds2VSPlotP =[util.load_exp_series(exp, part='all') for exp in exps2VSPlot]
+Ds2VSPlotP =[util.load_exp_series(exp, part='All') for exp in exps2VSPlot]
 
 for ds,ename in zip(Ds2VSPlotP,expObjs2VSPlot):
     print 'dsshape:' ,ds[0].shape
     x_obj = [RAR,shLGD,LGDr,VIAB]
+    x_obj =  [get_obj_ID(e) for e in  ename.split('/')]
+    x_obj.extend([])
+    print x_obj
+    #x_obj.pop(0) #kicking out for once
     y_objs = [EVO]
     color_obj= FIT
     #print' currently plotting only one trial'
@@ -262,9 +271,9 @@ print 'starting to look at evolvability...'
 expObjs2EvoComp = ['RAR/SOLnd','RAR/shSOLrnd' ]
 expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
 expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# medium
-expObjs2EvoComp = ['RAR','RAR/LGE','RAR/VIAB','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs2EvoComp = ['LGE','LGD/LGE', 'LGDr/shLGD']
-expObjs2EvoComp = ['RAR','RAR/VIAB']
+expObjs2EvoComp = ['RAR','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expObjs2EvoComp = ['RAR','RAR/VIAB','RAR/VIABP']
 exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
 Ds2EvoCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2EvoComp]
 Ds2EvoCompP =[util.load_exp_series(exp,part='P') for exp in exps2EvoComp]
@@ -278,7 +287,8 @@ nGens = X.shape[2]
 gensEvoMeasured = []
 AllEvos =[]
 AllEvosP =[]
-for exp, expAll in zip(Ds2EvoCompQ,Ds2EvoCompAll):
+AllEvosSTD=[]
+for exp, expAll in zip(Ds2EvoCompQ,Ds2EvoCompP):
     X = exp[0]
     print 'Xshape :' , X.shape
     gensEvo = [i for i in range(X.shape[2]) if np.sum(X[EVO,:,i])< 0]
@@ -292,12 +302,17 @@ for exp, expAll in zip(Ds2EvoCompQ,Ds2EvoCompAll):
     meanEvosP = [np.mean(d[EVO,:,gensEvo],axis=1) for d in expAll]
     meanEvosExpP = np.mean(meanEvosP, axis=0)
     AllEvosP.append(meanEvosExpP)
+    #STDs for parents
+    stdEvosP = [np.std(d[EVO,:,gensEvo],axis=1) for d in expAll]
+    stdsEvosExpP = np.mean(stdEvosP, axis=0)
+    AllEvosSTD.append(stdsEvosExpP)
 
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 colormap = plt.cm.nipy_spectral
 ax.set_color_cycle([colormap(i) for i in np.linspace(0, 1,len(expObjs2EvoComp))])
 #[ax.plot(gensEvo,-evos ,'-o', label= exp+'Q') for  evos, exp, gensEvo in zip(AllEvos, expObjs2EvoComp, gensEvoMeasured)]
 [ax.plot(gensEvo,-evos ,'-o', label= exp) for  evos, exp, gensEvo in zip(AllEvosP, expObjs2EvoComp, gensEvoMeasured)]
+#[ax.fill_between(gensEvo,map(add,-evos,std),map(add,-evos,-std) ,color='grey', alpha= 0.3) for  evos, exp, gensEvo,std in zip(AllEvosP, expObjs2EvoComp, gensEvoMeasured,AllEvosSTD)]
 ax.set_xlim([0,nGens])
 ax.set_xlabel('generations')
 ax.set_ylabel('mean evolvability')

@@ -191,9 +191,10 @@ class MazeSolution(Solution):
             #self.history.append(eob.map_into_grid(self, self.grid_sz))
             
             for k in range(len(self.selected4)):
-                #VIAB computation is still carried on but not selected for
-                if self.selected4[k] != VIAB:
-                    self.objectives[k] = self.objs[self.selected4[k]]
+                self.objectives[k] = self.objs[self.selected4[k]]
+                #VIAB is excluded here as its computation needs to be  carried on 
+                if self.selected4[k]==VIAB and not probe_RARs :
+                    self.objectives[k] = 0
 
 
     def set_grid_sz(self,gs, historygrid=None):
@@ -252,11 +253,11 @@ mazelevels= [ 'medium']
 objsNoGrid =[[FIT],[FIT,DIV]]
 objsNoGrid =[]
 objsGr = [[RAR]]
-objsGr = [[RAR,LGE],[RAR,VIAB],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
 objsGr = [[RAR,CUR], [CUR], [RAR,CUR,VIAB]]
 objsGr = [[RAR,EVO],[RAR,EVO,CUR], [RAR,VIAB,EVO]]
 objsGr = [[LGE],[LGD,LGE], [LGDr,shLGD]]
-objsGr = [[RAR,VIAB],[RAR]]
+objsGr = [[RAR,LGE],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
+objsGr = [[RAR,VIAB],[RAR,VIABP],[RAR]]
 objs2BRecorded = [RAR,LGD]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
@@ -267,8 +268,8 @@ breakflag =False #  stop trial after first success
 saveChronic=True
 EvoBoosterIntervall= 50
 evoMutants = 150
-trial_start=0
-Ntrials = 4
+trial_start=5
+Ntrials = 10
 
 NovGamma = int(NPop*.03)
 
