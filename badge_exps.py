@@ -239,38 +239,37 @@ NNov = 15  # neigbours looked at when computing novelty
 wallcondition = 'soft' #'soft'
 datapath = './out/'+wallcondition+'/'
 wallpunish = False
-disp=True
 NovTresh = 0.08
    
-mazeName = "hard" # there must be a directory with this name in /out
 mazeName = 'gridComp'
 mazeName = "mediumNegSOL" # there must be a directory with this name in /out
 mazeName = "medium" # there must be a directory with this name in /out
 mazeName = "T"
 mazeName = "evoCorr" # there must be a directory with this name in /out
+mazeName = "hard" # there must be a directory with this name in /out
 
-mazelevels= [ 'hard']
 mazelevels= [ 'medium']
+mazelevels= [ 'hard']
 
 objsNoGrid =[[FIT],[FIT,DIV]]
 objsNoGrid =[]
-objsGr = [[RAR,CUR], [CUR], [RAR,CUR,VIAB]]
+objsGr = [[RAR,ZERO]]
+objsGr = [[RAR,VIAB],[RAR,VIABP],[RAR]]
 objsGr = [[RAR],[RAR,VIAB],[RAR,CUR],[RAR,EVO],[RAR,EVO,CUR],[RAR,CUR,EVO],[NOV,EVO] ]
 objsGr = [[RAR,CUR,VIAB],[CUR/VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
-objsGr = [[RAR,VIAB],[RAR,VIABP],[RAR]]
-objsGr = [[RAR,ZERO]]
 objs2BRecorded = [RAR,LGD]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [200] #according to maze level
-breakflag =False #  stop trial after first success   
-saveChronic=True
-EvoBoosterIntervall= 50
-evoMutants = 150
+NGens = [1000] #according to maze level
+breakflag =True #  stop trial after first success   
+disp=False
+saveChronic=False
+EvoBoosterIntervall= 50000
+evoMutants = 1
 trial_start=0
-Ntrials = 3
+Ntrials = 30
 
 NovGamma = int(NPop*.03)
 
