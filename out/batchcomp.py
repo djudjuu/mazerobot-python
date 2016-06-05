@@ -16,14 +16,13 @@ wallcondition = 'soft'#soft''
 mazeName = 'gridCompHard'
 mazeName = 'T'
 mazeName = 'mediumNegSOL'
-mazeName = 'medium'
 mazeName = 'gridComp'
+mazeName = 'medium'
 mazeName = 'evoCorr'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
 
-expObjs = ['CUR/RAR/EVO','RAR/EVO','FIT/EVO','CUR/EVO','RAR/PEVO','FIT','CUR','SEVO','CUR/SEVO','RAR/CUR', 'RAR/SEVO','FIT/DIV', 'NOV','RAR/CUR/EVO/SEVO','RAR/CUR/SEVO','RAR/CUR/EVO','RAR', 'FFA']#,'RAR/CUR/PEVO','CUR/PEVO', 'PEVO/EVO',  'NOV/EVO','NOV/PEVO','FIT/PEVO']
 #expObjs=['RAR/PEVO']
 expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd'] #normal
 expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
@@ -31,9 +30,10 @@ expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# me
 expObjs = ['RAR/SOLr','RAR/VIAB','NOV','NOV/VIAB','FFA','FIT'] #normal
 expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
 expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp 
-expObjs = ['RAR'] # gridComp
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
+expObjs = ['RAR'] # gridComp
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
 grid_szs= [13,18,20,25,300]
@@ -62,7 +62,7 @@ convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for ex
 
 ########### rearraning from best to worst while taking out all experiments that never solved it
 #sort after ConvRate, then after speed
-'''criteria = [exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs]
+criteria = [exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs]
 
 
 sumExp = zip(exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs)
@@ -81,7 +81,6 @@ convs = [e[6] for e in sumExp]
 
 print 'expObjs',expObjs
 #print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
-'''
 
 ################ GRIDSIZE COMPARISON ##############
 '''
@@ -126,8 +125,7 @@ print 'summary table made...\n'
 
 
 ######################### STATISTICAL SIGNIFICANCE #####
-'''
-ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
+'''ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
 
 [ps[i].insert(i, -1) for i in range(len(ps))]
 
@@ -225,12 +223,12 @@ print "Correlations table made...\n"'''
 
 ################# plot objectives against each other ################
 '''print 'preparing to plot objectives against each other...'
-expObjs2VSPlot = ['RAR/VIAB','RAR/VIABP']
 expObjs2VSPlot = ['RAR']#'RAR/LGDr','RAR/shLGD','RAR/VIAB']
+expObjs2VSPlot = ['RAR/VIABP']
 Gen2VisCorr= -1
 exps2VSPlot = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2VSPlot]
 Ds2VSPlotQ =[util.load_exp_series(exp, part='Q') for exp in exps2VSPlot]
-Ds2VSPlotP =[util.load_exp_series(exp, part='All') for exp in exps2VSPlot]
+Ds2VSPlotP =[util.load_exp_series(exp, part='P') for exp in exps2VSPlot]
 
 for ds,ename in zip(Ds2VSPlotP,expObjs2VSPlot):
     print 'dsshape:' ,ds[0].shape
@@ -238,7 +236,7 @@ for ds,ename in zip(Ds2VSPlotP,expObjs2VSPlot):
     x_obj =  [get_obj_ID(e) for e in  ename.split('/')]
     x_obj.extend([])
     print x_obj
-    #x_obj.pop(0) #kicking out for once
+    x_obj.pop(0) #kicking out for once
     y_objs = [EVO]
     color_obj= FIT
     #print' currently plotting only one trial'
@@ -248,7 +246,6 @@ for ds,ename in zip(Ds2VSPlotP,expObjs2VSPlot):
 pp.savefig()
 plt.show()'''
 ############ CONVERGENCE RATE ###########
-'''
 plt.figure('average convergence rate')
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 #lenexps = [np.asarray([di.shape[2] for di in exp]) for exp in Ds]
@@ -264,7 +261,7 @@ ax.set_ylabel('convergence rate')
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
-plt.show()'''
+plt.show()
 
 # ############# EVOLVABILITY COMPARISONS #########################
 print 'starting to look at evolvability...'
@@ -274,6 +271,8 @@ expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOL
 expObjs2EvoComp = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs2EvoComp = ['RAR','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs2EvoComp = ['RAR','RAR/VIAB','RAR/VIABP']
+expObjs2EvoComp = ['RAR','NOV/VIAB','NOV']
+expObjs2EvoComp = ['RAR','RAR/ZERO','RAR/VIAB','RAR/VIABP']
 exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
 Ds2EvoCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2EvoComp]
 Ds2EvoCompP =[util.load_exp_series(exp,part='P') for exp in exps2EvoComp]

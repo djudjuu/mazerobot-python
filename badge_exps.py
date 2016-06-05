@@ -183,6 +183,7 @@ class MazeSolution(Solution):
                     self.IRARflag = not self.IRARflag
             else:
                     self.objs[IRAR] = 0
+            self.objs[ZERO]=0
 
             #if not probe_RARs: 
                 #self.objs[VIAB]=0
@@ -193,7 +194,8 @@ class MazeSolution(Solution):
             for k in range(len(self.selected4)):
                 self.objectives[k] = self.objs[self.selected4[k]]
                 #VIAB is excluded here as its computation needs to be  carried on 
-                if self.selected4[k]==VIAB and not probe_RARs :
+                # tanke false away to only select for VIAB in intervals
+                if False and self.selected4[k]==VIAB and not probe_RARs :
                     self.objectives[k] = 0
 
 
@@ -252,12 +254,11 @@ mazelevels= [ 'medium']
 
 objsNoGrid =[[FIT],[FIT,DIV]]
 objsNoGrid =[]
-objsGr = [[RAR]]
 objsGr = [[RAR,CUR], [CUR], [RAR,CUR,VIAB]]
-objsGr = [[RAR,EVO],[RAR,EVO,CUR], [RAR,VIAB,EVO]]
-objsGr = [[LGE],[LGD,LGE], [LGDr,shLGD]]
-objsGr = [[RAR,LGE],[RAR,LGEr],[RAR,LGD],[RAR,LGDr],[RAR,LGDnd],[RAR,shLGD],[RAR,shLGDnd]]
+objsGr = [[RAR],[RAR,VIAB],[RAR,CUR],[RAR,EVO],[RAR,EVO,CUR],[RAR,CUR,EVO],[NOV,EVO] ]
+objsGr = [[RAR,CUR,VIAB],[CUR/VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
 objsGr = [[RAR,VIAB],[RAR,VIABP],[RAR]]
+objsGr = [[RAR,ZERO]]
 objs2BRecorded = [RAR,LGD]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
@@ -268,8 +269,8 @@ breakflag =False #  stop trial after first success
 saveChronic=True
 EvoBoosterIntervall= 50
 evoMutants = 150
-trial_start=5
-Ntrials = 10
+trial_start=0
+Ntrials = 3
 
 NovGamma = int(NPop*.03)
 
