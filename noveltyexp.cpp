@@ -76,7 +76,7 @@ static bool area_of_interest=false;
 static bool rand_repl=false;
 char output_dir[200]="";
 static int param=-1;
-static int push_back_size = 20;
+static int push_back_size = 10;
 
 
 void set_extinction(bool _ext) {

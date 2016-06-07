@@ -17,8 +17,9 @@ mazeName = 'gridCompHard'
 mazeName = 'T'
 mazeName = 'mediumNegSOL'
 mazeName = 'gridComp'
-mazeName = 'medium'
 mazeName = 'evoCorr'
+mazeName = 'medium'
+mazeName = 'hard'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
@@ -32,8 +33,9 @@ expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
 expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp 
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
-expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
 expObjs = ['RAR'] # gridComp
+expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','FFA','CUR/VIAB']# all medium
+expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','CUR','RAR/VIAB','FIT','FFA','NOV/VIAB', 'NOV','FIT/DIV','CUR/VIAB','RAR/EVO']# all back
 pp = PdfPages(mazeName+'-multiplot.pdf')
 
 grid_szs= [13,18,20,25,300]
@@ -120,6 +122,7 @@ filename = './'+wallcondition +'/'+str(mazeName)+str(grid_sz) + '-Summary'+str(c
 with open(filename,'w') as f:
 	f.write('Objectives' + ',' + 'Convergence Rate' + ',' +'Solved at'+ ','+ 'STD'+ ','+ 'N' +'\n') 
 	for exp,mf,std,cr,n in zip(expObjs,meanfirst,stdfirst,convs,Ns):
+                exp=exp[:-2]
 		f.write(exp.replace(',','/') + ',' + "%.2f"% cr+',' +"%.1f"%mf + ',' + "%.1f"%std + ',' +str(n) +'\n') 
 print 'summary table made...\n'
 

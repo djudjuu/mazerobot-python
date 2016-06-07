@@ -13,9 +13,9 @@ if [ ! -d $target ]; then
 fi
 
 if [ $data = "y" ]; then
-	cp $port/* $target
+	cp -u $port/* $target
 	echo "everyting copied"
 else
-	cp $port/*{Archive,Solver}* $target
+	cp -u $port/*{Archive,Solver}* $target
 	echo "Archives and Solvers copied"
 fi
