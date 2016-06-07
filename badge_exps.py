@@ -264,14 +264,14 @@ grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [300] #according to maze level
-breakflag =False #  stop trial after first success   
+NGens = [1000] #according to maze level
+breakflag =True #  stop trial after first success   
 disp=True
-saveChronic=True
+saveChronic=false
 EvoBoosterIntervall= 50000
 evoMutants = 1
 trial_start=0
-Ntrials = 2
+Ntrials = 10
 
 NovGamma = int(NPop*.03)
 
