@@ -2,20 +2,16 @@
 
 expname=$1
 wallcondition=${2-soft}
-data=${3-"n"}
 
 port=~/Dropbox/Uni/Data/$wallcondition/$expname
 target=../out/$wallcondition/$expname/
 
 if [ ! -d $target ]; then
 	mkdir $target
+	mkdir $target/medium
+	mkdir $target/hard
 	echo "created folder $expname"
 fi
 
-if [ $data = "y" ]; then
-	cp -u $port/* $target
-	echo "everyting copied"
-else
-	cp -u $port/*{Archive,Solver}* $target
-	echo "Archives and Solvers copied"
-fi
+cp -u -r $port/* $target
+echo "everything copied"

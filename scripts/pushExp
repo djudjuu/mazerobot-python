@@ -10,16 +10,13 @@ port=~/Dropbox/Uni/Data/$wallcondition/$expname
 
 if [ ! -d $port ]; then
 	mkdir $port
+	mkdir $port/medium
+	mkdir $port/hard
 	echo "created folder $expname"
 fi
 
 nOfExps= ls -1 ../out/$wallcondition/$expname/ | wc -l
 echo "$nOfExps experiments found..."
 
-if [ $data = "y" ]; then
-	cp -u ../out/$wallcondition/$expname/* ~/Dropbox/Uni/Data/$wallcondition/$expname/
-	echo "everyting copied"
-else
-	cp -u ../out/$wallcondition/$expname/*{Archive,Solver}* ~/Dropbox/Uni/Data/$wallcondition/$expname/ 
-	echo "Archives and Solvers copied"
-fi
+cp -u -r ../out/$wallcondition/$expname/* ~/Dropbox/Uni/Data/$wallcondition/$expname/ 
+echo "Done"

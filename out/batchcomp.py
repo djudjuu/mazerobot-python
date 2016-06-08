@@ -253,11 +253,11 @@ ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 firstSolvedAsArray = [np.asarray(solved) for solved  in firstSolved]
 
 maxgen =min(1500,np.max([np.max(x) for x in firstSolvedAsArray]) )
-convRates = [[len(solved[solved<=i])/float(ntrials) for i in range(maxgen)] for solved,ntrials in zip(firstSolvedAsArray, Ns)]
-#convRates = [[ len(lenexp[lenexp<=i])/float(len()) for i in range(maxgen)] for lenexp in lenexps]
+convRates = [[len(solved[solved<=i])/float(ntrials) for i in range(0,maxgen,10)] for solved,ntrials in zip(firstSolvedAsArray, Ns)]
+#convRates = [[ len(lenexp[lenexp<=i])/float(len()) for i in range(0,maxgen,10)] for lenexp in lenexps]
 ax.set_xlabel('generations')
 ax.set_ylabel('convergence rate')
-[ax.plot( range(maxgen), convRate,label =exp)  for convRate,exp in zip(convRates,expObjs)]
+[ax.plot( range(0,maxgen,10), convRate,label =exp)  for convRate,exp in zip(convRates,expObjs)]
 #plt.legend(loc=4)
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.png'))
