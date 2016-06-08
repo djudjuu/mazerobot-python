@@ -17,9 +17,9 @@ nOfExps= ls -1 ../out/$wallcondition/$expname/ | wc -l
 echo "$nOfExps experiments found..."
 
 if [ $data = "y" ]; then
-	cp -i ../out/$wallcondition/$expname/* ~/Dropbox/Uni/Data/$wallcondition/$expname/
+	cp -u ../out/$wallcondition/$expname/* ~/Dropbox/Uni/Data/$wallcondition/$expname/
 	echo "everyting copied"
 else
-	cp -i ../out/$wallcondition/$expname/*{Archive,Solver}* ~/Dropbox/Uni/Data/$wallcondition/$expname/ 
+	cp -u ../out/$wallcondition/$expname/*{Archive,Solver}* ~/Dropbox/Uni/Data/$wallcondition/$expname/ 
 	echo "Archives and Solvers copied"
 fi

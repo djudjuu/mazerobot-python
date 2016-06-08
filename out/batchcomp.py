@@ -13,12 +13,13 @@ from operator import add
 
 wallcondition = 'soft'#soft''
 
-mazeName = 'gridCompHard'
-mazeName = 'T'
-mazeName = 'mediumNegSOL'
-mazeName = 'gridComp'
-mazeName = 'medium'
-mazeName = 'evoCorr'
+expName = 'gridCompHard'
+expName = 'mediumNegSOL'
+expName = 'gridComp'
+expName = 'medium'
+expName = 'evoCorr'
+mazelevel = 'medium'
+expName = 'T'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
@@ -33,14 +34,14 @@ expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
-expObjs = ['RAR'] # gridComp
-pp = PdfPages(mazeName+'-multiplot.pdf')
+expObjs = ['CUR/VIAB'] # gridComp
+pp = PdfPages(expName+'-multiplot.pdf')
 
 grid_szs= [13,18,20,25,300]
 grid_szs= [8,10,13,15,18,20,23,25,30]
 grid_szs= [15]
 cn = '' #comparison number that can be used to differ between different analyses 
-exps = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product(expObjs,grid_szs))]
+exps = [ wallcondition+'/'+expName + '/'+mazelevel+'/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product(expObjs,grid_szs))]
 print 'lenexps', len(exps)
 print 'exps',exps
 
@@ -116,7 +117,7 @@ plt.show()'''
 Ns = [len(exp) for exp in solvers]
 #convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
 #print convs, Ns
-filename = './'+wallcondition +'/'+str(mazeName)+str(grid_sz) + '-Summary'+str(cn)+ '.csv'
+filename = './'+wallcondition +'/'+str(expName)+ '/'+mazelevel + '-Summary'+str(cn)+ '.csv'
 with open(filename,'w') as f:
 	f.write('Objectives' + ',' + 'Convergence Rate' + ',' +'Solved at'+ ','+ 'STD'+ ','+ 'N' +'\n') 
 	for exp,mf,std,cr,n in zip(expObjs,meanfirst,stdfirst,convs,Ns):

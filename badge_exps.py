@@ -237,39 +237,37 @@ def write_params(paramlist, expname, trialnr):
 ##### PARAMS #########
 NNov = 15  # neigbours looked at when computing novelty
 wallcondition = 'soft' #'soft'
-datapath = './out/'+wallcondition+'/'
 wallpunish = False
 NovTresh = 0.08
    
-mazeName = 'gridComp'
-mazeName = "mediumNegSOL" # there must be a directory with this name in /out
-mazeName = "medium" # there must be a directory with this name in /out
-mazeName = "T"
-mazeName = "evoCorr" # there must be a directory with this name in /out
-mazeName = "hard" # there must be a directory with this name in /out
+expName = 'gridComp'
+expName = "medium" # there must be a directory with this name in /out
+expName = "evoCorr" # there must be a directory with this name in /out
+expName = "hard" # there must be a directory with this name in /out
+expName = "T"
+datapath = './out/'+wallcondition+'/'+expName +'/'
 
-mazelevels= [ 'medium']
 mazelevels= [ 'hard']
+mazelevels= [ 'medium','hard']
 
 objsNoGrid =[[FIT],[FIT,DIV]]
-objsNoGrid =[]
-objsGr = [[RAR,ZERO]]
-objsGr = [[RAR,VIAB],[RAR,VIABP],[RAR]]
-objsGr = [[RAR],[RAR,VIAB],[RAR,CUR],[RAR,EVO],[RAR,EVO,CUR],[RAR,CUR,EVO],[NOV,EVO] ]
-objsGr = [[RAR,CUR,VIAB],[CUR/VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
 objs2BRecorded = [RAR,LGD]
+objsNoGrid =[]
+objsGr = [[RAR],[RAR,VIAB],[RAR,CUR],[RAR,EVO],[RAR,EVO,CUR],[RAR,CUR,EVO],[NOV,EVO] ]
+objsGr = [[RAR,CUR,VIAB],[CUR,VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
+objsGr=[[RAR]]
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [1000] #according to maze level
+NGens = [10,10] #according to maze level
 breakflag =True #  stop trial after first success   
-disp=False
+disp=True
 saveChronic=False
 EvoBoosterIntervall= 50000
 evoMutants = 1
 trial_start=0
-Ntrials = 30
+Ntrials = 2
 
 NovGamma = int(NPop*.03)
 
@@ -289,14 +287,14 @@ import sys
 if __name__ == '__main__':
 #maybe add random seeding, but make sure to save it later for reproducability
     for mazelevel,ngen in zip(mazelevels,NGens):
-       statfile = datapath+mazeName+'-stats.csv'
+       statfile = datapath+expName+'-stats.csv'
        mazepy.mazenav.initmaze(mazelevel + '_maze_list.txt', "test.ne")
        mazepy.mazenav.random_seed()
        exp_list= zip( objsNoGrid,No_grid_szs)
        exp_list.extend(list(itertools.product(objsGr, grid_szs)))
        print exp_list
        for obj, gridsz in exp_list:
-          exp_name = wallcondition + '/'+mazeName+ '/'
+          exp_name = wallcondition + '/'+expName+'/'+mazelevel+ '/'
           for o in obj:
             exp_name += str(obj_names[o])
           exp_name += str(gridsz) + '-'
