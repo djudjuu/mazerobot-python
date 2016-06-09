@@ -75,6 +75,9 @@ class MazeSolution(Solution):
         self.objs[YMID] = my
         #print x,y
         #print mx,my, '(midfeature)'
+
+        test = [self.robot.get_data_at_x(i) for i in range(8)]
+        print test
         
         #ACESS METHOD robot.get()
         my2 = self.robot.get_my()

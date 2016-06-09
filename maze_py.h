@@ -116,9 +116,17 @@ class mazenav {
   float get_my() {
 	return (nov_item->data[0][3] - nov_item->miny)/(nov_item->maxy - nov_item->miny);
   }  
-  /*vector<float> get_data() {
-    return nov_item->data;
-  }*/
+  float get_data_at_x(int i) 
+  {
+	  if (i%2==0) //xcord -> scaleby x
+	  {
+		return (nov_item->data[0][i] - nov_item->minx)/(nov_item->maxx - nov_item->minx);
+	  }
+	  else //ycord -> scaleby y
+	  {
+		return (nov_item->data[0][i] - nov_item->miny)/(nov_item->maxy - nov_item->miny);
+	  }
+  }
   //end julius
   bool viable() {
    return nov_item->viable;

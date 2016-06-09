@@ -205,6 +205,7 @@ class mazenav(_object):
     def get_y(self): return _mazepy.mazenav_get_y(self)
     def get_mx(self): return _mazepy.mazenav_get_mx(self)
     def get_my(self): return _mazepy.mazenav_get_my(self)
+    def get_data_at_x(self, *args): return _mazepy.mazenav_get_data_at_x(self, *args)
     def viable(self): return _mazepy.mazenav_viable(self)
     def solution(self): return _mazepy.mazenav_solution(self)
     __swig_destroy__ = _mazepy.delete_mazenav
