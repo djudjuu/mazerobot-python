@@ -27,8 +27,10 @@ LGDnd=25      #just counts how many different recent behaviors, ignores distribu
 shLGD=26     #how many different recent behacviors, those need to be farther apart
 shLGDnd=27     #how many different recent behacviors, those need to be farther apart
 evoMeasured =28    #1 if evo measured, 0 elsewise
+XMID=29
+YMID=30
 
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured']
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured','XMID', 'YMID']
 
 def get_obj_ID(string):
         return obj_names.index(string)

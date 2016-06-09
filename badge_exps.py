@@ -61,11 +61,37 @@ class MazeSolution(Solution):
         also increments the personal history grid
         '''
         self.robot.map()
+
+        #ACESS METHOD featuredetector ()
+        mx = mazepy.feature_detector.midx(self.robot)
+        my = mazepy.feature_detector.midy(self.robot)
         x = mazepy.feature_detector.endx(self.robot)
         y = mazepy.feature_detector.endy(self.robot)
         self.behavior=np.array([x,y])
+        #self.behaviorWalk=np.array([x,y,xm,ym])
         self.objs[XEND] = x
         self.objs[YEND] = y
+        self.objs[XMID] = mx
+        self.objs[YMID] = my
+        #print x,y
+        #print mx,my, '(midfeature)'
+        
+        #ACESS METHOD robot.get()
+        my2 = self.robot.get_my()
+        mx2 = self.robot.get_mx()
+        x2 = self.robot.get_x()
+        y2 = self.robot.get_y()
+        #print x2, y2
+        #print  mx2,my2, '(midget)'
+        if  mx2==x and my2 == y:
+            print "success..x"
+        if not  my2 == y:
+            print my2, y
+        else:
+            print "success.."
+        #assert mx != x
+        #assert my != y
+
 
         #record fitness and curiosity and evolvabilities
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
@@ -247,8 +273,8 @@ expName = "hard" # there must be a directory with this name in /out
 expName = "T"
 datapath = './out/'+wallcondition+'/'+expName +'/'
 
-mazelevels= [ 'hard']
 mazelevels= [ 'medium','hard']
+mazelevels= [ 'hard']
 
 objsNoGrid =[[FIT],[FIT,DIV]]
 objs2BRecorded = [RAR,LGD]
@@ -260,14 +286,14 @@ grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [10,10] #according to maze level
+NGens = [100]#,10] #according to maze level
 breakflag =True #  stop trial after first success   
 disp=True
-saveChronic=False
+saveChronic=True
 EvoBoosterIntervall= 50000
 evoMutants = 1
 trial_start=0
-Ntrials = 2
+Ntrials = 1
 
 NovGamma = int(NPop*.03)
 

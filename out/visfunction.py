@@ -200,7 +200,7 @@ def clear_axis(ax):
 
 cmaps = ['RdYlBu','autumn', 'spring', 'summer', 'winter', 'Greys']
 markers = ['o','v','s', 'p', '8','D'] 
-def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False, cm = cmaps, markr = markers    ):
+def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False, cm = cmaps, markr = markers,midway=False ):
 	ii = 0
 	if best:
 		sc = 0
@@ -220,7 +220,10 @@ def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False,
 			    bottom='off', top='off')
 	if alle:
 		for i in range(X.shape[1]):
-			ax.scatter(X[XEND,i,:until], X[YEND,i,:until], c = np.arange(-until,0), cmap='hot')
+                        if not midway:
+                                ax.scatter(X[XEND,i,:until], X[YEND,i,:until], c = np.arange(-until,0), cmap='hot')
+                        else:
+                                ax.scatter(X[XMID,i,:until], X[YMID,i,:until], c = np.arange(-until,0), cmap='hot')
 
 
 

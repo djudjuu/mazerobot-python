@@ -4271,6 +4271,50 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_mazenav_get_mx(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  mazenav *arg1 = (mazenav *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  float result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:mazenav_get_mx",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_mazenav, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mazenav_get_mx" "', argument " "1"" of type '" "mazenav *""'"); 
+  }
+  arg1 = reinterpret_cast< mazenav * >(argp1);
+  result = (float)(arg1)->get_mx();
+  resultobj = SWIG_From_float(static_cast< float >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_mazenav_get_my(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  mazenav *arg1 = (mazenav *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  float result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:mazenav_get_my",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_mazenav, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mazenav_get_my" "', argument " "1"" of type '" "mazenav *""'"); 
+  }
+  arg1 = reinterpret_cast< mazenav * >(argp1);
+  result = (float)(arg1)->get_my();
+  resultobj = SWIG_From_float(static_cast< float >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_mazenav_viable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   mazenav *arg1 = (mazenav *) 0 ;
@@ -4383,6 +4427,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"mazenav_load_new", _wrap_mazenav_load_new, METH_VARARGS, NULL},
 	 { (char *)"mazenav_get_x", _wrap_mazenav_get_x, METH_VARARGS, NULL},
 	 { (char *)"mazenav_get_y", _wrap_mazenav_get_y, METH_VARARGS, NULL},
+	 { (char *)"mazenav_get_mx", _wrap_mazenav_get_mx, METH_VARARGS, NULL},
+	 { (char *)"mazenav_get_my", _wrap_mazenav_get_my, METH_VARARGS, NULL},
 	 { (char *)"mazenav_viable", _wrap_mazenav_viable, METH_VARARGS, NULL},
 	 { (char *)"mazenav_solution", _wrap_mazenav_solution, METH_VARARGS, NULL},
 	 { (char *)"delete_mazenav", _wrap_delete_mazenav, METH_VARARGS, NULL},

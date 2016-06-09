@@ -64,7 +64,7 @@ void set_age_objective(bool ao) {
     age_objective=ao;
 }
 
-static int number_of_samples = 1;
+static int number_of_samples = 2;
 static int simulated_timesteps = 400;
 bool seed_mode = false;
 char seed_name[100]="";
@@ -965,13 +965,14 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
     newenv=mazesimIni(the_env,net,dc);
     newenv->goalattract = goal_attract;
     //data collection vector initialization
-    //dc.clear();
-
+    dc.clear();
+    
+    novelty_measure = novelty_sample; //julius
     if (novelty_measure == novelty_sample ||
             novelty_measure ==novelty_sample_free)
         data.reserve(timesteps/stepsize);
  
-    novelty_measure=novelty_accum;
+    //novelty_measure=novelty_accum;
     if (novelty_measure == novelty_accum)
     {
         data.reserve(100);
@@ -986,20 +987,22 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
     /*ENABLE FOR ADDT'L INFO STUDIES*/
     if (number_of_samples>0)
         stepsize=timesteps/number_of_samples;
-
+    
     for (int i=0; i<timesteps; i++)
     {
         fitness+=mazesimStep(newenv,net,dc);
         //if taking additional samples, collect during run
-        if (novelty_measure==novelty_sample ||
+        if (novelty_measure==novelty_sample ||	//maybe add here true so that sampling occurs
                 novelty_measure==novelty_sample_free)
             if ((timesteps-i-1)%stepsize==0)
             {
                 if(!newenv->hero.collide) {
+                    //cout << "sample taken at timestep: " << i << endl;
                     data.push_back(newenv->hero.location.x);
                     data.push_back(newenv->hero.location.y);
                 }
                 else {
+                    cout << "collision so -10 added " << endl; // julius test if there isan errorwith th ecollision 
                     data.push_back(-10.0);
                     data.push_back(-10.0);
                 }
@@ -1125,27 +1128,30 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
             data.push_back(y);
         }
 
+    //julius: does this need to be disabled when i sample more than one point?
     if (novelty_measure==novelty_accum)
     {
         accum->transform();
         if(ni!=NULL) 
           ni->path_entropy=accum->entropy();
         for (int x=0; x<accum->size; x++)
-            data.push_back(accum->buffer[x]);
-    }
+            data.push_back(accum->buffer[x]);    }
 
+  //writing data onto the novelty item
   if(ni!=NULL) {
   if(newenv->reachgoal)
 	ni->solution=true;
     else
 	ni->solution=false;
-
     the_env->get_range((ni->minx),(ni->miny),(ni->maxx),(ni->maxy)); 
     double xsz=ni->maxx-ni->minx;
     double ysz=ni->maxy-ni->miny;
     ni->max_dist = sqrt(xsz*xsz+ysz*ysz);
     ni->end_x=newenv->hero.location.x;
     ni->end_y=newenv->hero.location.y;
+    cout << "datasize in mazesim:" << data.size() <<" "<< data[0] <<" "<< data[1] << data[2] << data[3] << endl;
+    //ni->mid_x=data[2];//julius 
+    //ni->mid_y=data[3];
     ni->timesteps=newenv->steps;
     ni->collisions=newenv->hero.collisions;
     ni->tot_turn=newenv->hero.total_spin;
@@ -1336,6 +1342,7 @@ noveltyitem* maze_novelty_map(Organism *org,data_record* record)
 
         org->eliminate=false;
         fitness+=mazesim(org->net,gather,record,envList[x],org,new_item);
+
         if (org->eliminate) {
             new_item->viable=false;
             org->eliminate=false;
@@ -1372,6 +1379,7 @@ noveltyitem* maze_novelty_map(Organism *org,data_record* record)
     if (fitness>highest_fitness)
         highest_fitness=fitness;
 
+    //cout <<"gathersize: "<< gather.size()<< "," << gather[0].size() << endl;
     for (int i=0; i<gather.size(); i++)
         new_item->data.push_back(gather[i]);
 

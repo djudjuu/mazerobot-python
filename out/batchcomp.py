@@ -15,14 +15,14 @@ wallcondition = 'soft'#soft''
 
 expName = 'gridCompHard'
 expName = 'mediumNegSOL'
-expName = 'gridComp'
 expName = 'medium'
 expName = 'evoCorr'
-mazelevel = 'medium'
 expName = 'T'
+expName = 'gridComp'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
+mazelevel = 'medium'
 
 #expObjs=['RAR/PEVO']
 expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd'] #normal
@@ -34,19 +34,17 @@ expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
-expObjs = ['CUR/VIAB'] # gridComp
+expObjs = ['RAR'] # gridComp
 pp = PdfPages(expName+'-multiplot.pdf')
 
-grid_szs= [13,18,20,25,300]
-grid_szs= [8,10,13,15,18,20,23,25,30]
-grid_szs= [15]
+grid_szs= [13,18,20,25,30]
+grid_szs= [8,10,13,15,18,20,25,30,40] #23
+grid_szs= [40]
 cn = '' #comparison number that can be used to differ between different analyses 
 exps = [ wallcondition+'/'+expName + '/'+mazelevel+'/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product(expObjs,grid_szs))]
 print 'lenexps', len(exps)
 print 'exps',exps
 
-expObjs = [e+str(grid_sz) for e,grid_sz in list(itertools.product(expObjs,grid_szs))]
-print expObjs
 
 ########### load objectives or solvers (and sorting them)
 
@@ -63,6 +61,7 @@ convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for ex
 
 ########### rearraning from best to worst while taking out all experiments that never solved it
 #sort after ConvRate, then after speed
+'''
 criteria = [exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs]
 
 
@@ -82,35 +81,54 @@ convs = [e[6] for e in sumExp]
 
 print 'expObjs',expObjs
 #print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
-
-################ GRIDSIZE COMPARISON ##############
 '''
-mazeName2 = 'gridCompHard'
-exps2 = [ wallcondition+'/'+mazeName2 + '/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product(expObjs,grid_szs))]
-firstSolved2 = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers2]
-meanfirst2 =[np.mean(exp) for exp in firstSolved2] 
-solvers2  = [util.load_exp_series(exp, solvers = True) for exp in exps2]
-convs2=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers2]
-mfboth=( np.asarray(meanfirst) +np.asarray(meanfirst2))/2.0
-print mfboth.shape, len(grid_szs)
+################ GRIDSIZE COMPARISON ##############
+grid_szs= [8,10,13,15,18,20,25,30] #23
+grid_szs= [20]
+expObjs2GridComp = ['RAR','CUR']
+mazelevels=['medium','hard']
+#to hold a timeseries with length of grid_sz for every experiment
+convrates = []
+speeds = []
+for target in expObjs2GridComp:
+    conv =[]
+    speed =[]
+    for mazelevel in mazelevels:
+        expNames = [ wallcondition+'/'+expName + '/'+mazelevel+'/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product([str(target)],grid_szs))]
+        solvers  = [util.load_exp_series(exp, solvers = True) for exp in expNames]
+        convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
+        conv.append(convs)
+        firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers]
+        meanfirst =[np.mean(exp) for exp in firstSolved] 
+        speed.append(meanfirst)
+   
+    meanconv = map(lambda x: np.asarray(x),conv)
+    convrates.append(np.mean(meanconv, axis=0))
+    meanspeed = map(lambda x: np.asarray(x),speed)
+    speeds.append(np.mean(meanspeed, axis=0))
+
+print 'after prepations convshaep::', len(convrates), len(grid_szs)
 plt.figure()
-plt.subplot(211)
-convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
+plt.subplot2grid((2,4), (0,0), colspan=3)
+#convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
 plt.title('average convergence rate')
-plt.plot(range(len(grid_szs)),convboth,'-o')
+[plt.plot(range(len(grid_szs)),convrate,'-o',label=target) for convrate,target in zip(convrates,expObjs2GridComp)]
 plt.xticks(range(len(grid_szs)),grid_szs)
 plt.xlabel("grid size")
-plt.ylim([0.5,1.1])
+#plt.ylim([0.5,1.1])
 plt.axhline(1)
 plt.ylabel("convergence rate")
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 
-plt.subplot(212)
+plt.subplot2grid((2,4), (1,0), colspan=3)
+#convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
 plt.title('average solving speed')
-plt.plot(range(len(grid_szs)),mfboth,'-o')
+[plt.plot(range(len(grid_szs)),speed,'-o',label=target) for speed,target in zip(speeds,expObjs2GridComp)]
 plt.xticks(range(len(grid_szs)),grid_szs)
 plt.xlabel("grid size")
 plt.ylabel("solving speed (generation)")
-plt.show()'''
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
+plt.show()
 
 ########################## SUMMARY  ############
 
@@ -260,7 +278,7 @@ ax.set_ylabel('convergence rate')
 [ax.plot( range(0,maxgen,10), convRate,label =exp)  for convRate,exp in zip(convRates,expObjs)]
 #plt.legend(loc=4)
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
-plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-ConvergenceRate.png'))
+plt.savefig('./'+wallcondition+'/'+expName+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
 plt.show()
 

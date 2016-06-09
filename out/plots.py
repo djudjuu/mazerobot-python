@@ -8,17 +8,18 @@ from fixedparams import *
 from util import util
 
 wallcondition = 'soft'
-objectives = 'RARSOLnd'
-mazeName = 'medium'
-grid_sz = 13
-trialNr= 1
-title = wallcondition + '/' + mazeName +'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
+objectives = 'RAR'
+expName = 'T'
+mazelevel = 'hard'
+grid_sz = 15
+trialNr= 0
+title = wallcondition + '/' + expName +'/'+mazelevel+'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
 
 
-mazefile = '../hard_maze2.txt'
 mazefile = '../s_maze2.txt'
 mazefile = '../ss_maze.txt'
 mazefile = '../medium_maze.txt'
+mazefile = '../hard_maze.txt'
 
 
 ##############3#load data
@@ -66,7 +67,7 @@ eliteN = int(NPop*(elite/100.0))
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,shSOLnd,SOLnd,EVO]
+want2plot = [ FIT,XMID,XEND,YMID,YEND,CUR]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1
@@ -98,7 +99,8 @@ scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
 ax1 = plt.subplot(122)
 ax1.set_title('Best individuals')
 drawMazeOnAxes(ax1, mazefile)
-scatter_individuals(ax1,data, obj_idxs = [VIAB],best=True, until= Nplot)
+scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=True)#,X = dsorted)
+#scatter_individuals(ax1,data, obj_idxs = [VIAB],best=True, until= Nplot)
 #scatter_individuals(ax1,best=False,  alle= True, X = dsorted)
 
 ##### plot normalized objectives together in one plot 

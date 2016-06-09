@@ -102,11 +102,24 @@ class mazenav {
   void clear() { return; }
 
   float get_x() { 
+    //cout << "used getx" << endl;//julius: if handed this way, positiona are not normalized to 0-1
     return nov_item->data[0][0];
   }
   float get_y() {
     return nov_item->data[0][1];
   }
+  //julius: added to sample one more point from the data record
+  //also changed: number_of_samples = 2 in noveltyexp.cpp ~line 40
+  float get_mx() { //
+	  return (nov_item->data[0][2] - nov_item->minx)/(nov_item->maxx - nov_item->minx);
+  }
+  float get_my() {
+	return (nov_item->data[0][3] - nov_item->miny)/(nov_item->maxy - nov_item->miny);
+  }  
+  /*vector<float> get_data() {
+    return nov_item->data;
+  }*/
+  //end julius
   bool viable() {
    return nov_item->viable;
   }
