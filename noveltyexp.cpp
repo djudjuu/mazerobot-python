@@ -954,9 +954,11 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
 
 
     vector<float> data;
+    vector<float> data4cur;//julius
 
     int timesteps=the_env->steps; //simulated_timesteps;
     int stepsize=10000;
+    bool measure_curiosity=true;
 
     double fitness=0.0;
     Environment *newenv;
@@ -973,15 +975,18 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
         data.reserve(timesteps/stepsize);
  
     //novelty_measure=novelty_accum;
-    if (novelty_measure == novelty_accum)
+    if ( measure_curiosity)
     {
-        data.reserve(100);
         float minx,miny,maxx,maxy;
         newenv->get_range(minx,miny,maxx,maxy);
         vector<int> dims;
         dims.push_back(ENT_GRID_SIZE);
         dims.push_back(ENT_GRID_SIZE);
         accum=new position_accumulator(dims,minx,miny,maxx,maxy);
+        if (novelty_measure == novelty_accum)
+        {
+             data.reserve(100);
+        }
     }
 
     /*ENABLE FOR ADDT'L INFO STUDIES*/
@@ -997,7 +1002,7 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
             if ((timesteps-i-1)%stepsize==0)
             {
                 if(!newenv->hero.collide) {
-                    cout << "sample taken at timestep: " << i << endl;
+                    //cout << "sample taken at timestep: " << i << endl;
                     data.push_back(newenv->hero.location.x);
                     data.push_back(newenv->hero.location.y);
                 }
@@ -1009,7 +1014,8 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
             }
 
         float loc[2]= {newenv->hero.location.x,newenv->hero.location.y};
-        if (novelty_measure==novelty_accum)
+        if (measure_curiosity ||
+                novelty_measure==novelty_accum)
         {
             accum->add_point(loc);
         }
@@ -1129,11 +1135,14 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
         }
 
     //julius: does this need to be disabled when i sample more than one point?
-    if (novelty_measure==novelty_accum)
+    if (measure_curiosity) //these...
     {
         accum->transform();
         if(ni!=NULL) 
           ni->path_entropy=accum->entropy();
+    }
+    if (novelty_measure==novelty_accum)//...used to be one
+    {
         for (int x=0; x<accum->size; x++)
             data.push_back(accum->buffer[x]);    }
 
@@ -1149,7 +1158,7 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
     ni->max_dist = sqrt(xsz*xsz+ysz*ysz);
     ni->end_x=newenv->hero.location.x;
     ni->end_y=newenv->hero.location.y;
-    cout << "datasize in mazesim:" << data.size() <<" "<< data[0] <<" "<< data[1] << data[2] << data[3] << endl;
+    //cout << "datasize in mazesim:" << data.size() <<" "<< data[0] <<" "<< data[1] << data[2] << data[3] << endl;
     //ni->mid_x=data[2];//julius 
     //ni->mid_y=data[3];
     ni->timesteps=newenv->steps;
@@ -1172,7 +1181,8 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
         record->ToRec[5]= (-newenv->hero.collisions);
     }
 
-    if (novelty_measure==novelty_accum)
+    if (measure_curiosity || 
+            novelty_measure==novelty_accum)
         delete accum;
 
     dc.push_back(data);

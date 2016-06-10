@@ -36,6 +36,7 @@ class MazeSolution(Solution):
         self.grid = 0 #4 personal history
         self.history = []
         self.objs=[0.0]*len(obj_names) #here i save everything for analysis
+        self.behaviorSamples = 0
         self.solver = False
         self.IRARflag = False  #true if IRAR has been evaluated
         self.parentRar = 0
@@ -63,38 +64,14 @@ class MazeSolution(Solution):
         self.robot.map()
 
         #ACESS METHOD featuredetector ()
-        mx = mazepy.feature_detector.midx(self.robot)
-        my = mazepy.feature_detector.midy(self.robot)
         x = mazepy.feature_detector.endx(self.robot)
         y = mazepy.feature_detector.endy(self.robot)
         self.behavior=np.array([x,y])
-        #self.behaviorWalk=np.array([x,y,xm,ym])
         self.objs[XEND] = x
         self.objs[YEND] = y
-        self.objs[XMID] = mx
-        self.objs[YMID] = my
-        #print x,y
-        #print mx,my, '(midfeature)'
-
-        test = [self.robot.get_data_at_x(i) for i in range(8)]
-        print test
         
-        #ACESS METHOD robot.get()
-        my2 = self.robot.get_my()
-        mx2 = self.robot.get_mx()
-        x2 = self.robot.get_x()
-        y2 = self.robot.get_y()
-        #print x2, y2
-        #print  mx2,my2, '(midget)'
-        if  mx2==x and my2 == y:
-            print "success..x"
-        if not  my2 == y:
-            print my2, y
-        else:
-            print "success.."
-        #assert mx != x
-        #assert my != y
-
+        self.behaviorSamples=np.array([self.robot.get_data_at_x(i) for i in range(BEHAV_DIM)])
+        
 
         #record fitness and curiosity and evolvabilities
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
@@ -289,7 +266,7 @@ grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
 NPop = 100 # Population size
-NGens = [100]#,10] #according to maze level
+NGens = [30]#,10] #according to maze level
 breakflag =True #  stop trial after first success   
 disp=True
 saveChronic=True

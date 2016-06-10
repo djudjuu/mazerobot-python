@@ -84,8 +84,8 @@ print 'expObjs',expObjs
 '''
 ################ GRIDSIZE COMPARISON ##############
 grid_szs= [8,10,13,15,18,20,25,30] #23
-grid_szs= [20]
-expObjs2GridComp = ['RAR','CUR']
+grid_szs= [10,20,30]
+expObjs2GridComp = ['RAR','CUR','RAR/CUR']
 mazelevels=['medium','hard']
 #to hold a timeseries with length of grid_sz for every experiment
 convrates = []
