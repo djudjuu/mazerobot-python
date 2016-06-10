@@ -154,7 +154,7 @@ class NSGAII:
         pos_archive = [np.zeros((self.grid_sz,self.grid_sz)) for i in range(bvDims/2)]
         naive_archive = [np.zeros(self.grid_sz) for i in range(bvDims)]
         smart_archive = np.zeros((self.grid_sz, self.grid_sz))
-        archives = [ smart_archive,pos_archive, naive_archive, HD_archive ]
+        archives = [ smart_archive,pos_archive, naive_archive, HD_archive_dic ]
         
         #old
         archive_array = np.zeros((self.grid_sz, self.grid_sz))

@@ -8,13 +8,14 @@ from fixedparams import *
 
 #MAPPING POPULATION,ROBOTS,MAZENAVS TO GRIDS
 
-def map_pop_to_archives(P,grid_sz,archives,HD=True):
+def map_pop_to_archives(P,grid_sz,archives,HD=True, test=False):
         '''
         maps the population into 4 different kinds of archives in this order
         smartarchive
         pos_archive
         naive_archive
         HD_archive (can be disabled because it is so expensive in high dimensions)
+                can also be array or dictionary
         '''
         for p in P:
                 idxs = tuple([ int(x*grid_sz) for x in p.behaviorSamples])
@@ -35,14 +36,15 @@ def map_pop_to_archives(P,grid_sz,archives,HD=True):
                 
                 #HD_Archive; (all dimensions relate to each other)
                 if HD:
-                        if type(archives[3] == dict):
+                        if type(archives[3]) == dict:
                                 if idxs in archives[3].keys():
                                         archives[3][idxs]+=1
                                 else:
                                         archives[3].update({idxs:1})
                         else:
                                 archives[3][idxs]+=1
-
+                if test:
+                        archives[4][idxs]+=1
         return archives
 
 def map_mazenav_behavior(mazenav,grid_sz):
@@ -113,8 +115,9 @@ def map_pop_to_array_by_objective(pop,array_sz,obj,grid=None):
 ## ENTROPY CALCULATIONS 
 def HD_entropy(grid, mazenav,grid_sz):
         if type(grid) == dict:
-                return HD_entropyDic
-        return individual_entropy(grid, map_mazenav_behavior(mazenav,grid_sz)[0])
+                return HD_entropyDic(grid,mazenav,grid_sz)
+        else:
+                return individual_entropy(grid, map_mazenav_behavior(mazenav,grid_sz)[0])
 
 def HD_entropyDic(grid, mazenav,grid_sz):
         fsamp = np.sum(grid.values())

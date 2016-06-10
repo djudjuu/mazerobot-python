@@ -130,17 +130,21 @@ class MazeSolution(Solution):
         
             #RARITIES
             if np.any([ r in self.selected4+recordObj for r in[ RAR , LRAR,naiveRAR,tRAR]]):
+                self.objs[RAR] = - eob.HD_entropy(archives[3],self, self.grid_sz)
+                #dicRAR = - eob.HD_entropy(archives[4],self, self.grid_sz)
                 #oldRAR = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
-                self.objs[RAR] = - eob.HD_entropy(archives[0],self, self.grid_sz)
+                #assert oldRAR == dicRAR #only fires when sampling rate =1
+                #assert dicRAR == self.objs[RAR]
             
             if np.any([ r in self.selected4+recordObj for r in[ tRAR]]):
                 self.objs[tRAR] = - eob.pos_entropy(archives[1],self, self.grid_sz)
             
             if np.any([ r in self.selected4+recordObj for r in[ smartRAR]]):
-                self.objs[smartRAR] = - eob.smart_entropy(archives[3],self,self.grid_sz)
+                self.objs[smartRAR] = - eob.smart_entropy(archives[0],self,self.grid_sz)
             
             if np.any([ r in self.selected4+recordObj for r in[ naiveRAR]]):
                 self.objs[naiveRAR] = - eob.naive_entropy(archives[2],self,self.grid_sz)
+
             #FFA
             if FFA in self.selected4+recordObj:
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
@@ -289,9 +293,10 @@ expName = "sampleComp"
 mazelevels= [ 'hard']
 mazelevels= [ 'medium','hard']
 NGens = [1000,1000] #according to maze level
-objsGr=[[RAR],[tRAR],[naiveRAR]]
-objsGr=[[smartRAR]]
-sample_sz=2
+objsGr=[[RAR],[tRAR],[naiveRAR],[smartRAR]]
+objsGr=[[naiveRAR]]
+objsGr=[[RAR]]
+sample_sz=1
 grid_szs = [10]#,13,15,18,20,23,25,30]
 trial_start=0
 Ntrials = 5
