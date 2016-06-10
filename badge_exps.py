@@ -37,6 +37,7 @@ class MazeSolution(Solution):
         self.history = []
         self.objs=[0.0]*len(obj_names) #here i save everything for analysis
         self.behaviorSamples = 0
+        self.BEHAV_DIM = 0
         self.solver = False
         self.IRARflag = False  #true if IRAR has been evaluated
         self.parentRar = 0
@@ -69,8 +70,7 @@ class MazeSolution(Solution):
         self.behavior=np.array([x,y])
         self.objs[XEND] = x
         self.objs[YEND] = y
-        
-        self.behaviorSamples=np.array([self.robot.get_data_at_x(i) for i in range(BEHAV_DIM)])
+        self.behaviorSamples=np.array([self.robot.get_data_at_x(i) for i in range(self.BEHAV_DIM)])
         
 
         #record fitness and curiosity and evolvabilities
@@ -205,8 +205,15 @@ class MazeSolution(Solution):
                     self.objectives[k] = 0
 
 
-    def set_grid_sz(self,gs, historygrid=None):
+    def set_grid_sz(self,gs,samples=2, historygrid=None):
+       '''
+        called  upon initialization of individuals
+        sets grid_sz
+        and indicates how many samples are taken throughout the
+        walk through the maze
+       '''
        self.grid_sz = gs
+       self.BEHAV_DIM = samples*2
        if historygrid==None:
            self.grid = np.zeros((gs,gs))
        else:
@@ -216,7 +223,9 @@ class MazeSolution(Solution):
         ''' Crossover of T1 solutions.
         '''
         child_solution = MazeSolution(self.selected4, self.robot.copy())
-        child_solution.set_grid_sz(self.grid_sz, self.grid)
+        child_solution.set_grid_sz(self.grid_sz,
+                                   samples=self.BEHAV_DIM/2,
+                                   historygrid=self.grid)
         child_solution.parentRar= int(np.copy(self.objs[LRAR]))
         child_solution.IRARflag = not self.IRARflag 
         child_solution.parentIDs.append(self.id)
@@ -262,6 +271,7 @@ objsNoGrid =[]
 objsGr = [[RAR],[RAR,VIAB],[RAR,CUR],[RAR,EVO],[RAR,EVO,CUR],[RAR,CUR,EVO],[NOV,EVO] ]
 objsGr = [[RAR,CUR,VIAB],[CUR,VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
 objsGr=[[RAR]]
+sample_sz=2
 grid_szs = [15,18,20,23,25,30]
 grid_szs = [15]#,13,15,18,20,23,25,30]
 No_grid_szs = [15]*len(objsNoGrid)
@@ -323,7 +333,7 @@ if __name__ == '__main__':
              P = []
              for i in range(NPop):
                  P.append(MazeSolution(obj))
-                 P[-1].set_grid_sz(gridsz)
+                 P[-1].set_grid_sz(gridsz,samples=sample_sz)
              print "run nsga2"
              s = nsga2.run(P, NPop, ngen, visualization = disp, title = exp_name + str(ti),
                                    NovArchive= (NOV in obj),
