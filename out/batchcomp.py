@@ -17,8 +17,8 @@ expName = 'gridCompHard'
 expName = 'mediumNegSOL'
 expName = 'evoCorr'
 expName = 'T'
-expName = 'gridComp'
 expName = 'performance'
+expName = 'gridComp'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
@@ -35,6 +35,7 @@ expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs = ['RAR','CUR'] # gridComp
 expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
+expObjs=[]
 pp = PdfPages(expName+'-multiplot.pdf')
 
 grid_szs= [8,10,13,15,18,20,25,30,40] #23
@@ -74,8 +75,7 @@ def sort_exps(convidx,speedidx,*resultlists):
     sumExp = zip(*resultlists)
     sumExp=sorted(sumExp, key=lambda x: (-x[convidx],x[speedidx]))
     return zip(*sumExp)
-
-exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst= sort_exps(5,3,exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst)
+#exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst= sort_exps(5,3,exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst)
 
 ########################## SUMMARY  ############
 def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='soft',mazelvl=''):
@@ -92,23 +92,27 @@ def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='
             for elements in zip(expobjs,*catshort):
                 f.write(elements[0].replace(',','/') +','+ ", ".join(str(e) for e in elements[1:])+'\n')
     print 'summary table',filename,' made...\n'
-make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 'speed','std','N'],'yuupi',mazelvl='medium')
+#make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 'speed','std','N'],'yuupi',mazelvl='medium')
 
 
 ################ GRID-COMPARISON ##############
-'''grid_szs= [8,10,13,15,18,20,25,30] #23
-grid_szs= [10,20,30,40]
+print 'preparing grid comparison...'
+grid_szs= [8,10,13,15,18,20,25,30] #23
+grid_szs= [5,10,20,30,40]
 expObjs2GridComp = ['RAR','CUR','RAR/CUR']
 mazelevels=['medium','hard']
 #to hold a timeseries with length of grid_sz for every experiment
 convrates = []
 speeds = []
+Nsgrids=[]
 for target in expObjs2GridComp:
     conv =[]
     speed =[]
-    for mazelevel in mazelevels:
+    for mi,mazelevel in enumerate(mazelevels):
         expNames = [ wallcondition+'/'+expName + '/'+mazelevel+'/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product([str(target)],grid_szs))]
         solvers  = [util.load_exp_series(exp, solvers = True) for exp in expNames]
+        if mi==0:
+            Nsgrids.append(len(solvers[0]))
         convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
         conv.append(convs)
         firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers]
@@ -123,7 +127,6 @@ for target in expObjs2GridComp:
 print 'after prepations convshaep::', len(convrates), len(grid_szs)
 plt.figure()
 plt.subplot2grid((2,4), (0,0), colspan=3)
-#convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
 plt.title('average convergence rate')
 [plt.plot(range(len(grid_szs)),convrate,'-o',label=target) for convrate,target in zip(convrates,expObjs2GridComp)]
 plt.xticks(range(len(grid_szs)),grid_szs)
@@ -141,7 +144,14 @@ plt.xticks(range(len(grid_szs)),grid_szs)
 plt.xlabel("grid size")
 plt.ylabel("solving time (generation)")
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
-plt.show()'''
+#plt.show()
+
+print 'lengths :',map(lambda x: (len(x),x[0]) ,[expObjs2GridComp,convrates,speeds,Nsgrids])
+#expObjs2GridComp,convrates,speeds,Nsgrids = sort_exps(1,2,expObjs2GridComp,convrates,speeds,Nsgrids)
+make_summary_table('gridComp',expObjs2GridComp,
+                   [convrates,speeds,Nsgrids],
+                   ['Convergence Rate', 'Solving Time','N'],
+                   title='grids')
 
 ###################### SAMPLE COMPARISON ###############
 expName = 'sampleComp'
@@ -322,6 +332,7 @@ for ds,ename in zip(Ds2VSPlotP,expObjs2VSPlot):
     visfunction.visCorrAtGen(ds,x_obj,y_objs,color_obj,gen=Gen2VisCorr,title=ename)
 pp.savefig()
 plt.show()'''
+
 ############ CONVERGENCE RATE ###########
 '''plt.figure('average convergence rate')
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
@@ -407,7 +418,6 @@ genEvoIntervall = gensEvoMeasured[0][1] - gensEvoMeasured[0][0]
 plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-EvolvabilityOverTime.png'))
 pp.savefig()
 plt.show()
-
 
 ##### PLOT evolvability correlation over time ###########
 f = plt.figure('How does the correlation with evolvability change over time?')

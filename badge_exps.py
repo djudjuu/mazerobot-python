@@ -290,9 +290,10 @@ NovGamma = int(NPop*.03)
 
 #### IMPORTANT PARAMS ###
 expName = "sampleComp"
-mazelevels= [ 'hard']
+expName = "T"
 mazelevels= [ 'medium','hard']
-NGens = [1000,1000] #according to maze level
+mazelevels= [ 'hard']
+NGens = [10]#00,1000] #according to maze level
 objsGr=[[naiveRAR]]
 objsGr=[[RAR]]
 objsGr=[[RAR],[tRAR],[naiveRAR],[smartRAR]]
