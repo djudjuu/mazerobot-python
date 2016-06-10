@@ -149,7 +149,7 @@ class NSGAII:
         solved = {}
 
         #Archives to save sampled behavior
-        HD_archive = np.zeros([self.grid_sz]*bvDims)
+        #HD_archive = np.zeros([self.grid_sz]*bvDims)
         HD_archive_dic = {}
         pos_archive = [np.zeros((self.grid_sz,self.grid_sz)) for i in range(bvDims/2)]
         naive_archive = [np.zeros(self.grid_sz) for i in range(bvDims)]
@@ -168,7 +168,7 @@ class NSGAII:
         archives = eob.map_pop_to_archives(P,self.grid_sz,archives)
 
         
-        assert np.all(archive_array == archives[1][-1])
+        #assert np.all(archive_array == archives[1][-1])
         #assert np.all(archive_array == archives[0])
         ffa_archive = eob.map_pop_to_array_by_objective(
                                         P, self.grid_sz,
