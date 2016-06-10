@@ -6,6 +6,56 @@ import random
 import itertools
 from fixedparams import *
 
+#MAPPING POPULATION,ROBOTS,MAZENAVS TO GRIDS
+
+def map_pop_to_archives(P,grid_sz,archives,HD=True):
+        '''
+        maps the population into 4 different kinds of archives in this order
+        smartarchive
+        pos_archive
+        naive_archive
+        HD_archive (can be disabled because it is so expensive in high dimensions)
+        '''
+        for p in P:
+                idxs = tuple([ int(x*grid_sz) for x in p.behaviorSamples])
+                
+                #smart_archive (all timesamples interpreted as positions into one grid)
+                idxpairs = [(idxs[i],idxs[i+1]) for i in range(0,len(idxs),2)]
+                for idxpair in idxpairs:
+                        archives[0][idxpair]+=1 
+
+                #pos_archives (each timeslot gets its own grid)
+                idxpairs = [(idxs[i],idxs[i+1]) for i in range(0,len(idxs),2)]
+                for idxpair,archive in zip(idxpairs, archives[1]):
+                        archive[idxpair]+=1 
+
+                #naive_archive ( all  timesamples get their own grid, no relation between x and y position)
+                for idx,archive in zip(idxs, archives[2]):
+                        archive[idx]+=1
+                
+                #HD_Archive; (all dimensions relate to each other)
+                if HD:
+                        if type(archives[3] == dict):
+                                if idxs in archives[3].keys():
+                                        archives[3][idxs]+=1
+                                else:
+                                        archives[3].update({idxs:1})
+                        else:
+                                archives[3][idxs]+=1
+
+        return archives
+
+def map_mazenav_behavior(mazenav,grid_sz):
+        '''
+        discretizes the mazenav's behavior into different tuples of indeces
+        HD (x1,y1,...xn,yn)
+        pos ((x1,y1),...(xn,yn))
+        naive ((x1),...(y1))
+        '''
+        idxs = tuple([ int(x*grid_sz) for x in mazenav.behaviorSamples])
+        idxpairs = [(idxs[i],idxs[i+1]) for i in range(0,len(idxs),2)]
+        return idxs, idxpairs, idxs
+
 def map_into_grid(mazenav, grid_sz):
         """discretizes the robots behavior into a grid and writes the original values into its .behavior attribute.
         expects to be given a MazeSolution class, but can also be given a behavior
@@ -59,6 +109,44 @@ def map_pop_to_array_by_objective(pop,array_sz,obj,grid=None):
                 key = int(k.objs[obj]*(array_sz))
                 grid[key] += 1
         return grid
+
+## ENTROPY CALCULATIONS 
+def HD_entropy(grid, mazenav,grid_sz):
+        if type(grid) == dict:
+                return HD_entropyDic
+        return individual_entropy(grid, map_mazenav_behavior(mazenav,grid_sz)[0])
+
+def HD_entropyDic(grid, mazenav,grid_sz):
+        fsamp = np.sum(grid.values())
+        key = map_mazenav_behavior(mazenav,grid_sz)[0]
+        p = grid[key]/float(fsamp)
+        entr = p * math.log(p)
+        entr /= grid[key]
+        assert entr <=0
+        return -entr
+
+def pos_entropy(grids, mazenav, grid_sz):
+        behavs =  map_mazenav_behavior(mazenav,grid_sz)[1]
+        entr=0
+        for behav,grid in zip(behavs,grids):
+                entr += individual_entropy(grid,behav)
+        return entr
+
+def naive_entropy(grids, mazenav, grid_sz):
+        behavs =  map_mazenav_behavior(mazenav,grid_sz)[2]
+        entr=0
+        for behav,grid in zip(behavs,grids):
+                entr += individual_entropy(grid,behav)
+        return entr
+
+def smart_entropy(grid, mazenav, grid_sz):
+        behavs =  map_mazenav_behavior(mazenav,grid_sz)[1]
+        entr=0
+        for behav in behavs:
+                entr += individual_entropy(grid,behav)
+        return entr
+
+
 
 def calc_individual_entropy(grid, mazenav, grid_sz):
         return individual_entropy(grid,map_into_grid(mazenav,grid_sz))

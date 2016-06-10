@@ -3,7 +3,7 @@ CUR=1    # path entropy
 NOV=2    # Novelty as mean distance to k nearest neighbours
 EVO=3    # evolvability as entropy over xxx extra created offspring 
 PEVO=4   #evo as an individuals contribution to the diversity of the stepping stones accumulated by the population
-RAR=5    # Rarity wrt to accumulated history of behavior
+RAR=5    # Rarity wrt to accumulated history of behavior, all dimensions depend on each other
 SEVO=6   #one-step lookahead contribution to the diversity of the next generatio
 DIV=7    # Diversity as mean distance to all the population
 FFA=8   #frequency fitness assignment with respect to accumulated history of fitness values
@@ -28,9 +28,13 @@ shLGD=26     #how many different recent behacviors, those need to be farther apa
 shLGDnd=27     #how many different recent behacviors, those need to be farther apart
 evoMeasured =28    #1 if evo measured, 0 elsewise
 XMID=29
-YMID=30
+#YMID in some , now changed smartRAR
+smartRAR=30#assuming all samples can be mapped into the same grid
+naiveRAR=31 # rarity, all dimension areindependnat
+tRAR=32 # Rarity wrt to accumulated history of behavior, only dimensions sample at  the same timestep  depend on each other
 
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured','XMID', 'YMID']
+
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured','XMID', 'smartRAR','naiveRAR','tRAR']
 
 def get_obj_ID(string):
         return obj_names.index(string)

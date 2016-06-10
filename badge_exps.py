@@ -89,7 +89,8 @@ class MazeSolution(Solution):
                   gammaLRAR=0.2,gammaGrid=0.5,
                   shSOLSpan = 20,
                   recordObj=[],
-                 probe_RARs=False):
+                 probe_RARs=False,
+                 archives=None):
         '''
         calculate all coevolutionary objectives that require reference to the history or the other individuals in the populaiton:
         novelty, diversity, ffa, pevo, rar,sol,lrar,irar
@@ -127,9 +128,19 @@ class MazeSolution(Solution):
                 self.dists.sort()
                 self.objs[NOV] = - np.sum(self.dists[:NNov])
         
-            #RARITY
-            if np.any([ r in self.selected4+recordObj for r in[ RAR , LRAR]]):
-                self.objs[RAR] = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
+            #RARITIES
+            if np.any([ r in self.selected4+recordObj for r in[ RAR , LRAR,naiveRAR,tRAR]]):
+                #oldRAR = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
+                self.objs[RAR] = - eob.HD_entropy(archives[0],self, self.grid_sz)
+            
+            if np.any([ r in self.selected4+recordObj for r in[ tRAR]]):
+                self.objs[tRAR] = - eob.pos_entropy(archives[1],self, self.grid_sz)
+            
+            if np.any([ r in self.selected4+recordObj for r in[ smartRAR]]):
+                self.objs[smartRAR] = - eob.smart_entropy(archives[3],self,self.grid_sz)
+            
+            if np.any([ r in self.selected4+recordObj for r in[ naiveRAR]]):
+                self.objs[naiveRAR] = - eob.naive_entropy(archives[2],self,self.grid_sz)
             #FFA
             if FFA in self.selected4+recordObj:
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
@@ -274,20 +285,21 @@ NPop = 100 # Population size
 NovGamma = int(NPop*.03)
 
 #### IMPORTANT PARAMS ###
-expName = "T"
-mazelevels= [ 'medium','hard']
+expName = "sampleComp"
 mazelevels= [ 'hard']
-NGens = [100]#,1000] #according to maze level
-objsGr=[[RAR]]
-sample_sz=10
-grid_szs = [15]#,13,15,18,20,23,25,30]
+mazelevels= [ 'medium','hard']
+NGens = [1000,1000] #according to maze level
+objsGr=[[RAR],[tRAR],[naiveRAR]]
+objsGr=[[smartRAR]]
+sample_sz=2
+grid_szs = [10]#,13,15,18,20,23,25,30]
 trial_start=0
-Ntrials = 1
+Ntrials = 5
 disp=True
-saveChronic=True
+saveChronic=False
 
 datapath = './out/'+wallcondition+'/'+expName +'/'
-description ='experiment to show how the dimensionalityof the behavior description affects the performance'
+description ='experiment to show how the dimensionalityof the behavior description affects the performance, grid size held constant at 10'
 descr_file  = datapath+expName+'-description.txt'
 with  open(descr_file, 'w') as f:
     f.write(description)
@@ -308,7 +320,7 @@ if __name__ == '__main__':
           exp_name = wallcondition + '/'+expName+'/'+mazelevel+ '/'
           for o in obj:
             exp_name += str(obj_names[o])
-          exp_name += str(gridsz) + '-'
+          exp_name += str(gridsz) +'samp'+str(sample_sz)+ '-'
           print exp_name
           print obj, ' with grid_sz: ', str(gridsz)
           with open(statfile,'a') as f:

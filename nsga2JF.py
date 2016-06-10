@@ -143,22 +143,41 @@ class NSGAII:
         Q = []
         if NovArchive: 
            self.NoveltyArchive = []
-        print P[0].BEHAV_DIM
-        chronic = numpy.zeros((len(obj_names)+P[0].BEHAV_DIM,population_size*2, Nslice))
+        bvDims = P[0].BEHAV_DIM
+        print 'bvdims:',bvDims
+        chronic = numpy.zeros((len(obj_names)+bvDims,population_size*2, Nslice))
         solved = {}
+
+        #Archives to save sampled behavior
+        HD_archive = np.zeros([self.grid_sz]*bvDims)
+        HD_archive_dic = {}
+        pos_archive = [np.zeros((self.grid_sz,self.grid_sz)) for i in range(bvDims/2)]
+        naive_archive = [np.zeros(self.grid_sz) for i in range(bvDims)]
+        smart_archive = np.zeros((self.grid_sz, self.grid_sz))
+        archives = [ smart_archive,pos_archive, naive_archive, HD_archive ]
+        
+        #old
         archive_array = np.zeros((self.grid_sz, self.grid_sz))
         ffa_archive = np.zeros(self.grid_sz)
+        
+       
+       #map initial generation into archive
+        archive_array = eob.map_population_to_grid(P,
+                                                   grid_sz =self.grid_sz,
+                                                   grid=archive_array)
+        archives = eob.map_pop_to_archives(P,self.grid_sz,archives)
+
+        
+        assert np.all(archive_array == archives[1][-1])
+        #assert np.all(archive_array == archives[0])
+        ffa_archive = eob.map_pop_to_array_by_objective(
+                                        P, self.grid_sz,
+                                         FIT,ffa_archive)
+        
         pp = 0 # counter to keep track of chronics that are saved
         stats_array = np.zeros((100,100))
         EvoBoosterFlag = False 
         measureEvoFlag = False
-        #map initial generation into archive
-        archive_array = eob.map_population_to_grid(P,
-                                                   grid_sz =self.grid_sz,
-                                                   grid=archive_array)
-        ffa_archive = eob.map_pop_to_array_by_objective(
-                                        P, self.grid_sz,
-                                         FIT,ffa_archive)
         
         for i in range(num_generations):
             if i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
@@ -216,7 +235,8 @@ class NSGAII:
                            probe_RARs = (EvoBoosterFlag or measureEvoFlag),
                            gammaGrid = self.gridGamma,
                           gammaLRAR = self.gammaLRAR,
-                           shSOLSpan=self.shSOLSpan)
+                           shSOLSpan=self.shSOLSpan,
+                           archives=archives)
                s.objs[PROGRESS] = progress
                if measureEvoFlag:
                        s.objs[evoMeasured] = 1
@@ -280,6 +300,7 @@ class NSGAII:
             ffa_archive = eob.map_pop_to_array_by_objective(
                                         Q, self.grid_sz,
                                          FIT,ffa_archive)
+            archives = eob.map_pop_to_archives(Q,self.grid_sz,archives)
             ### visualization
             if visualization:
                 viz = visuals.Vizzer(title)
