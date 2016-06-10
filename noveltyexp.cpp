@@ -64,7 +64,7 @@ void set_age_objective(bool ao) {
     age_objective=ao;
 }
 
-static int number_of_samples = 4;
+static int number_of_samples = 30;
 static int simulated_timesteps = 400;
 bool seed_mode = false;
 char seed_name[100]="";
@@ -1001,7 +1001,8 @@ double mazesim(Network* net, vector< vector<float> > &dc, data_record *record,En
                 novelty_measure==novelty_sample_free)
             if ((timesteps-i-1)%stepsize==0)
             {
-                if(!newenv->hero.collide) {
+                //if(!newenv->hero.collide) { julius
+                if(true) {
                     //cout << "sample taken at timestep: " << i << endl;
                     data.push_back(newenv->hero.location.x);
                     data.push_back(newenv->hero.location.y);

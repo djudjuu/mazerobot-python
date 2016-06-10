@@ -224,6 +224,16 @@ def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False,
                                 ax.scatter(X[XEND,i,:until], X[YEND,i,:until], c = np.arange(-until,0), cmap='hot')
                         else:
                                 ax.scatter(X[XMID,i,:until], X[YMID,i,:until], c = np.arange(-until,0), cmap='hot')
+def draw_path(ax, X, nrobs=1, ngens=[-1]):
+        r_idx = np.random.randint(0,X.shape[2],nrobs)
+        for i in r_idx:
+                for ngen in ngens:
+                        xs=X[len(obj_names):,i,ngen][::2]
+                        ys=X[len(obj_names):,i,ngen][1::2]
+                        nsamp = len(X[len(obj_names):,i,-1][::2])
+                        ax.plot(xs,ys,'-o')
+                        print len([ (y,x) for x,y in zip(xs,ys) if (y<0 and x<=0)])
+                        [ax.text(x,y,str(t), color='red', fontsize=12) for x,y,t in zip(xs,ys,range(nsamp))]
 
 
 

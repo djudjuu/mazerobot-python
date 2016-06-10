@@ -98,8 +98,11 @@ scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
 
 ax1 = plt.subplot(122)
 ax1.set_title('Best individuals')
+ax1.set_xlim([-.2,1.2])
+ax1.set_ylim([-.2,1.2])
 drawMazeOnAxes(ax1, mazefile)
-scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=True)#,X = dsorted)
+#scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=True)#,X = dsorted)
+draw_path(ax1,data,nrobs=1,ngens=[20,40,60])
 #scatter_individuals(ax1,data, obj_idxs = [VIAB],best=True, until= Nplot)
 #scatter_individuals(ax1,best=False,  alle= True, X = dsorted)
 

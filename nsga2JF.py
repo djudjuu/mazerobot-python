@@ -143,8 +143,8 @@ class NSGAII:
         Q = []
         if NovArchive: 
            self.NoveltyArchive = []
-
-        chronic = numpy.zeros((len(obj_names),population_size*2, Nslice))
+        print P[0].BEHAV_DIM
+        chronic = numpy.zeros((len(obj_names)+P[0].BEHAV_DIM,population_size*2, Nslice))
         solved = {}
         archive_array = np.zeros((self.grid_sz, self.grid_sz))
         ffa_archive = np.zeros(self.grid_sz)
@@ -186,7 +186,7 @@ class NSGAII:
                     p.objs[PROGRESS] = progress
                     p.childrenInQ = 0
            
-            print "Iteracao ", i,'psize: ', len(pfunc), ', qsize: ', len(qfunc) , ' fraction added to elite: ', progress, '%'
+            print "Iteracao ", i#,'psize: ', len(pfunc), ', qsize: ', len(qfunc) , ' fraction added to elite: ', progress, '%'
 
             R = []
             R.extend(P)
@@ -233,11 +233,11 @@ class NSGAII:
                     self.NoveltyArchive += [c.behavior for c in  random.sample(RfuncNew,min(self.NovGamma,len(RfuncNew)))]
            
 
-
             #save the end location and fitness of individuals throughout iterations
             robs = R # Q if i>1 else P #first generation Q is empty
             for r in range(len(robs)):
-               chronic[:,r,i%Nslice] = robs[r].objs
+               chronic[:len(obj_names),r,i%Nslice] = robs[r].objs
+               chronic[len(obj_names):,r,i%Nslice] = robs[r].behaviorSamples
             if NovArchive:
                chronic[ARCHIVESIZE,:,i%Nslice] = len(self.NoveltyArchive)
             Nweirdos = np.sum( chronic[WEIRDO,:,i%Nslice], axis=0)

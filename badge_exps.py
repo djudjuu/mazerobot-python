@@ -71,6 +71,7 @@ class MazeSolution(Solution):
         self.objs[XEND] = x
         self.objs[YEND] = y
         self.behaviorSamples=np.array([self.robot.get_data_at_x(i) for i in range(self.BEHAV_DIM)])
+        #print len(self.behaviorSamples)
         
 
         #record fitness and curiosity and evolvabilities
@@ -245,59 +246,53 @@ def write_params(paramlist, expname, trialnr):
    with open(paramfile, 'w') as f:
       [ f.write(str(param)+"\n") for param in paramlist]
 
-#mazepy.mazenav.initmaze("easy_maze_list.txt", "neat.ne")
-#mazepy.mazenav.initmaze("medium_maze_list.txt", "neat.ne")
-#mazepy.mazenav.initmaze("hard_maze_list.txt", "neat.ne")
 
 ##### PARAMS #########
 NNov = 15  # neigbours looked at when computing novelty
 wallcondition = 'soft' #'soft'
 wallpunish = False
 NovTresh = 0.08
-   
+objsNoGrid =[[FIT],[FIT,DIV]]
+objs2BRecorded = [RAR,LGD]
+objsNoGrid =[]
+No_grid_szs = [15]*len(objsNoGrid)
+objsGr = [[RAR],[RAR,VIAB],[RAR,CUR],[RAR,EVO],[RAR,EVO,CUR],[RAR,CUR,EVO],[NOV,EVO] ]
+objsGr = [[RAR,CUR,VIAB],[CUR,VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
+grid_szs = [15,18,20,23,25,30]
 expName = 'gridComp'
 expName = "medium" # there must be a directory with this name in /out
 expName = "evoCorr" # there must be a directory with this name in /out
 expName = "hard" # there must be a directory with this name in /out
-expName = "T"
-datapath = './out/'+wallcondition+'/'+expName +'/'
-
-mazelevels= [ 'medium','hard']
-mazelevels= [ 'hard']
-
-objsNoGrid =[[FIT],[FIT,DIV]]
-objs2BRecorded = [RAR,LGD]
-objsNoGrid =[]
-objsGr = [[RAR],[RAR,VIAB],[RAR,CUR],[RAR,EVO],[RAR,EVO,CUR],[RAR,CUR,EVO],[NOV,EVO] ]
-objsGr = [[RAR,CUR,VIAB],[CUR,VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
-objsGr=[[RAR]]
-sample_sz=2
-grid_szs = [15,18,20,23,25,30]
-grid_szs = [15]#,13,15,18,20,23,25,30]
-No_grid_szs = [15]*len(objsNoGrid)
-NPop = 100 # Population size
-NGens = [30]#,10] #according to maze level
-breakflag =True #  stop trial after first success   
-disp=True
-saveChronic=True
-EvoBoosterIntervall= 50000
-evoMutants = 1
-trial_start=0
-Ntrials = 1
-
-NovGamma = int(NPop*.03)
-
-
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
+EvoBoosterIntervall= 50000
+evoMutants = 1
+breakflag =True #  stop trial after first success   
+params = {}# 'grid_sz': grid_szs[0],'NMutation': evoMutants,'kNov':NNov, 'breakAfterSolved':breakflag,'wallpunish':wallpunish}
+NPop = 100 # Population size
+NovGamma = int(NPop*.03)
 
-params = {'Npop':NPop,'Ngens': NGens[0], 'grid_sz': grid_szs[0],
-           'NMutation': evoMutants,
-           'kNov':NNov, 'breakAfterSolved':breakflag,
-           'wallpunish':wallpunish}
+#### IMPORTANT PARAMS ###
+expName = "T"
+mazelevels= [ 'medium','hard']
+mazelevels= [ 'hard']
+NGens = [100]#,1000] #according to maze level
+objsGr=[[RAR]]
+sample_sz=10
+grid_szs = [15]#,13,15,18,20,23,25,30]
+trial_start=0
+Ntrials = 1
+disp=True
+saveChronic=True
+
+datapath = './out/'+wallcondition+'/'+expName +'/'
+description ='experiment to show how the dimensionalityof the behavior description affects the performance'
+descr_file  = datapath+expName+'-description.txt'
+with  open(descr_file, 'w') as f:
+    f.write(description)
+
 #Execution starts here
-
 import sys
 
 if __name__ == '__main__':
