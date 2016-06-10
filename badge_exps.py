@@ -293,13 +293,13 @@ expName = "sampleComp"
 mazelevels= [ 'hard']
 mazelevels= [ 'medium','hard']
 NGens = [1000,1000] #according to maze level
-objsGr=[[RAR],[tRAR],[naiveRAR],[smartRAR]]
 objsGr=[[naiveRAR]]
 objsGr=[[RAR]]
-sample_sz=1
+objsGr=[[RAR],[tRAR],[naiveRAR],[smartRAR]]
+sample_sz=2
 grid_szs = [10]#,13,15,18,20,23,25,30]
-trial_start=0
-Ntrials = 5
+trial_start=5
+Ntrials = 10
 disp=True
 saveChronic=False
 

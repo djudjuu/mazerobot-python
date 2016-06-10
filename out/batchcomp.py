@@ -15,10 +15,10 @@ wallcondition = 'soft'#soft''
 
 expName = 'gridCompHard'
 expName = 'mediumNegSOL'
-expName = 'medium'
 expName = 'evoCorr'
 expName = 'T'
 expName = 'gridComp'
+expName = 'performance'
 
 mazefile = '../medium_maze.txt'
 mazefile = '../s_maze2.txt'
@@ -33,13 +33,13 @@ expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
 expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp 
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expObjs = ['RAR','CUR'] # gridComp
 expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
-expObjs = ['RAR'] # gridComp
 pp = PdfPages(expName+'-multiplot.pdf')
 
-grid_szs= [13,18,20,25,30]
 grid_szs= [8,10,13,15,18,20,25,30,40] #23
-grid_szs= [40]
+grid_szs= [13,18,20,25,30]
+grid_szs= [15]
 cn = '' #comparison number that can be used to differ between different analyses 
 exps = [ wallcondition+'/'+expName + '/'+mazelevel+'/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product(expObjs,grid_szs))]
 print 'lenexps', len(exps)
@@ -50,7 +50,7 @@ print 'exps',exps
 
 # load only trials have been solved 
 solvers  = [util.load_exp_series(exp, solvers = True) for exp in exps]
-#print 'solverss:', len(solvers)
+print 'solverss:', len(solvers)
 
 firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers]
 
@@ -58,33 +58,46 @@ firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in
 meanfirst =[np.mean(exp) for exp in firstSolved] 
 stdfirst =[np.std(exp) for exp in firstSolved] 
 convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
+Ns = [len(exp) for exp in solvers]
 
-########### rearraning from best to worst while taking out all experiments that never solved it
+########### SORTING from best to worst while taking out all experiments that never solved it
 #sort after ConvRate, then after speed
-'''
-criteria = [exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs]
+def sort_exps(convidx,speedidx,*resultlists):
+    '''
+    sort a given experiment series by desired criteria.
+    expects the experiments summed up in a lists,whereas each lists holds
+    a specific piece of information about the experiment, such as 
+        example:expname,location,meanOfFirstSolved,ConvergenceRate,...
+    @returns, those lists sorted according to criterium 5 in descending order i
+    and 3 ascending order as second criterium
+    '''
+    sumExp = zip(*resultlists)
+    sumExp=sorted(sumExp, key=lambda x: (-x[convidx],x[speedidx]))
+    return zip(*sumExp)
+
+exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst= sort_exps(5,3,exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst)
+
+########################## SUMMARY  ############
+def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='soft',mazelvl=''):
+    '''
+    if nothing specified, assumes wall is soft and results are for both mazes
+    '''
+    print 'start summary table for ',expname
+    if mazelvl != '':
+        mazelvl += '/'
+    filename = './'+wallcondition +'/'+str(expname)+ '/'+mazelvl + title + '-Summary.csv'
+    with open(filename,'w') as f:
+            f.write('Objectives,'+ ", ".join(catnames) + '\n') 
+            catshort = [[round(x,2) for x in category] for category in categories]
+            for elements in zip(expobjs,*catshort):
+                f.write(elements[0].replace(',','/') +','+ ", ".join(str(e) for e in elements[1:])+'\n')
+    print 'summary table',filename,' made...\n'
+make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 'speed','std','N'],'yuupi',mazelvl='medium')
 
 
-sumExp = zip(exps,expObjs,solvers,meanfirst,firstSolved,stdfirst,convs)
-sumExp = zip(*criteria)
-
-sumExp=sorted(sumExp, key=lambda x: (-x[6],x[3]))
-
-exps = [e[0] for e in sumExp]
-expObjs = [e[1] for e in sumExp]
-solvers = [e[2] for e in sumExp]
-meanfirst = [e[3] for e in sumExp]
-firstSolved = [e[4] for e in sumExp]
-stdfirst = [e[5] for e in sumExp]
-convs = [e[6] for e in sumExp]
-# [crit = [e[i] for e in sumExp] for i,crit in enumerate(criteria)]
-
-print 'expObjs',expObjs
-#print 'len meanfirst, firstsolved:',len(meanfirst), len(firstSolved)
-'''
-################ GRIDSIZE COMPARISON ##############
-grid_szs= [8,10,13,15,18,20,25,30] #23
-grid_szs= [10,20,30]
+################ GRID-COMPARISON ##############
+'''grid_szs= [8,10,13,15,18,20,25,30] #23
+grid_szs= [10,20,30,40]
 expObjs2GridComp = ['RAR','CUR','RAR/CUR']
 mazelevels=['medium','hard']
 #to hold a timeseries with length of grid_sz for every experiment
@@ -122,26 +135,71 @@ plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 
 plt.subplot2grid((2,4), (1,0), colspan=3)
 #convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
-plt.title('average solving speed')
+plt.title('average solving time')
 [plt.plot(range(len(grid_szs)),speed,'-o',label=target) for speed,target in zip(speeds,expObjs2GridComp)]
 plt.xticks(range(len(grid_szs)),grid_szs)
 plt.xlabel("grid size")
-plt.ylabel("solving speed (generation)")
+plt.ylabel("solving time (generation)")
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
-plt.show()
+plt.show()'''
 
-########################## SUMMARY  ############
+###################### SAMPLE COMPARISON ###############
+expName = 'sampleComp'
+grid_sz= 10
+sample_szs= [2]
+expObjs2SampleComp = ['RAR','tRAR','smartRAR','naiveRAR']
+mazelevels=['medium','hard']
+#to hold a timeseries with length of grid_sz for every experiment
+convrates = []
+speeds = []
+NsSample = []
 
-Ns = [len(exp) for exp in solvers]
-#convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
-#print convs, Ns
-filename = './'+wallcondition +'/'+str(expName)+ '/'+mazelevel + '-Summary'+str(cn)+ '.csv'
-with open(filename,'w') as f:
-	f.write('Objectives' + ',' + 'Convergence Rate' + ',' +'Solved at'+ ','+ 'STD'+ ','+ 'N' +'\n') 
-	for exp,mf,std,cr,n in zip(expObjs,meanfirst,stdfirst,convs,Ns):
-		f.write(exp.replace(',','/') + ',' + "%.2f"% cr+',' +"%.1f"%mf + ',' + "%.1f"%std + ',' +str(n) +'\n') 
-print 'summary table made...\n'
+for target in expObjs2SampleComp:
+    conv =[]
+    speed =[]
+    for mi,mazelevel in enumerate(mazelevels):
+        expNames = [ wallcondition+'/'+expName + '/'+mazelevel+'/' + s.replace('/','')+str(grid_sz)+'samp'+str(sample_sz) for s,sample_sz in list(itertools.product([str(target)],sample_szs))]
+        solvers  = [util.load_exp_series(exp, solvers = True) for exp in expNames]
+        if mi==0:
+            NsSample.append(len(solvers[0]))
+        convs=  [ len([solver for solver in exp if solver != {}])/float(len(exp)) for exp in solvers]
+        conv.append(convs)
+        firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers]
+        meanfirst =[np.mean(exp) for exp in firstSolved] 
+        speed.append(meanfirst)
+   
+    meanconv = map(lambda x: np.asarray(x),conv)
+    convrates.append(np.mean(meanconv, axis=0))
+    meanspeed = map(lambda x: np.asarray(x),speed)
+    speeds.append(np.mean(meanspeed, axis=0))
 
+plt.figure('sampleszVSconv_speed')
+plt.subplot2grid((2,4), (0,0), colspan=3)
+#convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
+plt.title('average convergence rate')
+[plt.plot(range(len(sample_szs)),convrate,'-o',label=target) for convrate,target in zip(convrates,expObjs2SampleComp)]
+plt.xticks(range(len(sample_szs)),sample_szs)
+plt.xlabel("sample_sz")
+#plt.ylim([0.5,1.1])
+plt.axhline(1)
+plt.ylabel("convergence rate")
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
+
+plt.subplot2grid((2,4), (1,0), colspan=3)
+#convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
+plt.title('average solving time')
+[plt.plot(range(len(sample_szs)),speed,'-o',label=target) for speed,target in zip(speeds,expObjs2SampleComp)]
+plt.xticks(range(len(sample_szs)),sample_szs)
+plt.xlabel("sample_sz")
+plt.ylabel("solving time (generation)")
+plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
+#plt.show()
+print map(lambda x: len(x) ,[convrates,speeds,NsSample])
+expObjs2SampleComp,convrates,speeds,NsSample = sort_exps(1,2,expObjs2SampleComp,convrates,speeds,NsSample)
+make_summary_table('sampleComp',expObjs2SampleComp,
+                   [convrates,speeds,NsSample],
+                   ['Convergence Rate', 'Solving Time','N'],
+                   'sample5')
 
 ######################### STATISTICAL SIGNIFICANCE #####
 '''ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
@@ -265,7 +323,7 @@ for ds,ename in zip(Ds2VSPlotP,expObjs2VSPlot):
 pp.savefig()
 plt.show()'''
 ############ CONVERGENCE RATE ###########
-plt.figure('average convergence rate')
+'''plt.figure('average convergence rate')
 ax = plt.subplot2grid((1,4), (0,0), colspan=3)
 #lenexps = [np.asarray([di.shape[2] for di in exp]) for exp in Ds]
 firstSolvedAsArray = [np.asarray(solved) for solved  in firstSolved]
@@ -280,7 +338,7 @@ ax.set_ylabel('convergence rate')
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.savefig('./'+wallcondition+'/'+expName+str(grid_sz)+str('-ConvergenceRate.png'))
 pp.savefig()
-plt.show()
+plt.show()'''
 
 # ############# EVOLVABILITY COMPARISONS #########################
 print 'starting to look at evolvability...'
