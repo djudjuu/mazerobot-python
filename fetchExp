@@ -13,5 +13,5 @@ if [ ! -d $target ]; then
 	echo "created folder $expname"
 fi
 
-cp -u -r $port/* $target
+cp -u -v -r $port/* $target
 echo "everything copied"
