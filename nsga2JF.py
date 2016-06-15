@@ -301,6 +301,7 @@ class NSGAII:
                                         Q, self.grid_sz,
                                          FIT,ffa_archive)
             archives = eob.map_pop_to_archives(Q,self.grid_sz,archives)
+            #print [len(a) for a in archives]
             ### visualization
             if visualization:
                 viz = visuals.Vizzer(title)
