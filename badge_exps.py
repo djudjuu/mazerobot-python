@@ -283,25 +283,25 @@ gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
 EvoBoosterIntervall= 50000
 evoMutants = 1
-breakflag =True #  stop trial after first success   
 params = {}# 'grid_sz': grid_szs[0],'NMutation': evoMutants,'kNov':NNov, 'breakAfterSolved':breakflag,'wallpunish':wallpunish}
 NPop = 100 # Population size
 NovGamma = int(NPop*.03)
 
 #### IMPORTANT PARAMS ###
-expName = "sampleComp"
+breakflag =False #  stop trial after first success   
 expName = "T"
+expName = "typicalRuns"
 mazelevels= [ 'hard']
 mazelevels= [ 'medium','hard']
-NGens = [1000,1000] #according to maze level
+NGens = [200,200] #according to maze level
 objsGr=[[RAR]]
-objsGr=[[RAR],[tRAR],[naiveRAR]]
-sample_sz=40
+objsGr=[[RAR],[CUR]]
+sample_sz=1
 grid_szs = [10]#,13,15,18,20,23,25,30]
 trial_start=0
-Ntrials = 10
+Ntrials = 1
 disp=True
-saveChronic=False
+saveChronic=True
 
 datapath = './out/'+wallcondition+'/'+expName +'/'
 description ='experiment to show how the dimensionalityof the behavior description affects the performance, grid size held constant at 10'

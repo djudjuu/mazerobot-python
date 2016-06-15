@@ -217,13 +217,21 @@ def scatter_individuals(ax,X,  obj_idxs=None, until = 30, best=True, alle=False,
 		plt.colorbar(sc)
 		plt.legend(prop={'size':10})
 		plt.tick_params( axis='x', which='both',
-			    bottom='off', top='off')
+			    bottom='off', top='off',
+                 labelbottom='off')
 	if alle:
 		for i in range(X.shape[1]):
                         if not midway:
                                 ax.scatter(X[XEND,i,:until], X[YEND,i,:until], c = np.arange(-until,0), cmap='hot')
                         else:
                                 ax.scatter(X[XMID,i,:until], X[YMID,i,:until], c = np.arange(-until,0), cmap='hot')
+        plt.tick_params( axis='x', which='both',
+			    bottom='off', top='off',
+                 labelbottom='off')
+        plt.tick_params( axis='y', which='both',
+			    left='off', right='off',
+                 labelleft='off')
+
 def draw_path(ax, X, nrobs=1, ngens=[-1]):
         r_idx = np.random.randint(0,X.shape[2],nrobs)
         for i in r_idx:

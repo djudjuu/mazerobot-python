@@ -1,7 +1,7 @@
 #ifndef NVSET_H
 #define NVSET_H
 
-#define ENT_GRID_SIZE 20
+#define ENT_GRID_SIZE 10
 
 //#define PLOT_ON
 

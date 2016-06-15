@@ -9,17 +9,20 @@ from util import util
 
 wallcondition = 'soft'
 objectives = 'RAR'
-expName = 'T'
-mazelevel = 'hard'
-grid_sz = 15
+expName = 'typicalRuns'
+mazelevel = 'medium'
+mazelevel2 = 'hard'
+grid_sz = 10
 trialNr= 0
-title = wallcondition + '/' + expName +'/'+mazelevel+'/' + objectives+str(grid_sz) +'-'+ str(trialNr)
+sample_sz =1
+title = wallcondition + '/' + expName +'/'+mazelevel+'/' + objectives+str(grid_sz)+ 'samp' + str(sample_sz) +'-'+ str(trialNr)
+title2 = wallcondition + '/' + expName +'/'+mazelevel2+'/' + objectives+str(grid_sz)+ 'samp' + str(sample_sz) +'-'+ str(trialNr)
 
 
 mazefile = '../s_maze2.txt'
 mazefile = '../ss_maze.txt'
+mazefile2 = '../hard_maze.txt'
 mazefile = '../medium_maze.txt'
-mazefile = '../hard_maze.txt'
 
 
 ##############3#load data
@@ -30,6 +33,7 @@ mazefile = '../hard_maze.txt'
 """
 #data = np.load(title + '.npy')
 data = util.load_chronic(title)
+data2 = util.load_chronic(title2)
 
 Q = data[:,100:,:]
 P = data[:,:100,:]
@@ -46,7 +50,9 @@ nplots = 7
 fs= -1	# iteration when maze was first solved
 if solved != {}:
 	fs = solved.keys()[0]
-#dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
+eliteN=10
+dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
+dsorted2 = [sort_by_objective(data2, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
 
 #### PLOT PARAMS #######
 elite = 10 # in percentage
@@ -67,7 +73,7 @@ eliteN = int(NPop*(elite/100.0))
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,XMID,XEND,YMID,YEND,CUR]
+want2plot = [ FIT,CUR]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1
@@ -90,19 +96,34 @@ for obj in want2plot:
 ####### PLOT INDIVIDUALS IN MAZE ##############
 
 f = plt.figure(0)
-ax = plt.subplot(121)
-labelplot(title,fs,ax)
-drawMazeOnAxes(ax, mazefile)
-scatter_individuals(ax,data, best=False,  alle= True,until= Nplot)#,X = dsorted)
+#ax = plt.subplot(121)
+#labelplot(title,fs,ax)
+#ax.set_title('Population until generation 200')
+#drawMazeOnAxes(ax, mazefile)
+#scatter_individuals(ax,data, best=False,  alle= True,until= 100)
 #scatter_individuals(ax,best=False,  alle= True,X = dsortedEVO[:,:20,:],until=Nplot)
 
+ax0 = plt.subplot(121)
+ax0.set_title('Top 10 individuals for: '+objectives)
+drawMazeOnAxes(ax0, mazefile)
+#scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=False)#,X = dsorted)
+#draw_path(ax1,data,nrobs=1,ngens=[20,40,60])
+#scatter_individuals(ax1,data, obj_idxs = [RAR],best=True, until= Nplot)
+scatter_individuals(ax0,best=False,  alle= True, X = dsorted[get_obj_ID(objectives)][:,:10,:], until=Nplot)
+
 ax1 = plt.subplot(122)
-ax1.set_title('Best individuals')
-ax1.set_xlim([-.2,1.2])
-ax1.set_ylim([-.2,1.2])
-drawMazeOnAxes(ax1, mazefile)
+ax1.set_title('Top 10 individuals for: '+objectives)
+drawMazeOnAxes(ax1, mazefile2)
+#scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=False)#,X = dsorted)
+#draw_path(ax1,data,nrobs=1,ngens=[20,40,60])
+#scatter_individuals(ax1,data, obj_idxs = [RAR],best=True, until= Nplot)
+scatter_individuals(ax1,best=False,  alle= True, X = dsorted2[get_obj_ID(objectives)][:,:10,:], until=Nplot)
+
+#ax2 = plt.subplot(133)
+#ax2.set_title('Path through maze')
+#drawMazeOnAxes(ax2, mazefile)
 #scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=True)#,X = dsorted)
-draw_path(ax1,data,nrobs=1,ngens=[20,40,60])
+#draw_path(ax2,data,nrobs=1,ngens=[20,40,60])
 #scatter_individuals(ax1,data, obj_idxs = [VIAB],best=True, until= Nplot)
 #scatter_individuals(ax1,best=False,  alle= True, X = dsorted)
 
