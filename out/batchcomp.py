@@ -96,7 +96,7 @@ def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='
 
 
 ################ GRID-COMPARISON ##############
-print 'preparing grid comparison...'
+'''print 'preparing grid comparison...'
 grid_szs= [8,10,13,15,18,20,25,30] #23
 grid_szs= [5,10,20,30,40]
 expObjs2GridComp = ['RAR','CUR','RAR/CUR']
@@ -155,15 +155,23 @@ plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 
 ###################### SAMPLE COMPARISON ###############
 expName = 'sampleComp'
-grid_sz= 10
-sample_szs= [4]
 sample_szs= [1,2,4,6,10,20,100,200]
-expObjs2SampleComp = ['RAR','tRAR','naiveRAR']
+grid_sz = 10
+expObjs2SampleComp = ['tRAR']#,'tRAR','naiveRAR']
 mazelevels=['medium','hard']
 #to hold a timeseries with length of grid_sz for every experiment
 convrates = []
 speeds = []
 NsSample = []
+
+#special modificaiton for sample vs grid
+print 'preparing exp sample vs grid...'
+expName = 'sampleGrid'
+sample_szs= [1,2,20,40,200]
+grid_szs= [10,15,20,40]
+grid_sz = ''
+expObjs2SampleComp = [target+str(grsz) for target,grsz in itertools.product(expObjs2SampleComp,grid_szs)]
+print expObjs2SampleComp
 
 for target in expObjs2SampleComp:
     conv =[]

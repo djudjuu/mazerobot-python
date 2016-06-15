@@ -154,7 +154,9 @@ class NSGAII:
         pos_archive = [np.zeros((self.grid_sz,self.grid_sz)) for i in range(bvDims/2)]
         naive_archive = [np.zeros(self.grid_sz) for i in range(bvDims)]
         smart_archive = np.zeros((self.grid_sz, self.grid_sz))
-        archives = [ smart_archive,pos_archive, naive_archive, HD_archive_dic ]
+        archives = [ smart_archive, pos_archive,
+                    naive_archive, HD_archive_dic ]
+        archives.append(np.zeros(self.grid_sz))
         
         #old
         archive_array = np.zeros((self.grid_sz, self.grid_sz))
@@ -166,6 +168,12 @@ class NSGAII:
                                                    grid_sz =self.grid_sz,
                                                    grid=archive_array)
         archives = eob.map_pop_to_archives(P,self.grid_sz,archives)
+        Ncells = self.grid_sz**2
+        #the curiosityarchive
+        archives[4] =  eob.map_pop_to_array_by_objective(P, self.grid_sz,
+                                               CUR,
+                                               grid=archives[4],
+                                               scale=(math.log(1./Ncells),0))
 
         
         #assert np.all(archive_array == archives[1][-1])
@@ -178,6 +186,7 @@ class NSGAII:
         stats_array = np.zeros((100,100))
         EvoBoosterFlag = False 
         measureEvoFlag = False
+        maxCUR=0
         
         for i in range(num_generations):
             if i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
@@ -242,6 +251,9 @@ class NSGAII:
                        s.objs[evoMeasured] = 1
                if s.solver:
                   solvers +=1
+               if s.objs[CUR]<maxCUR:
+                  maxCUR = s.objs[CUR]
+                  print 'maxCUR: ', maxCUR
 
             #Novelty 
             # questions: archive is unique? no double entries?
@@ -273,6 +285,7 @@ class NSGAII:
                if breakAfterSolved:
                   break
 
+            #NSGA2
             #selection of most interesting trade-offs
             fronts = self.fast_nondominated_sort(R)
             
@@ -294,13 +307,12 @@ class NSGAII:
                 
             Q = self.make_new_pop(P)
             
-            #refQ = [q for q in Q if all(q.behavior>0)]
-            #print 'refQ', len(refQ)
             archive_array = eob.map_population_to_grid(Q, self.grid_sz, archive_array)
             ffa_archive = eob.map_pop_to_array_by_objective(
                                         Q, self.grid_sz,
                                          FIT,ffa_archive)
             archives = eob.map_pop_to_archives(Q,self.grid_sz,archives)
+            archives[4] =  eob.map_pop_to_array_by_objective(Q,self.grid_sz,CUR,grid=archives[4],scale=(math.log(1./Ncells),0))
             #print [len(a) for a in archives]
             ### visualization
             if visualization:
@@ -310,12 +322,12 @@ class NSGAII:
                 else:
                      viz.render_robots( [P,Q], color=[(0,255,0),(255,0,0)])
         self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archive_array)
-        #print 'lastchronicslice:', chronic[:,:,
 
         if solved!={}:
            ret = solved.keys()[0]
         else:
            ret = -1
+        print 'maxCUR:',maxCUR
         return ret
         
     def augmentParentEvo(self,pIDs, P, propagate = False):
@@ -338,43 +350,6 @@ class NSGAII:
         for r in pop:
                     r.objs[PEVO] = entropyJ2.grid_contribution_to_population(r.grid,popgrid)
 
-    def evaluate3(self,pop, NMutations =20):
-       '''
-       generates mutants for all individuals and 
-       maps them plus their offsprings into a grid.
-       Then computes an individuals contribution 
-       to the overall spread of all mutants
-       and writes that into the mazenaw objective list
-       ATTENTION: NMUTANTS IS FIXCODED is it still?
-       also computes evolvability in between:
-       '''        
-       mutants = []
-       for r in pop:
-          l = []
-          for i in range(NMutations):
-            mutant = r.robot.copy()
-            mutant.mutate()
-            mutant.map()
-            l.append(mutant)
-          #use mutants to calculate evolvability of individual
-          l.append(r.robot)
-          #robofamiliygrid = entropyJ.population_to_grids(l,self.grid_sz)
-          #r.objs[3] = entropyJ.calc_evolvability_entropy(r,
-          #                                         robofamiliygrid,
-           #                                        self.grid_sz)
-          mutants.append(l)
-       flattened_mutants = []
-       for ml in mutants:
-          flattened_mutants.extend(ml)
-       grid = entropyJ.map_robots_to_grids(flattened_mutants, self.grid_sz)
-       for ri in range(len(pop)):
-         superevo = 0
-         for m in mutants[ri]:
-            superevo -= entropyJ.calc_individual_entropy(grid,
-                                                          m,
-                                                          len(pop)*(1+NMutations),
-                                                          self.grid_sz)
-         pop[ri].objs[SEVO] = superevo
                
     def save_objectives(self,chronic,title,pp,solved=None, archive=None, stats=None):
         print "saving chronic of this run...." 

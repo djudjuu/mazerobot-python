@@ -96,19 +96,24 @@ def map_behaviors_to_grid(Bs, grid_sz):
                 grid[b] += 1
         return grid
 
-def map_pop_to_array_by_objective(pop,array_sz,obj,grid=None):
+def map_pop_to_array_by_objective(pop,array_sz,obj,grid=None,scale=None ):
         '''maps a lst of given mazenas into an array of given size according 
         to a given objective
         mazenavs with dummy (negative) behavior will not be mapped
         if no grid is given it will be created
         assumes obj to be normalized to [0,1] 
+        but if scale is not None, then it will be scaled, with scope = (min,max)
         '''
         if grid == None:
                 print "creating grid"
                 grid = np.zeros(array_sz)
         refPop = [p for p in pop if np.all(p.behavior>=0)]
         for k in refPop:
-                key = int(k.objs[obj]*(array_sz))
+                if scale!=None:
+                        key=scale_obj(k.objs[obj],scale[0],scale[1])
+                        key =int(key*array_sz)
+                else:
+                        key = int(k.objs[obj]*(array_sz))
                 grid[key] += 1
         return grid
 
@@ -148,8 +153,6 @@ def smart_entropy(grid, mazenav, grid_sz):
         for behav in behavs:
                 entr += individual_entropy(grid,behav)
         return entr
-
-
 
 def calc_individual_entropy(grid, mazenav, grid_sz):
         return individual_entropy(grid,map_into_grid(mazenav,grid_sz))
@@ -226,9 +229,17 @@ def map_mutants_to_grid(mazenav,Nmuts, grid_sz):
         grids[key] += 1
         return grids
 
+def frequency_of_objective(mazenav, obj_archive, obj_idx,mino, maxo):
+        '''
+        returns the entropy of the mazenav for the given objective
+        expects an archive that accumulated the behavior over time
+        '''
+        o = scale_obj(mazenav.objs[obj_idx], mino,maxo)
+        key = int(o*len(obj_archive))
+        return individual_entropy(obj_archive, key)
 
-
-
+def scale_obj(o, mino, maxo):
+        return (o-mino)/(maxo-mino)
 
 
 

@@ -78,6 +78,9 @@ class MazeSolution(Solution):
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
         self.objs[FIT] = - (1-dist2goal)
         self.objs[CUR] = - mazepy.feature_detector.state_entropy(self.robot)
+        Ncells = self.grid_sz*self.grid_sz
+        if self.objs[CUR] <  math.log(1./Ncells):
+            print 'you makea wrong calculation...'
         if(self.robot.solution()):
          self.solver = True
          print 'solution, (needed ',len(self.history),' mutations.'
@@ -144,6 +147,13 @@ class MazeSolution(Solution):
             
             if np.any([ r in self.selected4+recordObj for r in[ naiveRAR]]):
                 self.objs[naiveRAR] = - eob.naive_entropy(archives[2],self,self.grid_sz)
+            
+            #frCUR
+            if frCUR in self.selected4+recordObj:
+                self.objs[frCUR] = - eob.frequency_of_objective(self,archives[4],
+                                                                CUR,
+                                                                math.log(1./self.grid_sz**2),
+                                                                0)
 
             #FFA
             if FFA in self.selected4+recordObj:
@@ -289,13 +299,13 @@ NovGamma = int(NPop*.03)
 
 #### IMPORTANT PARAMS ###
 breakflag =False #  stop trial after first success   
-expName = "T"
 expName = "typicalRuns"
+expName = "T"
 mazelevels= [ 'hard']
-mazelevels= [ 'medium','hard']
-NGens = [200,200] #according to maze level
-objsGr=[[RAR]]
-objsGr=[[RAR],[CUR]]
+mazelevels= [ 'hard','medium']
+mazelevels= [ 'medium','medium']
+NGens = [800,800] #according to maze level
+objsGr=[[CUR,frCUR]]
 sample_sz=1
 grid_szs = [10]#,13,15,18,20,23,25,30]
 trial_start=0
