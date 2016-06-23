@@ -59,6 +59,7 @@ def make_title_from_objective(objs,names):
 
 def load_chronic(title):
 	data = np.load(title+'-'+str(0)+'.npy')
+        print 'title', title
 	#for i in range(1,Nslices):
 	#	tmp = np.load(title+str(i)+'.npy')
 	#	data = np.concatenate((data, tmp), axis=2)

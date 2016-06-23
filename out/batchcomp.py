@@ -33,8 +33,8 @@ expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
 expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp 
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
-expObjs = ['RAR','CUR'] # gridComp
 expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
+expObjs = ['RAR','CUR','RAR/CUR','frCUR','RAR/frCUR'] # gridComp
 expObjs=[]
 pp = PdfPages(expName+'-multiplot.pdf')
 
@@ -96,10 +96,10 @@ def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='
 
 
 ################ GRID-COMPARISON ##############
-'''print 'preparing grid comparison...'
+print 'preparing grid comparison...'
 grid_szs= [8,10,13,15,18,20,25,30] #23
 grid_szs= [5,10,20,30,40]
-expObjs2GridComp = ['RAR','CUR','RAR/CUR']
+expObjs2GridComp = ['CUR','RAR/CUR','frCUR','RAR/frCUR']
 mazelevels=['medium','hard']
 #to hold a timeseries with length of grid_sz for every experiment
 convrates = []
@@ -144,7 +144,7 @@ plt.xticks(range(len(grid_szs)),grid_szs)
 plt.xlabel("Grid size")
 plt.ylabel("Average Evaluations to Solution")
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
-#plt.show()'''
+plt.show()
 
 #print 'lengths :',map(lambda x: (len(x),x[0]) ,[expObjs2GridComp,convrates,speeds,Nsgrids])
 #expObjs2GridComp,convrates,speeds,Nsgrids = sort_exps(1,2,expObjs2GridComp,convrates,speeds,Nsgrids)
@@ -164,13 +164,24 @@ convrates = []
 speeds = []
 NsSample = []
 
+
+
 #special modificaiton for sample vs grid
+expObjs2SampleComp = ['tRAR']#,'tRAR','naiveRAR']
 print 'preparing exp sample vs grid...'
 expName = 'sampleGrid'
-sample_szs= [1,2,20,40,200]
+sample_szs= [1,2,20,40,100,200]
 grid_szs= [10,15,20,40]
 grid_sz = ''
 expObjs2SampleComp = [target+str(grsz) for target,grsz in itertools.product(expObjs2SampleComp,grid_szs)]
+
+#special modification for frObj
+expName = 'frObj'
+sample_szs= [1]
+grid_sz = 10
+expObjs2SampleComp = ['CUR/frCUR','frCUR','FIT/FFA','FIT','CUR','FFA']
+mazelevels=['medium','hard']
+
 print expObjs2SampleComp
 
 for target in expObjs2SampleComp:
@@ -196,7 +207,8 @@ plt.figure('sampleszVSconv_speed')
 plt.subplot2grid((2,4), (0,0), colspan=3)
 #convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
 plt.title('Convergence rate')
-[plt.plot(range(len(convrate)),convrate,'-o',label=target) for convrate,target in zip(convrates,expObjs2SampleComp)]
+#[plt.plot(range(len(convrate)),convrate,'-o',label=target) for convrate,target in zip(convrates,expObjs2SampleComp)]
+[plt.plot(range(len(convrate)),convrate,'-o',label=target[:-2]+'+ grid size ' + target[-2:]) for convrate,target in zip(convrates,expObjs2SampleComp)]
 plt.xticks(range(len(sample_szs)),[s*2 for s in sample_szs])
 plt.xlabel("Length of Behavioral Characterization")
 plt.ylim([0,1.1])
@@ -207,19 +219,19 @@ plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.subplot2grid((2,4), (1,0), colspan=3)
 #convboth=( np.asarray(convs) +np.asarray(convs2))/2.0
 plt.title('Solving Time')
-[plt.plot(range(len(convrate)),speed[:len(convrate)],'-o',label=target) for speed,target,convrate in zip(speeds,expObjs2SampleComp,convrates)]
+#[plt.plot(range(len(convrate)),speed[:len(convrate)],'-o',label=target) for speed,target,convrate in zip(speeds,expObjs2SampleComp,convrates)]
+[plt.plot(range(len(convrate)),speed[:len(convrate)],'-o',label=target[:-2]+'+ grid size ' + target[-2:]) for speed,target,convrate in zip(speeds,expObjs2SampleComp,convrates)]
 plt.xticks(range(len(sample_szs)),[s*2 for s in sample_szs])
 plt.xlabel("Length of Behavioral Characterization")
 plt.ylabel("Average Evaluations to Solution")
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.show()
 
-print map(lambda x: len(x) ,[convrates,speeds,NsSample])
-#expObjs2SampleComp,convrates,speeds,NsSample = sort_exps(1,2,expObjs2SampleComp,convrates,speeds,NsSample)
-#make_summary_table('sampleComp',expObjs2SampleComp,
-                   ##[convrates,speeds,NsSample],
-                   #['Convergence Rate', 'Solving Time','N'],
-                   #'sample5')
+print map(lambda x: (len(x),x[0]) ,[convrates,speeds,NsSample])
+expObjs2SampleComp,convrates,speeds,NsSample = sort_exps(1,2,expObjs2SampleComp,convrates,speeds,NsSample)
+make_summary_table(expName,expObjs2SampleComp, [convrates,speeds,NsSample],
+                   ['Convergence Rate', 'Solving Time','N'],
+                   'frObj')
 
 ######################### STATISTICAL SIGNIFICANCE #####
 '''ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]

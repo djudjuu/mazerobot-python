@@ -36,9 +36,9 @@ class MazeSolution(Solution):
         self.grid = 0 #4 personal history
         self.history = []
         self.objs=[0.0]*len(obj_names) #here i save everything for analysis
-        self.behaviorSamples = 0
-        self.BEHAV_DIM = 0
         self.solver = False
+        self.BEHAV_DIM = 0
+        self.behaviorSamples=np.zeros(1)
         self.IRARflag = False  #true if IRAR has been evaluated
         self.parentRar = 0
         self.newInArchive = True
@@ -70,7 +70,11 @@ class MazeSolution(Solution):
         self.behavior=np.array([x,y])
         self.objs[XEND] = x
         self.objs[YEND] = y
+        prev_bhv = self.behaviorSamples.copy()
         self.behaviorSamples=np.array([self.robot.get_data_at_x(i) for i in range(self.BEHAV_DIM)])
+        self.objs[locINT] = - eob.entropy_diff_path(self,prev_bhv,
+                                                    self.grid_sz,
+                                                   maze=True)
         #print len(self.behaviorSamples)
         
 
@@ -78,9 +82,6 @@ class MazeSolution(Solution):
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
         self.objs[FIT] = - (1-dist2goal)
         self.objs[CUR] = - mazepy.feature_detector.state_entropy(self.robot)
-        Ncells = self.grid_sz*self.grid_sz
-        if self.objs[CUR] <  math.log(1./Ncells):
-            print 'you makea wrong calculation...'
         if(self.robot.solution()):
          self.solver = True
          print 'solution, (needed ',len(self.history),' mutations.'
@@ -240,6 +241,7 @@ class MazeSolution(Solution):
        '''
        self.grid_sz = gs
        self.BEHAV_DIM = samples*2
+       #self.behaviorSamples=np.array([self.robot.get_data_at_x(i) for i in range(self.BEHAV_DIM)])
        if historygrid==None:
            self.grid = np.zeros((gs,gs))
        else:
@@ -256,8 +258,11 @@ class MazeSolution(Solution):
         child_solution.IRARflag = not self.IRARflag 
         child_solution.parentIDs.append(self.id)
         child_solution.history = list(self.history)
+        child_solution.behaviorSamples = self.behaviorSamples.copy()
         self.childrenInQ += 1
         return child_solution
+    def get_data_at_x(self,idx):
+            return self.robot.get_data_at_x(idx)
 
     def mutate(self):
         '''
@@ -301,12 +306,12 @@ NovGamma = int(NPop*.03)
 breakflag =False #  stop trial after first success   
 expName = "typicalRuns"
 expName = "T"
-mazelevels= [ 'hard']
 mazelevels= [ 'hard','medium']
 mazelevels= [ 'medium','medium']
-NGens = [800,800] #according to maze level
-objsGr=[[CUR,frCUR]]
-sample_sz=1
+mazelevels= [ 'hard']
+NGens = [300]#,300] #according to maze level
+objsGr=[[tRAR,locINT]]
+sample_sz=10
 grid_szs = [10]#,13,15,18,20,23,25,30]
 trial_start=0
 Ntrials = 1

@@ -64,7 +64,7 @@ void set_age_objective(bool ao) {
     age_objective=ao;
 }
 
-static int number_of_samples = 1;
+static int number_of_samples = 10;
 static int simulated_timesteps = 400;
 bool seed_mode = false;
 char seed_name[100]="";

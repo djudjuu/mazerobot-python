@@ -6,6 +6,91 @@ import random
 import itertools
 from fixedparams import *
 
+
+#MAPPING BIPEDS TO DYNAMIC ARCHIVES
+
+def map_pop_to_dyn_archives(P,archives,bin_sz, bdim=30):
+        '''
+        currently uses a 2dim archive for every  2 dimensions 
+        of the behavior vector
+        '''
+        for p in P:
+                keys = map_behaviors_to_key(p, bin_sz,bdim)[1]
+                for key,archive in zip(keys,archives):
+                        if key in archive.keys():
+                                archive[key] += 1
+                        else: 
+                                archive.update({key:1})
+        return archives
+
+def map_behaviors_to_key(r, bin_sz, bdim=30, scaled=False):
+        '''returns to sets of keys:
+                i) all dimensions independantly
+                ii) tupels of xy pairs
+        '''
+        if type(r) == type(np.zeros(3)):
+                behav = r
+        else: 
+                behav = [r.get_data_at_x(i) for i in range(bdim)]
+        single_keys = [ int(b/bin_sz) for b in behav]
+        keypairs = [(single_keys[i*2],single_keys[(i*2)+1]) 
+                    for i in range(len(single_keys)/2)]
+        return single_keys, keypairs
+
+##### BIPED ENTROPIES #####
+
+def dyn_pos_entropy(r,archives, bin_sz, bdim=30):
+        '''
+        currently returns the tRAR
+        '''
+        keys = map_behaviors_to_key(r,bin_sz,bdim)[1]
+        entr = 0
+        for key,archive in zip(keys,archives):
+                entr += individual_entropy(archive,key)
+        return entr
+
+def path_entropy(biped, bin_sz):
+        keys = map_behaviors_to_key(biped,bin_sz,biped.BEHAV_DIM)[1]
+        counts = np.asarray([float(keys.count(k)) for k in set(keys)])
+        ret =  grid_entropy(counts)
+        #print ret
+        assert ret >= -0
+        return ret
+
+def entropy_diff_path(biped, prev_bhv,bin_sz, maze=False):
+        #catch the first iteration
+        if np.sum(prev_bhv)==0:
+                return 0
+        keysNew = 0
+        keysOld = 0
+        if maze:
+                keysNew = map_mazenav_behavior(biped, biped.grid_sz)[1]
+                keysOld = map_mazenav_behavior(prev_bhv, biped.grid_sz)[1]
+        else:
+                keysNew = map_behaviors_to_key(biped,bin_sz,
+                                               biped.BEHAV_DIM)[1]
+                keysOld = map_behaviors_to_key(prev_bhv,bin_sz,
+                                               biped.BEHAV_DIM)[1]
+        entr = 0
+        fsamp = biped.BEHAV_DIM
+        #all new behaviors
+        for key in set(keysNew):
+                pN = float(keysNew.count(key)) / fsamp
+                entrN = - pN * math.log(pN)
+                pO = float(keysOld.count(key)) / fsamp
+                entrO = 0
+                if pO != 0:
+                        entrO = - pO * math.log(pO)
+                entr += entrN - entrO
+        #anyu old baehaviors missing?
+        for key in (set(keysOld) - set(keysNew)):
+                pO = float(keysOld.count(key)) / fsamp
+                entrO = - pO * math.log(pO)
+                entr += 0 - entrO
+        #jKprint entr
+        return  entr
+
+
 #MAPPING POPULATION,ROBOTS,MAZENAVS TO GRIDS
 
 def map_pop_to_archives(P,grid_sz,archives,HD=True, test=False):
@@ -50,11 +135,17 @@ def map_pop_to_archives(P,grid_sz,archives,HD=True, test=False):
 def map_mazenav_behavior(mazenav,grid_sz):
         '''
         discretizes the mazenav's behavior into different tuples of indeces
+        can also directly be given an array of  positions (need to be in [0,1])
         HD (x1,y1,...xn,yn)
         pos ((x1,y1),...(xn,yn))
         naive ((x1),...(y1))
         '''
-        idxs = tuple([ int(x*grid_sz) for x in mazenav.behaviorSamples])
+        behavs=0
+        if type(mazenav) == type(np.zeros(2)):
+                behavs=mazenav
+        else:
+                behavs = mazenav.behaviorSamples
+        idxs = tuple([ int(x*grid_sz) for x in behavs])
         idxpairs = [(idxs[i],idxs[i+1]) for i in range(0,len(idxs),2)]
         return idxs, idxpairs, idxs
 
@@ -163,18 +254,26 @@ def individual_entropy(grid, behavior):
         behavior is a tuple that must be within the size of the grid
         when there is no other behavior in the grid, return something psitive too: 0.01
         '''
-        if np.sum(grid>0) ==1:
-                return .01
-        assert np.sum(grid)>0
-        fsamp = np.sum(grid)
+        fsamp =0
+        if type(grid)==dict:
+                if np.sum(grid.values())==1:
+                        print 'WARNING: only one behavior in grid'
+                        return .01
+                fsamp = np.sum(grid.values())
+        else:
+                if np.sum(grid>0) ==1:
+                        print 'WARNING: only one behavior in grid'
+                        return .01
+                fsamp = np.sum(grid)
+        assert fsamp>0
         try:
-                p = grid[behavior]/fsamp
+                p = grid[behavior]/float(fsamp)
                 entr = p*math.log(p) # the entropy of all the complete cell
                 entr /= grid[behavior] # spread entropy across individuals in that cells 
                 assert entr<=0
                 return - entr
         except ValueError:
-                print 'ValueError', grid
+                print 'ValueError', grid[behavior]
                 print behavior
                 return 0
 
@@ -188,6 +287,7 @@ def grid_entropy(grid):
         if fsamp ==1:
                 return .01
         if fsamp ==0:
+                print 'no behav in grid'
                 return 0 
         p = grid/fsamp
         ps = p[p>0]

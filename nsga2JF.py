@@ -253,7 +253,7 @@ class NSGAII:
                   solvers +=1
                if s.objs[CUR]<maxCUR:
                   maxCUR = s.objs[CUR]
-                  print 'maxCUR: ', maxCUR
+                  #print 'maxCUR: ', maxCUR
 
             #Novelty 
             # questions: archive is unique? no double entries?
@@ -327,7 +327,7 @@ class NSGAII:
            ret = solved.keys()[0]
         else:
            ret = -1
-        print 'maxCUR:',maxCUR
+        #print 'maxCUR:',maxCUR
         return ret
         
     def augmentParentEvo(self,pIDs, P, propagate = False):
