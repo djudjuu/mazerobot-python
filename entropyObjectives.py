@@ -58,6 +58,10 @@ def path_entropy(biped, bin_sz):
         return ret
 
 def entropy_diff_path(biped, prev_bhv,bin_sz, maze=False):
+        '''
+        measures how much the rarity of the steps taken on the current path
+        differs from the one  previous ones
+        '''
         #catch the first iteration
         if np.sum(prev_bhv)==0:
                 return 0

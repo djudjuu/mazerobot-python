@@ -76,12 +76,19 @@ class MazeSolution(Solution):
                                                     self.grid_sz,
                                                    maze=True)
         #print len(self.behaviorSamples)
-        
+        #increment personal grid
+        for i in range(0,self.BEHAV_DIM,2):
+            self.grid[
+                int(self.behaviorSamples[i]*self.grid_sz),
+                int(self.behaviorSamples[i+1]/self.grid_sz)
+                    ] += 1
+
 
         #record fitness and curiosity and evolvabilities
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
         self.objs[FIT] = - (1-dist2goal)
         self.objs[CUR] = - mazepy.feature_detector.state_entropy(self.robot)
+        self.objs[lineageCUR] = - eob.grid_entropy(self.grid)
         if(self.robot.solution()):
          self.solver = True
          print 'solution, (needed ',len(self.history),' mutations.'
@@ -155,7 +162,6 @@ class MazeSolution(Solution):
                                                                 CUR,
                                                                 math.log(1./self.grid_sz**2),
                                                                 0)
-
             #FFA
             if FFA in self.selected4+recordObj:
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
@@ -291,13 +297,12 @@ objsGr = [[RAR,CUR,VIAB],[CUR,VIAB],[CUR],[FFA],[FIT,DIV],[FIT],[RAR,EVO]]
 grid_szs = [15,18,20,23,25,30]
 expName = 'gridComp'
 expName = "medium" # there must be a directory with this name in /out
-expName = "evoCorr" # there must be a directory with this name in /out
 expName = "hard" # there must be a directory with this name in /out
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
-EvoBoosterIntervall= 50000
-evoMutants = 1
+EvoBoosterIntervall= 50
+evoMutants = 200
 params = {}# 'grid_sz': grid_szs[0],'NMutation': evoMutants,'kNov':NNov, 'breakAfterSolved':breakflag,'wallpunish':wallpunish}
 NPop = 100 # Population size
 NovGamma = int(NPop*.03)
@@ -306,20 +311,20 @@ NovGamma = int(NPop*.03)
 breakflag =False #  stop trial after first success   
 expName = "typicalRuns"
 expName = "T"
+expName = "evoCorr" # there must be a directory with this name in /out
 mazelevels= [ 'hard','medium']
-mazelevels= [ 'medium','medium']
-mazelevels= [ 'hard']
-NGens = [300]#,300] #according to maze level
-objsGr=[[tRAR,locINT]]
-sample_sz=10
-grid_szs = [10]#,13,15,18,20,23,25,30]
+mazelevels= [ 'medium','hard']
+NGens = [200]#,300] #according to maze level
+objsGr=[[RAR,lineageCUR],[lineageCUR]]
+sample_sz=200
+grid_szs = [15]#,13,15,18,20,23,25,30]
 trial_start=0
-Ntrials = 1
+Ntrials = 5
 disp=True
 saveChronic=True
 
 datapath = './out/'+wallcondition+'/'+expName +'/'
-description ='experiment to show how the dimensionalityof the behavior description affects the performance, grid size held constant at 10'
+description ='experiment to whether or not the evoproxies have a good efefct on evolvability'
 descr_file  = datapath+expName+'-description.txt'
 with  open(descr_file, 'w') as f:
     f.write(description)
