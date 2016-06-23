@@ -254,6 +254,7 @@ class NSGAII:
                if s.objs[CUR]<maxCUR:
                   maxCUR = s.objs[CUR]
                   #print 'maxCUR: ', maxCUR
+            
 
             #Novelty 
             # questions: archive is unique? no double entries?

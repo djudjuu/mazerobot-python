@@ -72,9 +72,9 @@ class MazeSolution(Solution):
         self.objs[YEND] = y
         prev_bhv = self.behaviorSamples.copy()
         self.behaviorSamples=np.array([self.robot.get_data_at_x(i) for i in range(self.BEHAV_DIM)])
-        self.objs[locINT] = - eob.entropy_diff_path(self,prev_bhv,
-                                                    self.grid_sz,
-                                                   maze=True)
+        #self.objs[locINT] = - eob.entropy_diff_path(self,prev_bhv,
+                                                    #self.grid_sz,
+                                                   #maze=True)
         #print len(self.behaviorSamples)
         #increment personal grid
         for i in range(0,self.BEHAV_DIM,2):
@@ -82,7 +82,6 @@ class MazeSolution(Solution):
                 int(self.behaviorSamples[i]*self.grid_sz),
                 int(self.behaviorSamples[i+1]/self.grid_sz)
                     ] += 1
-
 
         #record fitness and curiosity and evolvabilities
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
