@@ -80,7 +80,7 @@ class MazeSolution(Solution):
         for i in range(0,self.BEHAV_DIM,2):
             self.grid[
                 int(self.behaviorSamples[i]*self.grid_sz),
-                int(self.behaviorSamples[i+1]/self.grid_sz)
+                int(self.behaviorSamples[i+1]*self.grid_sz)
                     ] += 1
 
         #record fitness and curiosity and evolvabilities
@@ -275,6 +275,7 @@ class MazeSolution(Solution):
         child_solution.behaviorSamples = self.behaviorSamples.copy()
         self.childrenInQ += 1
         return child_solution
+
     def get_data_at_x(self,idx):
             return self.robot.get_data_at_x(idx)
 
@@ -324,7 +325,6 @@ mazelevels= [ 'hard','medium']
 mazelevels= [ 'medium','hard']
 NGens = [200]#,300] #according to maze level
 objsGr=[[RAR,lineageCUR],[lineageCUR]]
-objsGr=[[lineageCUR]]
 sample_sz=200
 grid_szs = [15]#,13,15,18,20,23,25,30]
 trial_start=0
