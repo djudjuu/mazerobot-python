@@ -178,6 +178,7 @@ class MazeSolution(Solution):
                     self.objs[LRAR] =  self.objs[RAR]+gammaLRAR *self.parentRar
             else: 
                     self.objs[LRAR] =  0
+
                     
             #Lineage Grid Entropy and Diversity
             #currently with current position, if it should be excluded uncomment this line and comment it in 152
@@ -188,6 +189,9 @@ class MazeSolution(Solution):
                 self.objs[lineageCUR] = - eob.grid_entropy(self.grid)
             else:
                 self.objs[lineageCUR] = 0
+
+            if self.selected4 == [lineageCUR]:
+                self.objs[lineageCUR] = - eob.grid_entropy(self.grid)
 
             if probe_RARs and (LGE in self.selected4 + recordObj or
                                LGD in self.selected4 + recordObj):
@@ -320,6 +324,7 @@ mazelevels= [ 'hard','medium']
 mazelevels= [ 'medium','hard']
 NGens = [200]#,300] #according to maze level
 objsGr=[[RAR,lineageCUR],[lineageCUR]]
+objsGr=[[lineageCUR]]
 sample_sz=200
 grid_szs = [15]#,13,15,18,20,23,25,30]
 trial_start=0
