@@ -87,7 +87,6 @@ class MazeSolution(Solution):
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
         self.objs[FIT] = - (1-dist2goal)
         self.objs[CUR] = - mazepy.feature_detector.state_entropy(self.robot)
-        self.objs[lineageCUR] = - eob.grid_entropy(self.grid)
         if(self.robot.solution()):
          self.solver = True
          print 'solution, (needed ',len(self.history),' mutations.'
@@ -182,8 +181,14 @@ class MazeSolution(Solution):
                     
             #Lineage Grid Entropy and Diversity
             #currently with current position, if it should be excluded uncomment this line and comment it in 152
-            self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
-            self.history.append(eob.map_into_grid(self, self.grid_sz))
+            #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
+            #self.history.append(eob.map_into_grid(self, self.grid_sz))
+
+            if probe_RARs and (lineageCUR in self.selected4 + recordObj):
+                self.objs[lineageCUR] = - eob.grid_entropy(self.grid)
+            else:
+                self.objs[lineageCUR] = 0
+
             if probe_RARs and (LGE in self.selected4 + recordObj or
                                LGD in self.selected4 + recordObj):
                 lineagegridreduced = util.reduce_grid_sz(self.grid,gammaGrid)
@@ -309,8 +314,8 @@ NovGamma = int(NPop*.03)
 #### IMPORTANT PARAMS ###
 breakflag =False #  stop trial after first success   
 expName = "typicalRuns"
-expName = "T"
 expName = "evoCorr" # there must be a directory with this name in /out
+expName = "T"
 mazelevels= [ 'hard','medium']
 mazelevels= [ 'medium','hard']
 NGens = [200]#,300] #according to maze level
