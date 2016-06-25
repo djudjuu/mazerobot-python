@@ -329,28 +329,26 @@ expName = "hard" # there must be a directory with this name in /out
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
-EvoBoosterIntervall= 25
-evoMutants = 200
+EvoBoosterIntervall= 25000
+evoMutants = 2
 params = {}# 'grid_sz': grid_szs[0],'NMutation': evoMutants,'kNov':NNov, 'breakAfterSolved':breakflag,'wallpunish':wallpunish}
 NPop = 100 # Population size
 NovGamma = int(NPop*.03)
 
 #### IMPORTANT PARAMS ###
-breakflag =False #  stop trial after first success   
+breakflag =True #  stop trial after first success   
 expName = "typicalRuns"
+expName = "performance" # there must be a directory with this name in /out
 expName = "T"
-expName = "evoBAM" # there must be a directory with this name in /out
-expName = "evoPure" # there must be a directory with this name in /out
-mazelevels= [ 'hard']#,'hard']
-NGens = [200,200]#,300] #according to maze level
+NGens = [1000]#,300] #according to maze level
 mazelevels= [ 'medium','hard']
-objsGr=[[RAR,LGD]]#, [LGE],[discovery]]
-objsGr=[[LGD], [LGE],[discovery]]
+mazelevels= [ 'hard']#,'hard']
+objsGr=[[FIT,DIV]]#, [LGE],[discovery]]
 #attention: changed RAR to use end only and probeRAR is always true
-sample_sz=200
+sample_sz=1
 grid_szs = [15]#,13,15,18,20,23,25,30]
-trial_start=0
-Ntrials = 2
+trial_start=10
+Ntrials = 30
 disp=True
 saveChronic=True
 

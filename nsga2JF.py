@@ -178,7 +178,7 @@ class NSGAII:
                                                scale=(math.log(1./Ncells),0))
 
         
-        assert np.all(end_archive == archives[1][-1])
+        #assert np.all(end_archive == archives[1][-1])
         #assert np.all(archive_array == archives[0])
         ffa_archive = eob.map_pop_to_array_by_objective(
                                         P, self.grid_sz,
@@ -222,7 +222,7 @@ class NSGAII:
             for q in Q:
                     self.inform_parent(q, end=True)
             #print P[0].grid
-            assert  np.any(P[0].grid != P[1].grid)
+            #assert  np.any(P[0].grid != P[1].grid)
 
             R = []
             R.extend(P)
