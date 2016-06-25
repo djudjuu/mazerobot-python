@@ -34,10 +34,10 @@ naiveRAR=31 # rarity, all dimension areindependnat
 tRAR=32 # Rarity wrt to accumulated history of behavior, only dimensions sample at  the same timestep  depend on each other
 frCUR=33        #measures the frequency of curiosity values wih rrespect to an archive
 locINT=34       # measures the average change in entropy of the behavioral dimensions
-lineageCUR=35  #entropy over the complete experience of the lineafge
+discovery=35  #entropy over the complete experience of the lineafge
 
 
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured','XMID', 'smartRAR','naiveRAR','tRAR','frCUR','locINT','lineageCUR']
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured','XMID', 'smartRAR','naiveRAR','tRAR','frCUR','locINT','discovery']
 
 def get_obj_ID(string):
         return obj_names.index(string)

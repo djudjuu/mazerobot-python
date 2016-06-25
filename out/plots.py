@@ -8,15 +8,16 @@ from fixedparams import *
 from util import util
 
 wallcondition = 'soft'
-objectives = 'tRARlocINT'
-expName = 'T'
-mazelevel = 'medium'
+objectives = 'RARlineageCUR'
+expName = 'evoCorr'
 mazelevel = 'hard'
 mazelevel2 = 'hard'
-grid_sz = 10
+mazelevel = 'medium'
+grid_sz = 15
 trialNr= 0
-sample_sz =10
+sample_sz =1
 title = wallcondition + '/' + expName +'/'+mazelevel+'/' + objectives+str(grid_sz)+ 'samp' + str(sample_sz) +'-'+ str(trialNr)
+title = wallcondition + '/' + expName +'/'+mazelevel+'/' + objectives+str(grid_sz)+ '-'+ str(trialNr)
 title2 = wallcondition + '/' + expName +'/'+mazelevel2+'/' + objectives+str(grid_sz)+ 'samp' + str(sample_sz) +'-'+ str(trialNr)
 
 
@@ -74,7 +75,7 @@ eliteN = int(NPop*(elite/100.0))
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,CUR,locINT]
+want2plot = [ FIT,CUR,lineageCUR]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1
@@ -104,7 +105,7 @@ f = plt.figure(0)
 #scatter_individuals(ax,data, best=False,  alle= True,until= 100)
 #scatter_individuals(ax,best=False,  alle= True,X = dsortedEVO[:,:20,:],until=Nplot)
 
-obj4best= locINT
+obj4best= lineageCUR
 ax0 = plt.subplot(121)
 ax0.set_title('Top 10 individuals for: '+str(obj4best))
 drawMazeOnAxes(ax0, mazefile)
@@ -116,7 +117,7 @@ scatter_individuals(ax0,best=False,  alle= True, X = dsorted[obj4best][:,:10,:],
 ax1 = plt.subplot(122)
 ax1.set_title('Top 10 individuals for: '+str(obj4best))
 drawMazeOnAxes(ax1, mazefile2)
-#scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=False)#,X = dsorted)
+scatter_individuals(ax1,data, best=False,  alle= True,until= Nplot,midway=False)#,X = dsorted)
 #draw_path(ax1,data,nrobs=1,ngens=[20,40,60])
 #scatter_individuals(ax1,data, obj_idxs = [RAR],best=True, until= Nplot)
 #scatter_individuals(ax1,best=False,  alle= True, X = dsorted2[get_obj_ID(objectives)][:,:10,:], until=Nplot)

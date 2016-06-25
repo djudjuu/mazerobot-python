@@ -15,13 +15,11 @@ wallcondition = 'soft'#soft''
 
 expName = 'gridCompHard'
 expName = 'mediumNegSOL'
-expName = 'evoCorr'
 expName = 'T'
-expName = 'performance'
 expName = 'gridComp'
+expName = 'performance'
 
-mazefile = '../medium_maze.txt'
-mazefile = '../s_maze2.txt'
+mazelevel = 'hard'
 mazelevel = 'medium'
 
 #expObjs=['RAR/PEVO']
@@ -33,8 +31,8 @@ expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
 expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp 
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
-expObjs = ['RAR','RAR/CUR','RAR/CUR/VIAB','RAR/EVO/CUR','CUR','RAR/VIAB','FIT','CUR','FIT/DIV','NOV/VIAB', 'NOV','RAR/VIAB/EVO']# all medium
 expObjs = ['RAR','CUR','RAR/CUR','frCUR','RAR/frCUR'] # gridComp
+expObjs = ['RAR','FFA','RAR/CUR','CUR/VIAB','RAR/CUR/VIAB','RAR/VIAB','FIT','CUR','FIT/DIV', 'NOV','FIT/VIAB']# all medium
 expObjs=[]
 pp = PdfPages(expName+'-multiplot.pdf')
 
@@ -92,10 +90,11 @@ def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='
             for elements in zip(expobjs,*catshort):
                 f.write(elements[0].replace(',','/') +','+ ", ".join(str(e) for e in elements[1:])+'\n')
     print 'summary table',filename,' made...\n'
-#make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 'speed','std','N'],'yuupi',mazelvl='medium')
+#make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 'speed','std','N'],'yuupi',mazelvl=mazelevel)
 
 
 ################ GRID-COMPARISON ##############
+'''expName = 'gridComp'
 print 'preparing grid comparison...'
 grid_szs= [8,10,13,15,18,20,25,30] #23
 grid_szs= [5,10,20,30,40]
@@ -152,9 +151,10 @@ plt.show()
 #                   [convrates,speeds,Nsgrids],
 #                   ['Convergence Rate', 'Solving Time','N'],
 #                   title='grids')
+'''
 
 ###################### SAMPLE COMPARISON ###############
-expName = 'sampleComp'
+'''expName = 'sampleComp'
 sample_szs= [1,2,4,6,10,20,100,200]
 grid_sz = 10
 expObjs2SampleComp = ['tRAR']#,'tRAR','naiveRAR']
@@ -232,6 +232,7 @@ expObjs2SampleComp,convrates,speeds,NsSample = sort_exps(1,2,expObjs2SampleComp,
 make_summary_table(expName,expObjs2SampleComp, [convrates,speeds,NsSample],
                    ['Convergence Rate', 'Solving Time','N'],
                    'frObj')
+'''
 
 ######################### STATISTICAL SIGNIFICANCE #####
 '''ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
@@ -256,29 +257,30 @@ print 'significance table made...'
 '''
 
 ########################### CORRELATION ###################
-'''print 'making correlation table...'
-expObjs2correlate = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
+print 'making correlation table...'
+
 expObjs2correlate = ['RAR/SOLr','RAR/VIAB'] #normal
 expObjs2correlate = ['RAR/VIAB','NOV'] # gridComp
-expObjs2correlate = ['LGE','LGD/LGE', 'LGDr/shLGD']
-expObjs2correlate = ['LGE','LGD']
 expObjs2correlate = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs2correlate = ['RAR','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd','RAR/VIAB','RAR/VIABP'] #EVOcomp
+expObjs2correlate = ['RAR','RAR/discovery','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expName = 'evoCorr'
+grid_sz = 15
 until=200
-exps2correlate = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
+exps2correlate = [ wallcondition+'/'+ expName+ '/'+mazelevel + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
 Ds2corrQ =[util.load_exp_series(exp,Nexp=until,part='Q') for exp in exps2correlate]
-Ds2corrP =[util.load_exp_series(exp,Nexp=until,part='P') for exp in exps2correlate]
+#Ds2corrP =[util.load_exp_series(exp,Nexp=until,part='P') for exp in exps2correlate]
 Ds2corr =[util.load_exp_series(exp,Nexp=until,part='all') for exp in exps2correlate]
 
-evozeros = [np.mean([ np.sum(d[EVO,:,-1]==0)/float(d.shape[1]) for d in Ds]) for Ds in Ds2corrQ]
-print 'on average Evo==0 for ', evozeros, '% of robots in the ELITE?!?!'
+#evozeros = [np.mean([ np.sum(d[EVO,:,-1]==0)/float(d.shape[1]) for d in Ds]) for Ds in Ds2corrQ]
+#print 'on average Evo==0 for ', evozeros, '% of robots in the ELITE?!?!'
 
 gensEvo = [[i for i in range(X[0].shape[2]) if np.sum(X[0][EVO,:,i])< 0] for X in Ds2corrQ]
 print 'generations here EVO was measured:',gensEvo
 #gensEvo = [[-1]]*len(Ds2corr)
 
-RsP= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrP,gensEvo)]
-RsQ= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrQ,gensEvo)]
+#RsP= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrP,gensEvo)]
+#RsQ= [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corrQ,gensEvo)]
 RsAll = [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corr,gensEvo)]
 
 #with open(filename,'a') as f:
@@ -312,6 +314,7 @@ RsAll = [util.get_correlation_table(ds,gens=[gen[-1]]) for ds,gen in zip(Ds2corr
 #                else:
 #                    row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
 ##            f.write(row + '\n')
+filename = './'+wallcondition +'/'+str(expName)+ '/'+mazelevel +  '-Correlation.csv'
 with open(filename,'a') as f:
     f.write("\nCorrelation Tables (Pearson)\n (all)")
     for expname, R in zip(expObjs2correlate, RsAll):
@@ -328,7 +331,8 @@ with open(filename,'a') as f:
                 else:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
-print "Correlations table made...\n"'''
+print 'correlation table',filename,' made...\n'
+print "Correlations table made...\n"
 
 ################# plot objectives against each other ################
 '''print 'preparing to plot objectives against each other...'
@@ -378,12 +382,15 @@ print 'starting to look at evolvability...'
 expObjs2EvoComp = ['RAR/SOLnd','RAR/shSOLrnd' ]
 expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
 expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# medium
-expObjs2EvoComp = ['LGE','LGD/LGE', 'LGDr/shLGD']
-expObjs2EvoComp = ['RAR','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expObjs2EvoComp = [' RAR/discovery','LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs2EvoComp = ['RAR','RAR/VIAB','RAR/VIABP']
 expObjs2EvoComp = ['RAR','NOV/VIAB','NOV']
-expObjs2EvoComp = ['RAR','RAR/ZERO','RAR/VIAB','RAR/VIABP']
-exps2EvoComp = [ wallcondition+'/'+mazeName + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
+expObjs2EvoComp = ['RAR/discovery']
+expObjs2EvoComp = ['RAR','RAR/discovery','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
+expName = 'evoCorr'
+mazelevel = 'medium'
+grid_sz = 15
+exps2EvoComp = [ wallcondition+'/'+ expName +'/' +mazelevel + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]
 Ds2EvoCompQ =[util.load_exp_series(exp,part='Q') for exp in exps2EvoComp]
 Ds2EvoCompP =[util.load_exp_series(exp,part='P') for exp in exps2EvoComp]
 Ds2EvoCompAll =[util.load_exp_series(exp,part='all') for exp in exps2EvoComp]
@@ -423,8 +430,8 @@ ax.set_color_cycle([colormap(i) for i in np.linspace(0, 1,len(expObjs2EvoComp))]
 [ax.plot(gensEvo,-evos ,'-o', label= exp) for  evos, exp, gensEvo in zip(AllEvosP, expObjs2EvoComp, gensEvoMeasured)]
 #[ax.fill_between(gensEvo,map(add,-evos,std),map(add,-evos,-std) ,color='grey', alpha= 0.3) for  evos, exp, gensEvo,std in zip(AllEvosP, expObjs2EvoComp, gensEvoMeasured,AllEvosSTD)]
 ax.set_xlim([0,nGens])
-ax.set_xlabel('generations')
-ax.set_ylabel('mean evolvability')
+ax.set_xlabel('Generations')
+ax.set_ylabel('Mean Evolvability')
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 #color background according to first experiment
 genEvoIntervall = gensEvoMeasured[0][1] - gensEvoMeasured[0][0]
@@ -437,7 +444,7 @@ genEvoIntervall = gensEvoMeasured[0][1] - gensEvoMeasured[0][0]
 #ax.set_xlabel('generations')
 #ax.set_ylabel('mean % viable children')
 #plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
-plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-EvolvabilityOverTime.png'))
+plt.savefig('./'+wallcondition+'/'+expName+str(grid_sz)+str('-EvolvabilityOverTime.png'))
 pp.savefig()
 plt.show()
 
@@ -477,7 +484,7 @@ for i,exp in enumerate( expObjs2EvoComp):
     #ax.set_xlabel('generations')
     #plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 #plt.show()
-plt.savefig('./'+wallcondition+'/'+mazeName+str(grid_sz)+str('-EvolvabilityCorreltaionOverTime.png'))
+plt.savefig('./'+wallcondition+'/'+expName+str(grid_sz)+str('-EvolvabilityCorreltaionOverTime.png'))
 
 ############ plot average objectives over generations ####################
 '''

@@ -182,7 +182,7 @@ class MazeSolution(Solution):
                     
             #Lineage Grid Entropy and Diversity
             #currently with current position, if it should be excluded uncomment this line and comment it in 152
-            #self.grid[eob.map_into_grid(self, self.grid_sz)] += 1
+
             #self.history.append(eob.map_into_grid(self, self.grid_sz))
 
             if probe_RARs and (lineageCUR in self.selected4 + recordObj):
@@ -310,8 +310,8 @@ expName = "hard" # there must be a directory with this name in /out
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
-EvoBoosterIntervall= 10
-evoMutants = 30
+EvoBoosterIntervall= 50
+evoMutants = 200
 params = {}# 'grid_sz': grid_szs[0],'NMutation': evoMutants,'kNov':NNov, 'breakAfterSolved':breakflag,'wallpunish':wallpunish}
 NPop = 100 # Population size
 NovGamma = int(NPop*.03)
@@ -319,16 +319,16 @@ NovGamma = int(NPop*.03)
 #### IMPORTANT PARAMS ###
 breakflag =False #  stop trial after first success   
 expName = "typicalRuns"
-expName = "evoCorr" # there must be a directory with this name in /out
 expName = "T"
+expName = "evoCorr" # there must be a directory with this name in /out
 mazelevels= [ 'hard','medium']
-mazelevels= [ 'medium','hard']
+mazelevels= [ 'hard']#,'hard']
 NGens = [200]#,300] #according to maze level
 objsGr=[[RAR,lineageCUR],[lineageCUR]]
-sample_sz=200
+sample_sz=1
 grid_szs = [15]#,13,15,18,20,23,25,30]
 trial_start=0
-Ntrials = 5
+Ntrials = 2
 disp=True
 saveChronic=True
 
