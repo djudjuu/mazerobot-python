@@ -340,16 +340,15 @@ breakflag =True #  stop trial after first success
 expName = "typicalRuns"
 expName = "performance" # there must be a directory with this name in /out
 expName = "T"
-NGens = [1000]#,300] #according to maze level
+NGens = [1000,1000]#,300] #according to maze level
 mazelevels= [ 'medium','hard']
-mazelevels= [ 'hard']#,'hard']
-objsGr=[[FIT,DIV]]#, [LGE],[discovery]]
+objsGr=[[FFA,VIAB]]
 #attention: changed RAR to use end only and probeRAR is always true
 sample_sz=1
 grid_szs = [15]#,13,15,18,20,23,25,30]
-trial_start=10
+trial_start=0
 Ntrials = 30
-disp=True
+disp=False
 saveChronic=True
 
 datapath = './out/'+wallcondition+'/'+expName +'/'
