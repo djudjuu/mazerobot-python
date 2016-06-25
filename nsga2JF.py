@@ -156,17 +156,19 @@ class NSGAII:
         smart_archive = np.zeros((self.grid_sz, self.grid_sz))
         archives = [ smart_archive, pos_archive,
                     naive_archive, HD_archive_dic ]
+        #for curiosity
         archives.append(np.zeros(self.grid_sz))
         
-        #old
-        archive_array = np.zeros((self.grid_sz, self.grid_sz))
-        ffa_archive = np.zeros(self.grid_sz)
-        
+        #for recording only the end position
+        end_archive = np.zeros((self.grid_sz, self.grid_sz))
        
-       #map initial generation into archive
-        archive_array = eob.map_population_to_grid(P,
-                                                   grid_sz =self.grid_sz,
-                                                   grid=archive_array)
+       #for recording fitness frequencies
+        ffa_archive = np.zeros(self.grid_sz)
+       
+        #map initial generation into archive
+        end_archive = eob.map_population_to_grid(P, 
+                                               grid_sz =self.grid_sz,
+                                               grid=end_archive)
         archives = eob.map_pop_to_archives(P,self.grid_sz,archives)
         Ncells = self.grid_sz**2
         #the curiosityarchive
@@ -176,7 +178,7 @@ class NSGAII:
                                                scale=(math.log(1./Ncells),0))
 
         
-        #assert np.all(archive_array == archives[1][-1])
+        assert np.all(end_archive == archives[1][-1])
         #assert np.all(archive_array == archives[0])
         ffa_archive = eob.map_pop_to_array_by_objective(
                                         P, self.grid_sz,
@@ -190,7 +192,7 @@ class NSGAII:
         
         for i in range(num_generations):
             if i>1 and (i)%(Nslice)==0:# save chronic so that it does not get to big and i have it in case of freeze
-               self.save_objectives(chronic,title,pp, solved, archive_array,stats_array)
+               self.save_objectives(chronic,title,pp, solved, archives,stats_array)
                pp += 1
            
             pfunc = [p for p in P if np.all(p.behavior>=0)]
@@ -215,6 +217,12 @@ class NSGAII:
                     p.childrenInQ = 0
            
             print "Iteracao ", i#,'psize: ', len(pfunc), ', qsize: ', len(qfunc) , ' fraction added to elite: ', progress, '%'
+            
+            #informing parent about the end location of the behavior
+            for q in Q:
+                    self.inform_parent(q, end=True)
+            #print P[0].grid
+            assert  np.any(P[0].grid != P[1].grid)
 
             R = []
             R.extend(P)
@@ -235,13 +243,14 @@ class NSGAII:
             #and writes it in the list used for selection
             for s in R:
                #evaluates rarity (wrt to archive) and novelty (current pop and archive)
-               s.evaluate2( R, archive_array,
+               s.evaluate2( R, archives,
                            self.NoveltyArchive,
                            ffa_archive,
                            probe_Evo = measureEvoFlag,
                            EvoMuts = probeEvoNmutants,
                            recordObj = recordObj,
-                           probe_RARs = (EvoBoosterFlag or measureEvoFlag),
+                           probe_RARs =(EvoBoosterFlag or measureEvoFlag),
+                           #probe_RARs = True,#(EvoBoosterFlag or measureEvoFlag),
                            gammaGrid = self.gridGamma,
                           gammaLRAR = self.gammaLRAR,
                            shSOLSpan=self.shSOLSpan,
@@ -308,7 +317,7 @@ class NSGAII:
                 
             Q = self.make_new_pop(P)
             
-            archive_array = eob.map_population_to_grid(Q, self.grid_sz, archive_array)
+            end_archive = eob.map_population_to_grid(Q, self.grid_sz, end_archive)
             ffa_archive = eob.map_pop_to_array_by_objective(
                                         Q, self.grid_sz,
                                          FIT,ffa_archive)
@@ -322,7 +331,7 @@ class NSGAII:
                      viz.render_robots_and_archive(self.NoveltyArchive, [P,Q], color=[(0,255,0),(255,0,0),(0,0,180)])
                 else:
                      viz.render_robots( [P,Q], color=[(0,255,0),(255,0,0)])
-        self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archive_array)
+        self.save_objectives(chronic[:,:,:i%Nslice+1],title,pp, solved, archives)
 
         if solved!={}:
            ret = solved.keys()[0]
@@ -343,6 +352,20 @@ class NSGAII:
                             if propagate:
                                     p.objs[VIABP] -= 1
                                     self.augmentParentEvo(p.parentIDs,P,propagate)
+    def inform_parent(self, child, end=True):
+            '''
+            increments the lineagegrid off the parent with the behavior 
+            of its child
+            end: maps only end position
+            otherwise: maps complete path into grid
+            '''
+            if end:
+                    key = eob.map_into_grid(child,child.grid_sz)
+                    child.parent.grid[key] += 1
+            else:
+                    child.parent.map_path_to_grid(child, parent.grid)
+
+
 
     def evaluate_pevo(self,pop):
         popgrid = np.zeros((self.grid_sz, self.grid_sz) )

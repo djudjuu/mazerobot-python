@@ -32,8 +32,9 @@ expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp
 expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs = ['RAR','CUR','RAR/CUR','frCUR','RAR/frCUR'] # gridComp
-expObjs = ['RAR','FFA','RAR/CUR','CUR/VIAB','RAR/CUR/VIAB','RAR/VIAB','FIT','CUR','FIT/DIV', 'NOV','FIT/VIAB']# all medium
+expObjs = ['RAR','RAR/VIAB','RAR/CUR','CUR/VIAB','RAR/CUR/VIAB','FIT/VIAB','FIT','CUR']# viab exp 
 expObjs=[]
+expObjs = ['RAR','FFA','RAR/CUR','CUR/VIAB','RAR/CUR/VIAB','RAR/VIAB','FIT','CUR','FIT/DIV', 'NOV','FIT/VIAB']# all medium
 pp = PdfPages(expName+'-multiplot.pdf')
 
 grid_szs= [8,10,13,15,18,20,25,30,40] #23
@@ -73,7 +74,7 @@ def sort_exps(convidx,speedidx,*resultlists):
     sumExp = zip(*resultlists)
     sumExp=sorted(sumExp, key=lambda x: (-x[convidx],x[speedidx]))
     return zip(*sumExp)
-#exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst= sort_exps(5,3,exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst)
+exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst= sort_exps(5,3,exps,expObjs,solvers,meanfirst,firstSolved,convs,stdfirst)
 
 ########################## SUMMARY  ############
 def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='soft',mazelvl=''):
@@ -90,23 +91,28 @@ def make_summary_table(expname,expobjs,categories,catnames,title,wallcondition='
             for elements in zip(expobjs,*catshort):
                 f.write(elements[0].replace(',','/') +','+ ", ".join(str(e) for e in elements[1:])+'\n')
     print 'summary table',filename,' made...\n'
-#make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 'speed','std','N'],'yuupi',mazelvl=mazelevel)
+make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 'speed','std','N'],'yuupi',mazelvl=mazelevel)
 
 
 ################ GRID-COMPARISON ##############
-'''expName = 'gridComp'
+expName = 'gridComp'
+expName = 'performance'
 print 'preparing grid comparison...'
 grid_szs= [8,10,13,15,18,20,25,30] #23
 grid_szs= [5,10,20,30,40]
+grid_szs= [15]
 expObjs2GridComp = ['CUR','RAR/CUR','frCUR','RAR/frCUR']
+expObjs2GridComp = ['RAR','RAR/CUR','RAR/EVO','RAR/CUR/EVO']# viab exp 
 mazelevels=['medium','hard']
 #to hold a timeseries with length of grid_sz for every experiment
 convrates = []
 speeds = []
+SDs = []
 Nsgrids=[]
 for target in expObjs2GridComp:
     conv =[]
     speed =[]
+    SD = []
     for mi,mazelevel in enumerate(mazelevels):
         expNames = [ wallcondition+'/'+expName + '/'+mazelevel+'/' + s.replace('/','')+str(grid_sz) for s,grid_sz in list(itertools.product([str(target)],grid_szs))]
         solvers  = [util.load_exp_series(exp, solvers = True) for exp in expNames]
@@ -117,11 +123,15 @@ for target in expObjs2GridComp:
         firstSolved = [[ solved.keys()[0]  for solved in exp if solved != {}] for exp in solvers]
         meanfirst =[np.mean(exp) for exp in firstSolved] 
         speed.append(meanfirst)
+        meanSD =[np.std(exp) for exp in firstSolved] 
+        SD.append(meanSD)
    
     meanconv = map(lambda x: np.asarray(x),conv)
     convrates.append(np.mean(meanconv, axis=0))
     meanspeed = map(lambda x: np.asarray(x),speed)
     speeds.append(np.mean(meanspeed, axis=0))
+    meanSDs = map(lambda x: np.asarray(x),SD)
+    SDs.append(np.mean(meanSDs, axis=0))
 
 print 'after prepations convshaep::', len(convrates), len(grid_szs)
 plt.figure('gridComp')
@@ -145,13 +155,12 @@ plt.ylabel("Average Evaluations to Solution")
 plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 plt.show()
 
-#print 'lengths :',map(lambda x: (len(x),x[0]) ,[expObjs2GridComp,convrates,speeds,Nsgrids])
-#expObjs2GridComp,convrates,speeds,Nsgrids = sort_exps(1,2,expObjs2GridComp,convrates,speeds,Nsgrids)
-#make_summary_table('gridComp',expObjs2GridComp,
-#                   [convrates,speeds,Nsgrids],
-#                   ['Convergence Rate', 'Solving Time','N'],
-#                   title='grids')
-'''
+print 'lengths :',map(lambda x: (len(x),x[0]) ,[expObjs2GridComp,convrates,speeds,Nsgrids])
+expObjs2GridComp,convrates,speeds,Nsgrids = sort_exps(1,2,expObjs2GridComp,convrates,speeds,Nsgrids)
+make_summary_table('gridComp',expObjs2GridComp,
+                   [convrates,speeds,SDs,Nsgrids],
+                   ['Convergence Rate', 'Solving Time','SD','N'],
+                   title='grids')
 
 ###################### SAMPLE COMPARISON ###############
 '''expName = 'sampleComp'
@@ -257,14 +266,16 @@ print 'significance table made...'
 '''
 
 ########################### CORRELATION ###################
-print 'making correlation table...'
+'''print 'making correlation table...'
 
 expObjs2correlate = ['RAR/SOLr','RAR/VIAB'] #normal
 expObjs2correlate = ['RAR/VIAB','NOV'] # gridComp
 expObjs2correlate = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs2correlate = ['RAR','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd','RAR/VIAB','RAR/VIABP'] #EVOcomp
 expObjs2correlate = ['RAR','RAR/discovery','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
-expName = 'evoCorr'
+expObjs2correlate = ['RAR/LGD'] # gridComp
+mazelevel = 'medium'
+expName = 'evoBAM'
 grid_sz = 15
 until=200
 exps2correlate = [ wallcondition+'/'+ expName+ '/'+mazelevel + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
@@ -332,7 +343,7 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 print 'correlation table',filename,' made...\n'
-print "Correlations table made...\n"
+print "Correlations table made...\n"'''
 
 ################# plot objectives against each other ################
 '''print 'preparing to plot objectives against each other...'
@@ -385,9 +396,9 @@ expObjs2EvoComp = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOL
 expObjs2EvoComp = [' RAR/discovery','LGE','LGD/LGE', 'LGDr/shLGD']
 expObjs2EvoComp = ['RAR','RAR/VIAB','RAR/VIABP']
 expObjs2EvoComp = ['RAR','NOV/VIAB','NOV']
-expObjs2EvoComp = ['RAR/discovery']
 expObjs2EvoComp = ['RAR','RAR/discovery','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
-expName = 'evoCorr'
+expObjs2EvoComp = ['RAR/LGD']
+expName = 'evoBAM'
 mazelevel = 'medium'
 grid_sz = 15
 exps2EvoComp = [ wallcondition+'/'+ expName +'/' +mazelevel + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2EvoComp]

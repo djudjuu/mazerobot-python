@@ -45,6 +45,7 @@ class MazeSolution(Solution):
         self.childrenInQ = 0
         self.id = self._ids.next()
         self.parentIDs = []
+        self.parent = 0
         if(not robot):
          self.robot=mazepy.mazenav()
          self.robot.init_rand()
@@ -77,11 +78,13 @@ class MazeSolution(Solution):
                                                    #maze=True)
         #print len(self.behaviorSamples)
         #increment personal grid
-        for i in range(0,self.BEHAV_DIM,2):
-            self.grid[
-                int(self.behaviorSamples[i]*self.grid_sz),
-                int(self.behaviorSamples[i+1]*self.grid_sz)
-                    ] += 1
+        #self.map_path_to_grid(self, self.grid, end=True)#only end postion
+        self.map_path_to_grid(self, self.grid, end=False)# complete path
+        #for i in range(0,self.BEHAV_DIM,2):
+            #self.grid[
+                #int(self.behaviorSamples[i]*self.grid_sz),
+                #int(self.behaviorSamples[i+1]*self.grid_sz)
+                    #] += 1
 
         #record fitness and curiosity and evolvabilities
         dist2goal = mazepy.feature_detector.end_goal(self.robot)
@@ -91,6 +94,14 @@ class MazeSolution(Solution):
          self.solver = True
          print 'solution, (needed ',len(self.history),' mutations.'
         else: self.solver = False
+
+    def map_path_to_grid(self, mazenav,grid,end=False):
+        if end:
+            grid[map_into_grid(mazenav, mazenav.grid_sz)] += 1
+        else:
+            keys = eob.map_mazenav_behavior(mazenav,self.grid_sz)[1]
+            for key in keys:
+                grid[key] += 1
     
     def evaluate2(self,pop, archivegrid,
                   NovArchive=None,FFAArchive=None,
@@ -139,7 +150,13 @@ class MazeSolution(Solution):
         
             #RARITIES
             if np.any([ r in self.selected4+recordObj for r in[ RAR , LRAR,naiveRAR,tRAR]]):
-                self.objs[RAR] = - eob.HD_entropy(archives[3],self, self.grid_sz)
+                #this line to relate all dimensions:
+                #self.objs[RAR] = - eob.HD_entropy(archives[3],self, self.grid_sz)
+                #this line to use only endposition, irrescpective of 
+                #behavioral dimension
+                self.objs[RAR] = - eob.calc_individual_entropy(
+                                                archives[1][-1],
+                                                self,self.grid_sz)
                 #dicRAR = - eob.HD_entropy(archives[4],self, self.grid_sz)
                 #oldRAR = - eob.calc_individual_entropy(archivegrid,self,self.grid_sz)
                 #assert oldRAR == dicRAR #only fires when sampling rate =1
@@ -168,7 +185,7 @@ class MazeSolution(Solution):
             if probe_Evo or EVO in self.selected4:
                 mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
                 self.objs[EVO] = - eob.grid_entropy(mutantgrid)
-                self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
+                #self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
                 if self.objs[EVO]==0:
                         print 'EVO is actually 0'
                 del mutantgrid
@@ -179,35 +196,36 @@ class MazeSolution(Solution):
             else: 
                     self.objs[LRAR] =  0
 
+            #discovery instinct
+            if probe_RARs and (discovery in self.selected4 + recordObj):
+                self.objs[discovery] = - eob.grid_entropy(self.grid)
+            else:
+                self.objs[discovery] = 0
+            if self.selected4 == [discovery]:
+                self.objs[discovery] = - eob.grid_entropy(self.grid)
+
                     
             #Lineage Grid Entropy and Diversity
             #currently with current position, if it should be excluded uncomment this line and comment it in 152
 
             #self.history.append(eob.map_into_grid(self, self.grid_sz))
 
-            if probe_RARs and (lineageCUR in self.selected4 + recordObj):
-                self.objs[lineageCUR] = - eob.grid_entropy(self.grid)
-            else:
-                self.objs[lineageCUR] = 0
-
-            if self.selected4 == [lineageCUR]:
-                self.objs[lineageCUR] = - eob.grid_entropy(self.grid)
 
             if probe_RARs and (LGE in self.selected4 + recordObj or
                                LGD in self.selected4 + recordObj):
-                lineagegridreduced = util.reduce_grid_sz(self.grid,gammaGrid)
+                #lineagegridreduced = util.reduce_grid_sz(self.grid,gammaGrid)
                 self.objs[LGE] =  - eob.grid_entropy(self.grid)
-                self.objs[LGEr] =  - eob.grid_entropy(lineagegridreduced)
+                #self.objs[LGEr] =  - eob.grid_entropy(lineagegridreduced)
                 self.objs[LGD] = - np.sum(self.grid>0)
-                self.objs[LGDr] = - np.sum(lineagegridreduced>0)
-                self.objs[LGDnd] =  -np.sum(self.grid>0)/float(np.sum(self.grid))
+                #self.objs[LGDr] = - np.sum(lineagegridreduced>0)
+                #self.objs[LGDnd] =  -np.sum(self.grid>0)/float(np.sum(self.grid))
 
                 #short term 
                 #shSOL auf normalen grid
-                recent_lineagegrid = eob.map_behaviors_to_grid(self.history[-shSOLSpan:], self.grid_sz)
-                self.objs[shLGE] =  - eob.grid_entropy(recent_lineagegrid)
-                self.objs[shLGD] =  -np.sum(recent_lineagegrid>0)
-                self.objs[shLGDnd] =  -np.sum(recent_lineagegrid>0)/float(np.sum(recent_lineagegrid))
+                #recent_lineagegrid = eob.map_behaviors_to_grid(self.history[-shSOLSpan:], self.grid_sz)
+                #self.objs[shLGE] =  - eob.grid_entropy(recent_lineagegrid)
+                #self.objs[shLGD] =  -np.sum(recent_lineagegrid>0)
+                #self.objs[shLGDnd] =  -np.sum(recent_lineagegrid>0)/float(np.sum(recent_lineagegrid))
             else:
 
                 self.objs[LGE] = 0
@@ -271,6 +289,7 @@ class MazeSolution(Solution):
         child_solution.parentRar= int(np.copy(self.objs[LRAR]))
         child_solution.IRARflag = not self.IRARflag 
         child_solution.parentIDs.append(self.id)
+        child_solution.parent = self
         child_solution.history = list(self.history)
         child_solution.behaviorSamples = self.behaviorSamples.copy()
         self.childrenInQ += 1
@@ -310,7 +329,7 @@ expName = "hard" # there must be a directory with this name in /out
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
-EvoBoosterIntervall= 50
+EvoBoosterIntervall= 25
 evoMutants = 200
 params = {}# 'grid_sz': grid_szs[0],'NMutation': evoMutants,'kNov':NNov, 'breakAfterSolved':breakflag,'wallpunish':wallpunish}
 NPop = 100 # Population size
@@ -320,12 +339,15 @@ NovGamma = int(NPop*.03)
 breakflag =False #  stop trial after first success   
 expName = "typicalRuns"
 expName = "T"
-expName = "evoCorr" # there must be a directory with this name in /out
-mazelevels= [ 'hard','medium']
+expName = "evoBAM" # there must be a directory with this name in /out
+expName = "evoPure" # there must be a directory with this name in /out
 mazelevels= [ 'hard']#,'hard']
-NGens = [200]#,300] #according to maze level
-objsGr=[[RAR,lineageCUR],[lineageCUR]]
-sample_sz=1
+NGens = [200,200]#,300] #according to maze level
+mazelevels= [ 'medium','hard']
+objsGr=[[RAR,LGD]]#, [LGE],[discovery]]
+objsGr=[[LGD], [LGE],[discovery]]
+#attention: changed RAR to use end only and probeRAR is always true
+sample_sz=200
 grid_szs = [15]#,13,15,18,20,23,25,30]
 trial_start=0
 Ntrials = 2
@@ -333,7 +355,7 @@ disp=True
 saveChronic=True
 
 datapath = './out/'+wallcondition+'/'+expName +'/'
-description ='experiment to whether or not the evoproxies have a good efefct on evolvability'
+description ='experiment to whether or saving childbehavior helps.'
 descr_file  = datapath+expName+'-description.txt'
 with  open(descr_file, 'w') as f:
     f.write(description)

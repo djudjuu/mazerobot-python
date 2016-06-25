@@ -8,8 +8,8 @@ from fixedparams import *
 from util import util
 
 wallcondition = 'soft'
-objectives = 'RARlineageCUR'
-expName = 'evoCorr'
+objectives = 'RARdiscovery'
+expName = 'evoBAM'
 mazelevel = 'hard'
 mazelevel2 = 'hard'
 mazelevel = 'medium'
@@ -35,7 +35,7 @@ mazefile = '../medium_maze.txt'
 """
 #data = np.load(title + '.npy')
 data = util.load_chronic(title)
-data2 = util.load_chronic(title2)
+#data2 = util.load_chronic(title2)
 
 Q = data[:,100:,:]
 P = data[:,:100,:]
@@ -53,8 +53,8 @@ fs= -1	# iteration when maze was first solved
 if solved != {}:
 	fs = solved.keys()[0]
 eliteN=10
-dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
-dsorted2 = [sort_by_objective(data2, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
+#dsorted = [sort_by_objective(data, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
+#dsorted2 = [sort_by_objective(data2, get_obj_ID(o), eliteN, until=Nplot) for o in obj_names]
 
 #### PLOT PARAMS #######
 elite = 10 # in percentage
@@ -75,7 +75,7 @@ eliteN = int(NPop*(elite/100.0))
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,CUR,lineageCUR]
+want2plot = [ FIT,CUR,discovery, LGE]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1
@@ -94,6 +94,7 @@ for obj in want2plot:
 	ii += 1
 	plt.legend(bbox_to_anchor=(1.05,1. ), loc=2, borderaxespad=0.)
 	#add_solved_indication(ax, solved)
+plt.show()
 
 ####### PLOT INDIVIDUALS IN MAZE ##############
 

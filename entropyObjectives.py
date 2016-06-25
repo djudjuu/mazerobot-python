@@ -155,7 +155,7 @@ def map_mazenav_behavior(mazenav,grid_sz):
 
 def map_into_grid(mazenav, grid_sz):
         """discretizes the robots behavior into a grid and writes the original values into its .behavior attribute.
-        expects to be given a MazeSolution class, but can also be given a behavior
+        expects to be given a MazeSolution class
         ATTENTION: also accepts degenerate (negative) behavior
         @grid cells: returns a tuple with x and y index of grid
         """
