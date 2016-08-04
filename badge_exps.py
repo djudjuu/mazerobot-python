@@ -182,13 +182,15 @@ class MazeSolution(Solution):
                 self.objs[FFA] = - eob.calc_FFA(FFAArchive,self)
                 ffa = self.objs[FFA]
             #EVOLVABILITY 
-            if probe_Evo or EVO in self.selected4:
+            if probe_Evo or (EVO in self.selected4) or EVOspread in self.selected4 or frEVOspread in self.selected4 or frEVO in self.selected4:
                 mutantgrid = eob.map_mutants_to_grid(self, EvoMuts, self.grid_sz)
-                self.objs[EVO] = - eob.grid_entropy(mutantgrid)
-                #self.objs[REVO] = - eob.grid_contribution_to_population(mutantgrid, mutantgrid+archivegrid)
+                self.objs[EVOspread] = - eob.grid_entropy(mutantgrid)
+                self.objs[EVO] = - np.sum(mutantgrid>0)
+                #print self.objs[EVO],self.objs[EVOspread] 
                 if self.objs[EVO]==0:
                         print 'EVO is actually 0'
                 del mutantgrid
+                # frEVO are assessed separatedly
 
             #Lineage rarity: passing on heredity from
             if LRAR in self.selected4 or LRAR in recordObj:
@@ -329,8 +331,8 @@ expName = "hard" # there must be a directory with this name in /out
 gammaLRAR = .2
 gridGamma = .4 #how much reduce the grid to measure SOL
 shSOLSpan = 20
-EvoBoosterIntervall= 25
-evoMutants = 200
+EvoBoosterIntervall= 2500
+evoMutants = 20
 params = {}# 'grid_sz': grid_szs[0],'NMutation': evoMutants,'kNov':NNov, 'breakAfterSolved':breakflag,'wallpunish':wallpunish}
 NPop = 100 # Population size
 NovGamma = int(NPop*.03)
@@ -338,19 +340,16 @@ NovGamma = int(NPop*.03)
 #### IMPORTANT PARAMS ###
 breakflag =False #  stop trial after first success   
 expName = "typicalRuns"
+expName = "EVOS" # there must be a directory with this name in /out
 expName = "T"
-expName = "evoBAM" # there must be a directory with this name in /out
-expName = "evoPure" # there must be a directory with this name in /out
-mazelevels= [ 'hard']#,'hard']
 NGens = [200,200]#,300] #according to maze level
 mazelevels= [ 'medium','hard']
-objsGr=[[RAR,LGD]]#, [LGE],[discovery]]
-objsGr=[[LGD], [LGE],[discovery]]
+objsGr=[[frEVO],[frEVOspread],[EVO], [EVOspread]]
 #attention: changed RAR to use end only and probeRAR is always true
-sample_sz=200
+sample_sz=1
 grid_szs = [15]#,13,15,18,20,23,25,30]
 trial_start=0
-Ntrials = 2
+Ntrials = 1
 disp=True
 saveChronic=True
 

@@ -261,12 +261,12 @@ def individual_entropy(grid, behavior):
         fsamp =0
         if type(grid)==dict:
                 if np.sum(grid.values())==1:
-                        print 'WARNING: only one behavior in grid'
+                        print 'WARNING: only one behavior in dic'
                         return .01
                 fsamp = np.sum(grid.values())
         else:
                 if np.sum(grid>0) ==1:
-                        print 'WARNING: only one behavior in grid'
+                        print 'WARNING: only one behavior in grid', behavior
                         return .01
                 fsamp = np.sum(grid)
         assert fsamp>0
@@ -343,7 +343,7 @@ def frequency_of_objective(mazenav, obj_archive, obj_idx,mino, maxo):
         return individual_entropy(obj_archive, key)
 
 def scale_obj(o, mino, maxo):
-        return (o-mino)/(maxo-mino)
+        return (float(o)-mino)/(maxo-mino)
 
 
 

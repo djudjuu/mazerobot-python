@@ -8,8 +8,8 @@ from fixedparams import *
 from util import util
 
 wallcondition = 'soft'
-objectives = 'RARdiscovery'
-expName = 'evoBAM'
+objectives = 'EVO'
+expName = 'T'
 mazelevel = 'hard'
 mazelevel2 = 'hard'
 mazelevel = 'medium'
@@ -75,7 +75,7 @@ eliteN = int(NPop*(elite/100.0))
 
 f1=plt.figure(1)
 ii = 0
-want2plot = [ FIT,CUR,discovery, LGE]
+want2plot = [ FIT,CUR,EVO, EVOspread,frEVO, frEVOspread ]
 want2scale = []
 if len(want2scale)>0:
 	w2s=1

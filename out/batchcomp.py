@@ -22,19 +22,11 @@ expName = 'performance'
 mazelevel = 'hard'
 mazelevel = 'medium'
 
-#expObjs=['RAR/PEVO']
-expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/VIAB','RAR/shSOLr','RAR/shSOLnd']#,'RAR/shSOLnd'] #normal
-expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/SOLrnd','RAR/shSOLr','RAR/shSOLrnd']#,'RAR/shSOLnd']# negSOL
-expObjs = ['RAR/SOLnd','RAR/SOLr','RAR/SOLnd','RAR/shSOLr',]#,'RAR/shSOLnd']# medium
-expObjs = ['RAR/SOLr','RAR/VIAB','NOV','NOV/VIAB','FFA','FIT'] #normal
-expObjs = ['shSOLrnd','RAR/SOLnd'] # gridComp
-expObjs = ['RAR','RAR/VIAB','NOV','NOV/VIAB'] # gridComp 
-expObjs = ['LGE','LGD/LGE', 'LGDr/shLGD']
-expObjs = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
-expObjs = ['RAR','CUR','RAR/CUR','frCUR','RAR/frCUR'] # gridComp
 expObjs = ['RAR','RAR/VIAB','RAR/CUR','CUR/VIAB','RAR/CUR/VIAB','FIT/VIAB','FIT','CUR']# viab exp 
+expObjs=['RAR']
 expObjs=[]
 expObjs = ['RAR','FFA','RAR/CUR','CUR/VIAB','RAR/CUR/VIAB','RAR/VIAB','FIT','CUR','FIT/DIV', 'NOV','FIT/VIAB']# all medium
+expObjs=['RAR']
 pp = PdfPages(expName+'-multiplot.pdf')
 
 grid_szs= [8,10,13,15,18,20,25,30,40] #23
@@ -95,7 +87,7 @@ make_summary_table(expName,expObjs,[convs,meanfirst,stdfirst,Ns],['convrate', 's
 
 
 ################ GRID-COMPARISON ##############
-expName = 'gridComp'
+'''expName = 'gridComp'
 expName = 'performance'
 print 'preparing grid comparison...'
 grid_szs= [8,10,13,15,18,20,25,30] #23
@@ -161,6 +153,7 @@ make_summary_table('gridComp',expObjs2GridComp,
                    [convrates,speeds,SDs,Nsgrids],
                    ['Convergence Rate', 'Solving Time','SD','N'],
                    title='grids')
+'''
 
 ###################### SAMPLE COMPARISON ###############
 '''expName = 'sampleComp'
@@ -243,6 +236,7 @@ make_summary_table(expName,expObjs2SampleComp, [convrates,speeds,NsSample],
                    'frObj')
 '''
 
+
 ######################### STATISTICAL SIGNIFICANCE #####
 '''ps = [ [  scipy.stats.mannwhitneyu(i,j)[1]*2 for i in firstSolved if i!= j ] for j in firstSolved]
 
@@ -266,16 +260,16 @@ print 'significance table made...'
 '''
 
 ########################### CORRELATION ###################
-'''print 'making correlation table...'
+print 'making correlation table...'
 
 expObjs2correlate = ['RAR/SOLr','RAR/VIAB'] #normal
 expObjs2correlate = ['RAR/VIAB','NOV'] # gridComp
 expObjs2correlate = ['RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
 expObjs2correlate = ['RAR','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd','RAR/VIAB','RAR/VIABP'] #EVOcomp
 expObjs2correlate = ['RAR','RAR/discovery','RAR/LGE','RAR/LGEr','RAR/LGD','RAR/LGDr','RAR/LGDnd','RAR/shLGD','RAR/shLGDnd'] #EVOcomp
-expObjs2correlate = ['RAR/LGD'] # gridComp
+expObjs2correlate = ['EVOspread'] # gridComp
 mazelevel = 'medium'
-expName = 'evoBAM'
+expName = 'T'
 grid_sz = 15
 until=200
 exps2correlate = [ wallcondition+'/'+ expName+ '/'+mazelevel + '/' + s.replace('/','')+str(grid_sz) for s in expObjs2correlate]
@@ -332,7 +326,7 @@ with open(filename,'a') as f:
         exp = expname.split('/')
         f.write('\n'+expname + '\n:')
         #exp += ['FIT','CUR','EVO','REVO','RAR','VIAB','NOV']
-        exp += ['EVO','FIT']
+        exp += ['EVO','FIT','EVOspread','frEVO','frEVOspread']
         f.write( '\n ,'+str(exp)+ '\n')
         for obj in exp:
             row = obj+ ','
@@ -343,7 +337,8 @@ with open(filename,'a') as f:
                     row +="%.2f" %R[0][get_obj_ID(obj),get_obj_ID(obj2)]  + ','
             f.write(row + '\n')
 print 'correlation table',filename,' made...\n'
-print "Correlations table made...\n"'''
+print "Correlations table made...\n"
+
 
 ################# plot objectives against each other ################
 '''print 'preparing to plot objectives against each other...'

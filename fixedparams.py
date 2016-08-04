@@ -35,9 +35,12 @@ tRAR=32 # Rarity wrt to accumulated history of behavior, only dimensions sample 
 frCUR=33        #measures the frequency of curiosity values wih rrespect to an archive
 locINT=34       # measures the average change in entropy of the behavioral dimensions
 discovery=35  #entropy over the complete experience of the lineafge
+frEVO=36        # rarity of distinct EVO
+EVOspread=37    # evo measured with entropy
+frEVOspread=38  # rarity of evo with entropy
 
 
-obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured','XMID', 'smartRAR','naiveRAR','tRAR','frCUR','locINT','discovery']
+obj_names =  ['FIT', 'CUR', 'NOV', 'EVO','PEVO','RAR', 'SEVO', 'DIV','FFA','LGE', 'IRAR','LRAR','ARCHIVESIZE','WEIRDO','XEND', 'YEND','REVO','VIAB','PROGRESS','ZERO', 'VIABP','LGEr','shLGE','LGD','LGDr','LGDnd','shLGD','shLGDnd','evoMeasured','XMID', 'smartRAR','naiveRAR','tRAR','frCUR','locINT','discovery','frEVO','EVOspread','frEVOspread']
 
 def get_obj_ID(string):
         return obj_names.index(string)

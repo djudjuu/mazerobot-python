@@ -158,6 +158,10 @@ class NSGAII:
                     naive_archive, HD_archive_dic ]
         #for curiosity
         archives.append(np.zeros(self.grid_sz))
+        #for EVO
+        archives.append(np.zeros(self.grid_sz**2))
+        #for EVOspread
+        archives.append(np.zeros(self.grid_sz**2))
         
         #for recording only the end position
         end_archive = np.zeros((self.grid_sz, self.grid_sz))
@@ -166,13 +170,14 @@ class NSGAII:
         ffa_archive = np.zeros(self.grid_sz)
        
         #map initial generation into archive
-        end_archive = eob.map_population_to_grid(P, 
-                                               grid_sz =self.grid_sz,
-                                               grid=end_archive)
+        eob.map_population_to_grid(P, 
+                               grid_sz =self.grid_sz,
+                               grid=end_archive)
         archives = eob.map_pop_to_archives(P,self.grid_sz,archives)
         Ncells = self.grid_sz**2
         #the curiosityarchive
-        archives[4] =  eob.map_pop_to_array_by_objective(P, self.grid_sz,
+        if frCUR in P[0].selected4:
+                eob.map_pop_to_array_by_objective(P, self.grid_sz,
                                                CUR,
                                                grid=archives[4],
                                                scale=(math.log(1./Ncells),0))
@@ -263,10 +268,45 @@ class NSGAII:
                if s.objs[CUR]<maxCUR:
                   maxCUR = s.objs[CUR]
                   #print 'maxCUR: ', maxCUR
+
+            # assess EVO separatedly, only for the new individuals 
+            newIndividuals = R[-len(P):]
+            if measureEvoFlag or EVO in R[0].selected4 or EVOspread in R[0].selected4 or frEVO in R[0].selected4 or frEVOspread in R[0].selected4: 
+                    for r in newIndividuals:
+                        mutantgrid = eob.map_mutants_to_grid(r, probeEvoNmutants, r.grid_sz)
+                        r.objs[EVOspread] = - eob.grid_entropy(mutantgrid)
+                        r.objs[EVO] = - float(np.sum(mutantgrid>0))
+                        #print r.objs[EVO],r.objs[EVOspread] 
+                        if r.objs[EVO]==0:
+                                print 'EVO is actually 0'
+                        del mutantgrid
             
+            #now that evo is calculated, compute frEvo-objectives
+            if frEVO in R[0].selected4 or frEVOspread in R[0].selected4:
+                    #first map to archives
+                    eob.map_pop_to_array_by_objective( newIndividuals,
+                                                       self.grid_sz**2,
+                                                       EVO,
+                                                       grid=archives[5],
+                                                       scale=(-Ncells,0))
+                    '''eob.map_pop_to_array_by_objective(newIndividuals,
+                                                      self.grid_sz**2,
+                                                       EVOspread,
+                                                       grid=archives[6],
+                                                       scale=(np.log(1./Ncells),0))'''
+                    #than compute it
+                    for r in newIndividuals:
+                            r.objs[frEVO] = - eob.frequency_of_objective(r,archives[5],
+                                                                        EVO,
+                                                                       -Ncells,
+                                                                         0)
+                            '''r.objs[frEVOspread] = - eob.frequency_of_objective(r,
+                                                                  archives[6],
+                                                                  EVOspread,
+                                                                  np.log(1./Ncells),
+                                                                  0)'''
 
             #Novelty 
-            # questions: archive is unique? no double entries?
             # sample from parents and children or children only?) if not np.any([np.all(c.behavior==a) for a  in NoveltyArchive])]
 
             if NovArchive:
@@ -318,11 +358,16 @@ class NSGAII:
             Q = self.make_new_pop(P)
             
             end_archive = eob.map_population_to_grid(Q, self.grid_sz, end_archive)
-            ffa_archive = eob.map_pop_to_array_by_objective(
+            if FFA in Q[0].selected4:
+                    ffa_archive = eob.map_pop_to_array_by_objective(
                                         Q, self.grid_sz,
                                          FIT,ffa_archive)
+            if frCUR in Q[0].selected4:
+                    archives[4] =  eob.map_pop_to_array_by_objective(Q,self.grid_sz,
+                                             CUR,
+                                             grid=archives[4],
+                                             scale=(math.log(1./Ncells),0))
             archives = eob.map_pop_to_archives(Q,self.grid_sz,archives)
-            archives[4] =  eob.map_pop_to_array_by_objective(Q,self.grid_sz,CUR,grid=archives[4],scale=(math.log(1./Ncells),0))
             #print [len(a) for a in archives]
             ### visualization
             if visualization:
