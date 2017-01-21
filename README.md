@@ -1,3 +1,6 @@
+Me: Adaptations I did to Joel Lehman's neuroevolution experiments for my master's thesis.
+
+Original by Joel:
 mazerobot-python
 ================
 
