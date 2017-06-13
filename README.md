@@ -1,4 +1,4 @@
-Me: Adaptations I did to Joel Lehman's neuroevolution experiments for my master's thesis.
+Me: Adaptations I did to Joel Lehman's neuroevolution experiments for my master's thesis. Description of the experiments are in chapter 3 of thesis.pdf
 
 Original by Joel:
 mazerobot-python
